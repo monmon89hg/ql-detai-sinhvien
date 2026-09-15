@@ -1,0 +1,9 @@
+# File văn bản mặc định dùng LF; tự nhận diện file nhị phân
+* text=auto eol=lf
+
+# Maven Wrapper cho Linux/macOS
+/mvnw text eol=lf
+
+# Script Windows dùng CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf

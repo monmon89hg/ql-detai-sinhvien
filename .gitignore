@@ -7,11 +7,50 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-# https://maven.apache.org/tools/wrapper/#Usage_with_or_without_Binary_JAR
-.mvn/wrapper/maven-wrapper.jar
 
-# Eclipse m2e generated files
-# Eclipse Core
-.project
-# JDT-specific (Eclipse Java Development Tools)
+HELP.md
+
+# Eclipse / Spring Tool Suite
+.apt_generated/
 .classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+.vscode/
+
+.env
+.env.*
+!.env.example
+/src/main/resources/application-local.yml
+/src/main/resources/application-local.yaml
+/src/main/resources/application-local.properties
+
+/uploads/
+/logs/
+*.log
+/database/private-backups/
+
+.DS_Store
+Thumbs.db
