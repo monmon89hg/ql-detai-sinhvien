@@ -9,7 +9,7 @@ USE quan_ly_sinh_vien;
 
 -- Luu y: V2 va V3 can cac bang nen nguoi_dung, bo_mon (V1).
 -- Hay chay V1 truoc khi chay file nay.
-
+SOURCE V1_create_User_table.sql;
 SOURCE V2_create_topics.sql;
-SOURCE V3 _create_registration_tables.sql;
+SOURCE V3_create_registration_tables.sql;
 SOURCE V4_create_tables.sql;
