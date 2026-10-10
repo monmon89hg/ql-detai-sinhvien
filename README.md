@@ -1,143 +1,179 @@
-# Hệ thống quản lý đề tài sinh viên
+<p align="center">
+  <img src="src/main/resources/static/images/ute_logo.png" alt="Logo HCMUTE" width="78">
+</p>
 
-Đồ án cuối kỳ môn Lập trình Web — Nhóm 12.
+<h1 align="center">Hệ thống quản lý đề tài sinh viên Khoa CNTT</h1>
 
-Ứng dụng web hỗ trợ quản lý đợt đăng ký, đề tài, nhóm sinh viên,
-báo cáo và quá trình đánh giá kết quả.
+<p align="center">
+  Đồ án cuối kỳ môn <strong>Lập trình Web (WEPR330479)</strong><br>
+  <strong>Nhóm 12</strong> · Học kỳ 1, năm học 2026–2027
+</p>
+
+Ứng dụng web hỗ trợ Khoa CNTT quản lý các đợt đăng ký, đề tài, nhóm sinh viên, việc nộp báo cáo, hội đồng chấm điểm và kết quả. Hệ thống được xây dựng theo kiến trúc **Spring Boot MVC + Thymeleaf**, sử dụng **MySQL** để lưu trữ dữ liệu.
+
+> **Lưu ý:** Các chức năng dưới đây là **phạm vi triển khai của đồ án**, không phải xác nhận rằng tất cả đã hoàn thành hoặc kiểm thử thành công. README sẽ được cập nhật theo mã nguồn thực tế sau khi tích hợp.
 
 ## 1. Thành viên và phân công
 
-| Thành viên | MSSV | GitHub | Phần phụ trách |
-| --- | --- | --- | --- |
-| Thành viên 1 — Nhóm trưởng | Bổ sung | Bổ sung | Khởi tạo dự án, người dùng, phân quyền, tích hợp |
-| Thành viên 2 | Bổ sung | Bổ sung | Đợt đăng ký, đề tài, phân công giảng viên |
-| Thành viên 3 | Bổ sung | Bổ sung | Nhóm sinh viên, đăng ký đề tài, nộp báo cáo |
-| Thành viên 4 | Bổ sung | Bổ sung | Hội đồng, chấm điểm, tổng hợp kết quả |
+| Thành viên | MSSV | Họ và tên | GitHub | Phụ trách (Frontend + Backend) |
+| --- | --- | --- | --- | --- |
+| TV1 | 24162036 | Trần Phạm Đình Hoàng | [@Hoangzno1](https://github.com/Hoangzno1) | Tài khoản, phân quyền, bộ môn và thông báo |
+| TV2 | 24162074 | Nguyễn Anh Minh | [@monmon89hg](https://github.com/monmon89hg) | Đợt đăng ký, đề tài và phân công giảng viên |
+| TV3 | 24110070 | Nguyễn Thị Như Ý | [@y0unglewis](https://github.com/y0unglewis) | Nhóm sinh viên, đăng ký đề tài, nộp báo cáo; xây dựng Base UI chung |
+| TV4 | 24110152 | Nguyễn Quốc An | [@NguyenAn220206](https://github.com/NguyenAn220206) | Hội đồng, chấm điểm, tổng hợp và công bố kết quả |
 
-Chi tiết đóng góp được ghi tại [docs/contributions.md](docs/contributions.md)
-và các pull request của từng thành viên.
+Mỗi thành viên triển khai **giao diện Thymeleaf, xử lý nghiệp vụ Spring Boot và tích hợp dữ liệu** cho phân hệ mình phụ trách. Các trang sử dụng chung Header, Sidebar, Footer và bộ CSS/JS của nhóm.
 
 ## 2. Chức năng dự kiến
 
-- Đăng nhập và phân quyền người dùng.
-- Quản lý bộ môn, giảng viên và sinh viên.
-- Quản lý đợt đăng ký và danh sách đề tài.
-- Thành lập nhóm sinh viên và đăng ký đề tài.
-- Duyệt đăng ký và lưu lịch sử các lần đăng ký.
-- Nộp và quản lý báo cáo.
-- Phân công hội đồng, nhập điểm và tổng hợp kết quả.
-- Công bố kết quả và quản lý thông báo.
+- **Quản trị và phân quyền:** đăng nhập, đăng xuất, quản lý tài khoản sinh viên/giảng viên/cán bộ, bộ môn và thông báo.
+- **Quản lý đề tài theo hai giai đoạn:** giai đoạn 1 tiếp nhận, xét duyệt và công bố đề tài; giai đoạn 2 cho phép nhóm sinh viên đăng ký các đề tài đã công bố.
+- **Quản lý nhóm sinh viên:** thành lập nhóm, quản lý yêu cầu tham gia và nhóm trưởng. Khi đăng ký đề tài, nhóm phải có **3–5 thành viên chính thức** và đúng một nhóm trưởng; một sinh viên không đồng thời thuộc hai nhóm đang hoạt động.
+- **Đăng ký đề tài:** nhóm trưởng gửi đăng ký và theo dõi trạng thái xét duyệt; mỗi nhóm có tối đa **một bản ghi đăng ký đề tài** theo thiết kế GT05.
+- **Nộp báo cáo:** nhóm trưởng nộp tệp PDF (tối đa **20 MiB**), quản lý các phiên bản báo cáo.
+- **Hội đồng và chấm điểm:** phân công hội đồng **3–5 giảng viên**, nhập phiếu chấm, tổng hợp điểm; giảng viên không chấm đề tài mình hướng dẫn.
+- **Kết quả:** công bố, tra cứu kết quả trong phạm vi được phân quyền và thông báo đến sinh viên.
 
-Đây là phạm vi dự kiến; tiến độ triển khai được ghi ở mục 8.
-
-## 3. Công nghệ
+## 3. Công nghệ sử dụng
 
 | Thành phần | Công nghệ |
 | --- | --- |
-| Ngôn ngữ | Java 21 LTS |
-| Framework | Spring Boot 4.1.1 |
-| Kiến trúc web | Spring MVC, render HTML phía server |
-| Giao diện | Thymeleaf, HTML, CSS, JavaScript, Bootstrap 5.3.8 |
-| Bảo mật | Spring Security, session cookie, BCrypt |
-| Truy cập dữ liệu | Spring Data JPA, Hibernate |
-| Cơ sở dữ liệu | MySQL 8.4 LTS |
-| Quản lý thay đổi CSDL | Flyway |
-| Build | Maven 3.9.16 qua Maven Wrapper |
-| Quản lý mã nguồn | Git và GitHub |
+| Ngôn ngữ | Java 21 |
+| Backend | Spring Boot, Spring MVC, Spring Data JPA, Spring Security, Validation |
+| Frontend | Thymeleaf, HTML, CSS, JavaScript, Be Vietnam Pro |
+| Cơ sở dữ liệu | MySQL 8.4 |
+| Quản lý phiên bản CSDL | Flyway |
+| Build và quản lý dependencies | Maven Wrapper |
+| Quản lý mã nguồn và công việc | Git, GitHub Issues, Pull Requests |
 
-Các thư viện thuộc hệ sinh thái Spring được quản lý phiên bản
-thông qua Spring Boot trong `pom.xml`.
+Thiết kế CSDL của nhóm gồm **17 bảng**, sử dụng mã nghiệp vụ hoặc khóa ghép làm khóa chính; không dùng `id AUTO_INCREMENT` làm khóa chính thay thế.
 
-## 4. Cấu trúc dự án
+## 4. Cấu trúc thư mục
 
-Các đường dẫn chính và quy ước tổ chức:
+Các đường dẫn chính trong cấu trúc dự án (một số thư mục được bổ sung dần khi triển khai):
 
-| Đường dẫn | Nội dung |
-| --- | --- |
-| `src/main/java/` | Mã nguồn Java |
-| `src/main/resources/templates/` | Giao diện Thymeleaf |
-| `src/main/resources/static/` | CSS, JavaScript và tài nguyên giao diện |
-| `src/main/resources/db/migration/` | SQL migration của Flyway |
-| `src/main/resources/application.properties` | Cấu hình ứng dụng |
-| `src/test/` | Mã kiểm thử |
-| `database/seed/` | Dữ liệu mẫu |
-| `database/checks/` | SQL kiểm tra dữ liệu và ràng buộc |
-| `docs/database/` | Tài liệu thiết kế CSDL, ERD và từ điển dữ liệu |
-| `docs/use-cases/` | Đặc tả và sơ đồ use case |
-| `docs/contributions.md` | Phân công và ghi nhận đóng góp |
+```text
+ql-detai-sinhvien/
+├── .mvn/                                  # Maven Wrapper
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+├── src/
+│   ├── main/
+│   │   ├── java/                          # Controller, Service, Repository, Entity...
+│   │   └── resources/
+│   │       ├── templates/
+│   │       │   ├── fragments/             # Header, Sidebar, Footer... dùng chung
+│   │       │   └── shared/dashboard.html  # Trang Dashboard chung
+│   │       ├── static/
+│   │       │   ├── css/                   # CSS dùng chung
+│   │       │   ├── js/                    # JavaScript dùng chung
+│   │       │   └── images/ute_logo.png    # Logo HCMUTE
+│   │       ├── db/migration/              # SQL migration Flyway
+│   │       └── application.properties     # Cấu hình Spring Boot
+│   └── test/                              # Mã kiểm thử
+├── docs/
+│   └── QUY_UOC_TICH_HOP_UI.md             # Hướng dẫn dùng Base UI
+└── README.md
+```
 
-Một số thư mục sẽ được bổ sung khi bắt đầu triển khai phần tương ứng.
+**Quy ước giao diện:** các trang nghiệp vụ sử dụng lại các Thymeleaf fragments và CSS chung; không tạo Header/Sidebar riêng cho từng phân hệ. Xem chi tiết tại [`docs/QUY_UOC_TICH_HOP_UI.md`](docs/QUY_UOC_TICH_HOP_UI.md) sau khi PR Base UI được merge.
 
-## 5. Chuẩn bị môi trường
+## 5. Hướng dẫn chuẩn bị môi trường và chạy local
 
-Cài đặt:
+### Bước 1 — Cài đặt công cụ
 
-- JDK 21.
-- Git.
-- MySQL Community Server 8.4.
-- VS Code hoặc IntelliJ IDEA.
+Cài các công cụ sau:
 
-MySQL Workbench là công cụ tùy chọn để thao tác với database.
-Không cần cài Maven hoặc Tomcat riêng khi sử dụng Maven Wrapper
-và Tomcat nhúng của dự án.
+1. **JDK 21** (kiểm tra đúng JDK, không chỉ JRE).
+2. **Git** và **VS Code** hoặc IntelliJ IDEA.
+3. **MySQL Server 8.4** (MySQL Workbench là công cụ hỗ trợ, không bắt buộc).
 
-Kiểm tra Java:
+Dự án sử dụng **Maven Wrapper** và Tomcat nhúng, nên thông thường không phải cài Maven hoặc Tomcat riêng.
+
+Mở terminal trong VS Code và kiểm tra:
 
 ```powershell
 java -version
 javac -version
+git --version
 ```
 
-Cả hai cần hiển thị phiên bản 21.x.
+`java` và `javac` cần hiển thị phiên bản **21.x**. Nếu terminal không nhận lệnh sau khi cài đặt, hãy mở lại VS Code và kiểm tra biến môi trường `PATH`/`JAVA_HOME`.
 
-## 6. Lấy mã nguồn và kiểm tra cấu hình build
-
-Clone repository:
+### Bước 2 — Clone repository
 
 ```powershell
 git clone https://github.com/monmon89hg/ql-detai-sinhvien.git
 cd ql-detai-sinhvien
 ```
 
-Kiểm tra Maven và Java mà dự án đang sử dụng:
+Kiểm tra Maven Wrapper sử dụng đúng Java:
 
 ```powershell
 .\mvnw.cmd -v
 ```
 
-Kết quả mong đợi:
+Trên macOS/Linux, dùng `./mvnw` thay cho `.\mvnw.cmd`.
 
-- Apache Maven 3.9.16.
-- Java version 21.x.
+### Bước 3 — Chuẩn bị MySQL
 
-Trên macOS/Linux, sử dụng `./mvnw` thay cho `.\mvnw.cmd`.
+Khởi động MySQL Server và tạo schema local nếu chưa có:
 
-### Trạng thái chạy ứng dụng
-
-Dự án hiện mới có bộ khung. Cấu hình ứng dụng hiện tại:
-
-```properties
-spring.application.name=qldt
+```sql
+CREATE DATABASE IF NOT EXISTS qldt
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
 ```
 
-Chưa hoàn tất cấu hình kết nối MySQL, SQL tạo bảng và dữ liệu mẫu.
-Vì vậy, chưa bảo đảm ứng dụng khởi động thành công.
+**Chú ý:** SQL tạo bảng phải tuân theo migration Flyway đã thống nhất trong repo. Không chạy đồng thời script tạo bảng thủ công và migration Flyway trên cùng một schema chưa được quản lý phù hợp, để tránh lỗi bảng đã tồn tại hoặc sai lịch sử migration.
 
-Sau khi hoàn thành phần CSDL, nhóm sẽ bổ sung tại đây:
+### Bước 4 — Cấu hình kết nối
 
-1. Cách tạo database và tài khoản local.
-2. Các biến môi trường cần thiết.
-3. Cách chạy migration và nạp dữ liệu mẫu.
-4. Lệnh khởi động, địa chỉ truy cập và tài khoản demo.
+Khi phần cấu hình backend được tích hợp, mỗi thành viên cần thiết lập kết nối MySQL cho máy của mình. Ví dụ các thuộc tính Spring Boot thường dùng:
 
-Không đưa mật khẩu thật vào repository.
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/qldt
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+```
 
-## 7. Quy trình làm việc nhóm
+Đây là **ví dụ cấu hình**, cần đối chiếu với `application.properties`/profile thực tế của dự án trước khi sử dụng. Không commit mật khẩu MySQL, thông tin SMTP hoặc các tệp cấu hình chứa bí mật lên GitHub.
 
-Mỗi nhiệm vụ được thực hiện trên một nhánh riêng.
+Nếu project sử dụng các biến môi trường trên, trong PowerShell có thể thiết lập cho **phiên terminal hiện tại**:
 
-Trước khi bắt đầu, bảo đảm các thay đổi đang làm đã được lưu
-bằng commit hoặc stash, sau đó:
+```powershell
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="<mat-khau-mysql-cua-ban>"
+```
+
+### Bước 5 — Build, kiểm thử và chạy ứng dụng
+
+Sau khi dependencies, cấu hình MySQL và migration đã hoàn thiện:
+
+```powershell
+.\mvnw.cmd clean test
+.\mvnw.cmd spring-boot:run
+```
+
+Nếu ứng dụng dùng cổng mặc định của Spring Boot, có thể mở **http://localhost:8080**. Địa chỉ truy cập và tài khoản thử nghiệm sẽ được nhóm cập nhật theo cấu hình và dữ liệu mẫu thực tế.
+
+> **Quan trọng:** Việc có source code và Base UI không đồng nghĩa backend đã chạy thành công. Nếu lệnh build/chạy báo lỗi, cần kiểm tra log, JDK, dependency, kết nối MySQL, cấu hình Flyway và các migration trước khi kết luận ứng dụng hoạt động.
+
+## 6. Base UI chung và bản demo
+
+- Base UI của nhóm gồm **Header, Sidebar, Footer, các Thymeleaf fragments**, CSS/JS, logo HCMUTE và trang Dashboard chung.
+- Mỗi thành viên tạo các trang Thymeleaf nghiệp vụ của mình dựa trên layout chung.
+- Tài liệu hướng dẫn sử dụng UI: [`docs/QUY_UOC_TICH_HOP_UI.md`](docs/QUY_UOC_TICH_HOP_UI.md).
+- **[Xem bản demo UI trên GitHub Pages](https://y0unglewis.github.io/ql-detai-ui-demo/index.html)**: chỉ là giao diện HTML/CSS/JS tĩnh, **không có backend**.
+
+## 7. Quy trình làm việc nhóm với GitHub
+
+Nhóm theo dõi công việc qua **Issues**, phát triển trên nhánh riêng và tạo **Pull Request (PR) vào `main`**. Không push trực tiếp lên `main` khi đang làm tính năng.
+
+### Bắt đầu một công việc
+
+Đảm bảo các thay đổi local đã được commit hoặc lưu lại, sau đó:
 
 ```powershell
 git switch main
@@ -145,54 +181,37 @@ git pull --ff-only origin main
 git switch -c feat/ten-chuc-nang
 ```
 
-Sau khi hoàn thành một phần việc:
+Ví dụ tên nhánh: `feat/shared-dashboard-ui`, `feat/student-groups`, `feat/topic-management`.
+
+### Commit và đẩy nhánh
 
 ```powershell
 git status
-git diff
-git add DUONG_DAN_FILE_DA_SUA
+git add <duong-dan-file-can-commit>
 git diff --cached
-git commit -m "feat: describe the implemented change"
+git commit -m "feat: implement feature name"
 git push -u origin feat/ten-chuc-nang
 ```
 
-Thay tên nhánh, đường dẫn và nội dung commit bằng thông tin thực tế.
+`<duong-dan-file-can-commit>` là chỗ cần thay bằng đường dẫn thật; chỉ đưa vào commit các file thuộc công việc mình làm.
 
-Mở pull request vào `main`, ghi rõ:
+### Tạo Pull Request
 
-- Nội dung thay đổi.
-- Task hoặc Issue liên quan.
-- Cách kiểm tra và kết quả thực tế.
-- Phần chưa hoàn thành, nếu có.
+1. Trên GitHub, mở PR với **base: `main`** và **compare: nhánh đang làm**.
+2. Ghi rõ nội dung thay đổi, phần đã kiểm tra và những hạn chế còn lại (nếu có).
+3. Gắn Issue liên quan bằng `Closes #<so-issue>` (ví dụ `Closes #1`).
+4. Nhờ thành viên khác review, sau đó merge khi thống nhất.
+5. Các thành viên khác cập nhật `main` bằng `git pull --ff-only origin main` trước khi tiếp tục công việc mới.
 
-Một thành viên khác review trước khi merge.
-Nhóm sử dụng Create a merge commit để giữ lịch sử commit.
+Với thay đổi cơ sở dữ liệu, cần thống nhất thứ tự migration. **Không sửa migration đã áp dụng trên môi trường dùng chung**; tạo migration mới cho thay đổi tiếp theo.
 
-### Quy tắc SQL
+## 8. Tài liệu và lưu ý
 
-- SQL chính thức đặt trong `src/main/resources/db/migration/`.
-- Đặt tên theo dạng `V1__create_core_tables.sql`.
-- Thống nhất số migration trước khi merge.
-- Không sửa migration đã được áp dụng trên môi trường chung
-  hoặc máy của thành viên khác; tạo migration mới cho thay đổi tiếp theo.
-- Dữ liệu demo phải là dữ liệu giả.
-- Không commit mật khẩu, file báo cáo thật hoặc bản sao lưu riêng.
+- Thiết kế CSDL/ERD: lưu trong tài liệu dự án của nhóm; file `.mwb` có thể mở bằng MySQL Workbench, bản ảnh/PDF dùng để đưa vào báo cáo.
+- Quy ước Base UI: `docs/QUY_UOC_TICH_HOP_UI.md`.
+- Các tài liệu Use Case, rubric và minh chứng kiểm thử sẽ được quản lý và cập nhật theo sản phẩm thực tế.
+- Không commit mật khẩu, dữ liệu thật của sinh viên, file upload nhạy cảm hay thông tin bí mật.
 
-## 8. Tiến độ
+---
 
-- [x] Khởi tạo repository GitHub.
-- [x] Tạo bộ khung Spring Boot và Maven Wrapper.
-- [x] Thiết lập `.gitignore` và `.gitattributes`.
-- [ ] Xác nhận build và chạy với JDK 21.
-- [ ] Hoàn thiện đặc tả nghiệp vụ và thiết kế 17 bảng.
-- [ ] Viết và kiểm tra SQL migration.
-- [ ] Cấu hình kết nối MySQL.
-- [ ] Chuẩn bị dữ liệu mẫu.
-- [ ] Triển khai đăng nhập và phân quyền.
-- [ ] Triển khai các chức năng nghiệp vụ.
-- [ ] Kiểm thử tích hợp.
-- [ ] Triển khai bản demo.
-- [ ] Hoàn thiện báo cáo và hướng dẫn sử dụng.
-
-Cập nhật checklist theo kết quả thực tế, không đánh dấu hoàn thành
-chỉ vì đã tạo file hoặc thư mục.
+**Nhóm 12 — Hệ thống quản lý đề tài sinh viên Khoa CNTT · WEPR330479**
