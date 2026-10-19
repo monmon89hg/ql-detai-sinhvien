@@ -169,41 +169,72 @@ Nếu ứng dụng dùng cổng mặc định của Spring Boot, có thể mở 
 
 ## 7. Quy trình làm việc nhóm với GitHub
 
-Nhóm theo dõi công việc qua **Issues**, phát triển trên nhánh riêng và tạo **Pull Request (PR) vào `main`**. Không push trực tiếp lên `main` khi đang làm tính năng.
+Nhóm áp dụng quy trình Git Flow đơn giản với hai nhánh dài hạn:
 
-### Bắt đầu một công việc
+- `main`: nhánh ổn định, dùng cho bản phát hành và nộp đồ án.
+- `develop`: nhánh tích hợp các chức năng, kiểm thử trước khi đưa lên `main`.
 
-Đảm bảo các thay đổi local đã được commit hoặc lưu lại, sau đó:
+**Không push trực tiếp vào `main` hoặc `develop`.** Mọi thay đổi phải được tích hợp qua Pull Request (PR).
+
+### 7.1. Quy ước đặt tên nhánh
+
+- `feat/*`: phát triển chức năng mới.
+- `fix/*`: sửa lỗi.
+- `docs/*`: cập nhật tài liệu.
+- `chore/*`: cấu hình, bảo trì, database migration.
+
+Mỗi nhánh làm việc được tạo từ `develop`.
+
+### 7.2. Bắt đầu công việc
+
+Đảm bảo đã lưu an toàn các thay đổi local trước khi chuyển nhánh.
 
 ```powershell
-git switch main
-git pull --ff-only origin main
+git fetch origin
+git switch develop
+git pull --ff-only origin develop
 git switch -c feat/ten-chuc-nang
 ```
 
-Ví dụ tên nhánh: `feat/shared-dashboard-ui`, `feat/student-groups`, `feat/topic-management`.
-
-### Commit và đẩy nhánh
+### 7.3. Commit và push
 
 ```powershell
 git status
-git add <duong-dan-file-can-commit>
+git add <duong-dan-file>
 git diff --cached
 git commit -m "feat: implement feature name"
 git push -u origin feat/ten-chuc-nang
 ```
 
-`<duong-dan-file-can-commit>` là chỗ cần thay bằng đường dẫn thật; chỉ đưa vào commit các file thuộc công việc mình làm.
+Chỉ commit các file liên quan đến công việc. Không commit mật khẩu, token hoặc thông tin kết nối nhạy cảm.
 
-### Tạo Pull Request
+### 7.4. Tạo Pull Request
 
-1. Trên GitHub, mở PR với **base: `main`** và **compare: nhánh đang làm**.
-2. Ghi rõ nội dung thay đổi, phần đã kiểm tra và những hạn chế còn lại (nếu có).
-3. Gắn Issue liên quan bằng `Closes #<so-issue>` (ví dụ `Closes #1`).
-4. Nhờ thành viên khác review, sau đó merge khi thống nhất.
-5. Các thành viên khác cập nhật `main` bằng `git pull --ff-only origin main` trước khi tiếp tục công việc mới.
+1. Tạo PR với **base: `develop`**, compare: nhánh đang làm.
+2. Mô tả các thay đổi, kiểm thử đã thực hiện và vấn đề còn tồn tại.
+3. Liên kết GitHub Issue liên quan.
+4. Yêu cầu ít nhất một thành viên khác review.
+5. Chỉ merge khi đã xử lý các nhận xét và kiểm thử phù hợp.
+6. Sau khi merge, cập nhật `develop` local trước khi bắt đầu công việc tiếp theo.
 
-Với thay đổi cơ sở dữ liệu, cần thống nhất thứ tự migration. **Không sửa migration đã áp dụng trên môi trường dùng chung**; tạo migration mới cho thay đổi tiếp theo.
+### 7.5. Tích hợp bản cuối vào main
+
+Khi các phân hệ đã hoàn thiện và kiểm thử tích hợp thành công:
+
+1. Tạo PR với **base: `main`**, compare: `develop`.
+2. Kiểm tra build, database migration và luồng nghiệp vụ.
+3. Nhờ thành viên khác review.
+4. Merge PR vào `main` sau khi nhóm thống nhất.
+5. Sử dụng `main` làm nguồn cho bản phát hành/nộp đồ án.
+
+Không phát triển chức năng trực tiếp trên `main`.
+
+### 7.6. Quy tắc database migration
+
+- Các migration Flyway được quản lý chung trong repository.
+- Không sửa migration đã áp dụng trên môi trường dùng chung.
+- Khi thay đổi schema, cần thống nhất với các thành viên có bảng liên quan.
+- Migration mới phải được kiểm thử trước khi merge vào `develop`.
 
 ## 8. Tài liệu và lưu ý
 
