@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Chi tiết hội đồng')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div th:replace="~{fragments/sidebar :: sidebar('council')}"></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Chi tiết hội đồng')}"
+                ></div>
+
+                <div class="container">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading">
+                        <h1>Chi tiết hội đồng</h1>
+                        <p th:text="${hoiDong.tenHoiDong}"></p>
+                    </div>
+
+                    <section class="section">
+                        <div class="section-top">
+                            <h2 class="section-title">Thông tin hội đồng</h2>
+
+                            <a
+                                class="btn btn-outline"
+                                th:href="@{/hoi-dong}"
+                            >
+                                Quay lại danh sách
+                            </a>
+                        </div>
+
+                        <table class="data-table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Mã hội đồng</th>
+                                    <td th:text="${hoiDong.maHoiDong}"></td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Tên hội đồng</th>
+                                    <td th:text="${hoiDong.tenHoiDong}"></td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Mã đợt đăng ký</th>
+                                    <td th:text="${hoiDong.maDot}"></td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Địa điểm</th>
+                                    <td
+                                        th:text="${#strings.isEmpty(hoiDong.diaDiem)
+                                            ? 'Chưa cập nhật' : hoiDong.diaDiem}"
+                                    ></td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Trạng thái</th>
+                                    <td th:text="${hoiDong.trangThai}"></td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Mã người tạo</th>
+                                    <td th:text="${hoiDong.maNguoiTao}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section class="section">
+                        <div class="section-top">
+                            <h2 class="section-title">Thành viên hội đồng</h2>
+                        </div>
+
+                        <p th:if="${#lists.isEmpty(danhSachThanhVien)}">
+                            Hội đồng chưa có thành viên.
+                        </p>
+
+                        <table
+                            class="data-table"
+                            th:unless="${#lists.isEmpty(danhSachThanhVien)}"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">STT</th>
+                                    <th scope="col">Mã giảng viên</th>
+                                    <th scope="col">Họ tên</th>
+                                    <th scope="col">Chức danh</th>
+                                    <th scope="col" th:if="${coQuyenXoaThanhVien}">
+                                        Thao tác
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="thanhVien, viTri : ${danhSachThanhVien}">
+                                    <td th:text="${viTri.count}"></td>
+                                    <td th:text="${thanhVien.maGiangVien}"></td>
+                                    <td th:text="${thanhVien.hoTen}"></td>
+
+                                    <td th:switch="${thanhVien.chucDanh}">
+                                        <span th:case="'CHU_TICH'">Chủ tịch</span>
+                                        <span th:case="'THU_KY'">Thư ký</span>
+                                        <span th:case="'UY_VIEN'">Ủy viên</span>
+                                    </td>
+
+                                    <td th:if="${coQuyenXoaThanhVien}">
+                                        <form
+                                            th:action="@{/hoi-dong/{maHoiDong}/thanh-vien/{maGiangVien}/xoa(
+                                                maHoiDong=${hoiDong.maHoiDong},
+                                                maGiangVien=${thanhVien.maGiangVien})}"
+                                            method="post"
+                                            onsubmit="return confirm('Bạn có chắc muốn xóa thành viên này khỏi hội đồng?');"
+                                        >
+                                            <button class="btn btn-outline" type="submit">
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section class="section" th:if="${coQuyenThemThanhVien}">
+                        <div class="section-top">
+                            <h2 class="section-title">Thêm thành viên</h2>
+                        </div>
+
+                        <p th:if="${#lists.isEmpty(danhSachGiangVien)}">
+                            Chưa có giảng viên để lựa chọn.
+                        </p>
+
+                        <form
+                            th:action="@{/hoi-dong/{maHoiDong}/thanh-vien(maHoiDong=${hoiDong.maHoiDong})}"
+                            th:object="${thanhVienHoiDongForm}"
+                            method="post"
+                        >
+                            <div class="form-field">
+                                <label for="maGiangVien">Giảng viên *</label>
+
+                                <select
+                                    class="form-control"
+                                    th:field="*{maGiangVien}"
+                                    required
+                                >
+                                    <option value="">-- Chọn giảng viên --</option>
+
+                                    <option
+                                        th:each="giangVien : ${danhSachGiangVien}"
+                                        th:value="${giangVien.maGiangVien}"
+                                        th:text="${giangVien.maGiangVien + ' - ' + giangVien.hoTen}"
+                                    ></option>
+                                </select>
+
+                                <small
+                                    th:if="${#fields.hasErrors('maGiangVien')}"
+                                    th:errors="*{maGiangVien}"
+                                ></small>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="chucDanh">Chức danh *</label>
+
+                                <select
+                                    class="form-control"
+                                    th:field="*{chucDanh}"
+                                    required
+                                >
+                                    <option value="">-- Chọn chức danh --</option>
+
+                                    <option
+                                        th:each="chucDanh : ${danhSachChucDanh}"
+                                        th:value="${chucDanh.name()}"
+                                        th:text="${chucDanh.name() == 'CHU_TICH'
+                                            ? 'Chủ tịch'
+                                            : (chucDanh.name() == 'THU_KY'
+                                                ? 'Thư ký' : 'Ủy viên')}"
+                                    ></option>
+                                </select>
+
+                                <small
+                                    th:if="${#fields.hasErrors('chucDanh')}"
+                                    th:errors="*{chucDanh}"
+                                ></small>
+                            </div>
+
+                            <div class="btn-row">
+                                <button
+                                    class="btn btn-primary"
+                                    type="submit"
+                                >
+                                    Thêm thành viên
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="section" th:if="${coQuyenXacNhanSanSang}">
+                        <div class="section-top">
+                            <h2 class="section-title">Xác nhận hội đồng</h2>
+                        </div>
+
+                        <p>
+                            Hội đồng cần có từ 3 đến 5 giảng viên, gồm một chủ tịch
+                            và một thư ký. Sau khi xác nhận, danh sách thành viên
+                            sẽ được khóa chỉnh sửa.
+                        </p>
+
+                        <form
+                            th:action="@{/hoi-dong/{maHoiDong}/san-sang(
+                                maHoiDong=${hoiDong.maHoiDong})}"
+                            method="post"
+                            onsubmit="return confirm('Xác nhận hội đồng sẵn sàng? Sau bước này, không thể thêm hoặc xóa thành viên.');"
+                        >
+                            <div class="btn-row">
+                                <button class="btn btn-primary" type="submit">
+                                    Xác nhận sẵn sàng
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>
