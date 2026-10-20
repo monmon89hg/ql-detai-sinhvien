@@ -1,0 +1,270 @@
+{
+  "mysql": "8.4.13",
+  "schemas_retained": [
+    "qldt_demo_qa_fresh_c6670c4e4c",
+    "qldt_demo_qa_rollback_990536f100",
+    "qldt_demo_qa_legacy_e8237b38c0"
+  ],
+  "tests": [
+    {
+      "name": "fresh.V1_V5_create_17_business_tables",
+      "status": "PASS"
+    },
+    {
+      "name": "safety.direct_SQL_without_schema_opt_in_rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "safety.wrong_expected_schema_rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "safety.remote_hosts_blocked_before_connection",
+      "status": "PASS"
+    },
+    {
+      "name": "seed.fresh_insertion_and_precommit_business_validation",
+      "status": "PASS"
+    },
+    {
+      "name": "coverage.all_17_expected_counts_and_invariants",
+      "status": "PASS"
+    },
+    {
+      "name": "seed.second_run_byte_identical_all_17_tables",
+      "status": "PASS"
+    },
+    {
+      "name": "seed.non_demo_data_and_V5_roles_unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "seed.rerun_preserves_owner_demo_edits",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.foreign_key_1452",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.duplicate_membership_PK_1062",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.two_active_groups_generated_UNIQUE_1062",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.second_group_leader_generated_UNIQUE_1062",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.second_committee_chair_generated_UNIQUE_1062",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.grade_-0.01_CHECK_3819",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.grade_10.01_CHECK_3819",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.result_internal_formula_CHECK_3819",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.cross_table_sum_detected_by_validator",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.missing_required_form_detected_by_identity",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.same_count_wrong_assessor_identity_rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.wrong_assignment_type_detected_by_validator",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.supervisor_in_committee_detected_by_validator",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.six_members_detected_by_validator_only",
+      "status": "PASS"
+    },
+    {
+      "name": "pdf.six_real_files_size_sha256_and_database_metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "pdf.deterministic_regeneration_matches_committed_bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.tampered_PDF_rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "negative.existing_different_object_not_overwritten",
+      "status": "PASS"
+    },
+    {
+      "name": "safety.mid_seed_email_collision_rolls_back_all_inserts",
+      "status": "PASS"
+    },
+    {
+      "name": "legacy.v1_conflicts_reported_without_overwriting",
+      "status": "PASS"
+    },
+    {
+      "name": "service.capacity_6th_member_rejected",
+      "status": "SKIP",
+      "detail": "No membership Service/Controller exists; SQL validator test above is not service enforcement"
+    },
+    {
+      "name": "http.unauthorized_report_access",
+      "status": "SKIP",
+      "detail": "No authentication/report Controller/private application storage"
+    },
+    {
+      "name": "http.authenticated_A_to_I_workflows",
+      "status": "SKIP",
+      "detail": "Only application bootstrap Java class exists; all demo accounts intentionally locked"
+    },
+    {
+      "name": "service.concurrent_membership_upload_grade_publication",
+      "status": "SKIP",
+      "detail": "Transaction services not implemented"
+    },
+    {
+      "name": "integration.actual_Flyway_engine_and_Spring_startup",
+      "status": "SKIP",
+      "detail": "This runner executes V1-V5 SQL directly; Java runtime here is 17, project requires 21"
+    },
+    {
+      "name": "integration.SMTP_result_notification",
+      "status": "SKIP",
+      "detail": "No mail service; no messages sent"
+    },
+    {
+      "name": "final.all_database_invariants_still_valid_after_negative_rollbacks",
+      "status": "PASS"
+    }
+  ],
+  "counts": [
+    {
+      "table_name": "bo_mon",
+      "expected_rows": 4,
+      "actual_rows": 4,
+      "status": "PASS"
+    },
+    {
+      "table_name": "dang_ky_de_tai",
+      "expected_rows": 9,
+      "actual_rows": 9,
+      "status": "PASS"
+    },
+    {
+      "table_name": "de_tai",
+      "expected_rows": 17,
+      "actual_rows": 17,
+      "status": "PASS"
+    },
+    {
+      "table_name": "de_tai_giang_vien",
+      "expected_rows": 27,
+      "actual_rows": 27,
+      "status": "PASS"
+    },
+    {
+      "table_name": "dot_dang_ky",
+      "expected_rows": 7,
+      "actual_rows": 7,
+      "status": "PASS"
+    },
+    {
+      "table_name": "hoi_dong",
+      "expected_rows": 5,
+      "actual_rows": 5,
+      "status": "PASS"
+    },
+    {
+      "table_name": "hoi_dong_de_tai",
+      "expected_rows": 4,
+      "actual_rows": 4,
+      "status": "PASS"
+    },
+    {
+      "table_name": "ket_qua",
+      "expected_rows": 2,
+      "actual_rows": 2,
+      "status": "PASS"
+    },
+    {
+      "table_name": "nguoi_dung",
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "status": "PASS"
+    },
+    {
+      "table_name": "nguoi_dung_vai_tro",
+      "expected_rows": 48,
+      "actual_rows": 48,
+      "status": "PASS"
+    },
+    {
+      "table_name": "nhom_sinh_vien",
+      "expected_rows": 11,
+      "actual_rows": 11,
+      "status": "PASS"
+    },
+    {
+      "table_name": "nop_bao_cao",
+      "expected_rows": 6,
+      "actual_rows": 6,
+      "status": "PASS"
+    },
+    {
+      "table_name": "phieu_cham_diem",
+      "expected_rows": 14,
+      "actual_rows": 14,
+      "status": "PASS"
+    },
+    {
+      "table_name": "thanh_vien_hoi_dong",
+      "expected_rows": 14,
+      "actual_rows": 14,
+      "status": "PASS"
+    },
+    {
+      "table_name": "thanh_vien_nhom",
+      "expected_rows": 38,
+      "actual_rows": 38,
+      "status": "PASS"
+    },
+    {
+      "table_name": "thong_bao",
+      "expected_rows": 4,
+      "actual_rows": 4,
+      "status": "PASS"
+    },
+    {
+      "table_name": "vai_tro",
+      "expected_rows": 5,
+      "actual_rows": 5,
+      "status": "PASS"
+    }
+  ],
+  "migration_method": "Execute the unchanged V1-V5 SQL files in order; not a Flyway engine/startup test",
+  "validation": {
+    "total_checks": 89,
+    "foreign_key_checks": 38,
+    "failures": 0
+  }
+}
