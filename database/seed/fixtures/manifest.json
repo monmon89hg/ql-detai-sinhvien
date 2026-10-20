@@ -1,0 +1,79 @@
+{
+  "format_version": 1,
+  "storage_contract": "private-local-qa-only; application storage not implemented",
+  "generator": "reportlab 4.4.9; invariant=True",
+  "reports": [
+    {
+      "ma_nhom": "DEMO_N02",
+      "phien_ban": 1,
+      "ma_nguoi_nop": "DEMO_SV04",
+      "nop_luc": "2026-10-19 14:00:00",
+      "ten_file_goc": "DEMO_N02-v1.pdf",
+      "file": "DEMO_N02-v1.pdf",
+      "object_key": "demo-fixtures/v1/DEMO_N02/v1.pdf",
+      "mime_type": "application/pdf",
+      "kich_thuoc_byte": 66001,
+      "sha256": "e6be786edab36e3a11d9e75d364d068791fd3f382e4f075f6fd76ec77290c7e0"
+    },
+    {
+      "ma_nhom": "DEMO_N08",
+      "phien_ban": 1,
+      "ma_nguoi_nop": "DEMO_SV26",
+      "nop_luc": "2026-09-05 09:00:00",
+      "ten_file_goc": "DEMO_N08-v1.pdf",
+      "file": "DEMO_N08-v1.pdf",
+      "object_key": "demo-fixtures/v1/DEMO_N08/v1.pdf",
+      "mime_type": "application/pdf",
+      "kich_thuoc_byte": 66014,
+      "sha256": "a58ecba2da7469735b77f549da4cb8d32779d6bdd5ecd48e33c16566637457ba"
+    },
+    {
+      "ma_nhom": "DEMO_N08",
+      "phien_ban": 2,
+      "ma_nguoi_nop": "DEMO_SV26",
+      "nop_luc": "2026-09-09 09:00:00",
+      "ten_file_goc": "DEMO_N08-v2.pdf",
+      "file": "DEMO_N08-v2.pdf",
+      "object_key": "demo-fixtures/v1/DEMO_N08/v2.pdf",
+      "mime_type": "application/pdf",
+      "kich_thuoc_byte": 66027,
+      "sha256": "aa261d7e7d6a511685572a1e02c0e908b6fb4e61e71c260df7791f58babcbeb5"
+    },
+    {
+      "ma_nhom": "DEMO_N09",
+      "phien_ban": 1,
+      "ma_nguoi_nop": "DEMO_SV29",
+      "nop_luc": "2026-09-08 09:00:00",
+      "ten_file_goc": "DEMO_N09-v1.pdf",
+      "file": "DEMO_N09-v1.pdf",
+      "object_key": "demo-fixtures/v1/DEMO_N09/v1.pdf",
+      "mime_type": "application/pdf",
+      "kich_thuoc_byte": 66016,
+      "sha256": "f45213ce4d45bde8b2491cfa6391ca2671cf337337af1afa714b438541c8742b"
+    },
+    {
+      "ma_nhom": "DEMO_N10",
+      "phien_ban": 1,
+      "ma_nguoi_nop": "DEMO_SV32",
+      "nop_luc": "2026-09-09 10:00:00",
+      "ten_file_goc": "DEMO_N10-v1.pdf",
+      "file": "DEMO_N10-v1.pdf",
+      "object_key": "demo-fixtures/v1/DEMO_N10/v1.pdf",
+      "mime_type": "application/pdf",
+      "kich_thuoc_byte": 66029,
+      "sha256": "bd9c51d6841606a42e0bb5cbcc021c9048b0455f784b93521ea0363cd8876771"
+    },
+    {
+      "ma_nhom": "DEMO_N11",
+      "phien_ban": 1,
+      "ma_nguoi_nop": "DEMO_SV35",
+      "nop_luc": "2026-09-09 11:00:00",
+      "ten_file_goc": "DEMO_N11-v1.pdf",
+      "file": "DEMO_N11-v1.pdf",
+      "object_key": "demo-fixtures/v1/DEMO_N11/v1.pdf",
+      "mime_type": "application/pdf",
+      "kich_thuoc_byte": 66017,
+      "sha256": "82fb1c02635e3bfe092d49a5dc7e2bdc4189e6ce4cee474f5c5290811a205e99"
+    }
+  ]
+}
