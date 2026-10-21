@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @EnableWebSecurity
-@Profile("!hoi-dong-local")
+@Profile("!hoi-dong-local & !preview")
 public class SecurityConfig {
 
     @Bean
