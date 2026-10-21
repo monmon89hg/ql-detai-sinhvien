@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Danh sách đề tài')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('topics')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Danh sách đề tài')}"></div>
+
+        <div class="container">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+
+            <div class="page-heading" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h1>Danh sách đề tài nghiên cứu</h1>
+                    <p>Tra cứu và tìm kiếm đề tài theo đợt đăng ký, bộ môn và trạng thái.</p>
+                </div>
+                <div>
+                    <a th:href="@{/de-tai/de-xuat}" class="btn btn-primary">+ Đề xuất đề tài mới</a>
+                </div>
+            </div>
+
+            <!-- BỘ LỌC TÌM KIẾM -->
+            <div class="placeholder" style="max-width: 100%; margin-bottom: 20px; padding: 20px;">
+                <form th:action="@{/de-tai}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 120px; gap: 12px; align-items: end;">
+                    <div class="form-field" style="margin: 0;">
+                        <label>Đợt đăng ký</label>
+                        <select name="dotId" class="form-control">
+                            <option value="">-- Tất cả đợt --</option>
+                            <option th:each="d : ${dots}" th:value="${d.id}" th:text="${d.tenDot}" th:selected="${d.id == selectedDotId}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-field" style="margin: 0;">
+                        <label>Trạng thái</label>
+                        <select name="trangThai" class="form-control">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="CHO_DUYET" th:selected="${selectedTrangThai == 'CHO_DUYET'}">Chờ duyệt</option>
+                            <option value="DA_DUYET" th:selected="${selectedTrangThai == 'DA_DUYET'}">Đã duyệt</option>
+                            <option value="CONG_BO" th:selected="${selectedTrangThai == 'CONG_BO'}">Đã công bố (SV xem)</option>
+                            <option value="TU_CHOI" th:selected="${selectedTrangThai == 'TU_CHOI'}">Bị từ chối</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field" style="margin: 0;">
+                        <label>Từ khóa tìm kiếm</label>
+                        <input type="text" name="keyword" class="form-control" placeholder="Tên hoặc mã đề tài..." th:value="${keyword}">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="height: 42px;">Tìm kiếm</button>
+                </form>
+            </div>
+
+            <!-- BẢNG ĐỀ TÀI -->
+            <div class="placeholder" style="max-width: 100%;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đề tài</th>
+                            <th>Tên đề tài</th>
+                            <th>Mã đợt</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(deTais)}">
+                            <td colspan="5" style="text-align:center; padding: 25px; color:#869bab;">
+                                Không có đề tài nào phù hợp với bộ lọc tìm kiếm.
+                            </td>
+                        </tr>
+                        <tr th:each="dt : ${deTais}">
+                            <td><strong class="route-line" th:text="${dt.maDeTai}">DT001</strong></td>
+                            <td>
+                                <strong th:text="${dt.tenDeTai}">Hệ thống nhận diện biển số xe</strong>
+                            </td>
+                            <td><span class="status-pill" th:text="'Đợt #' + ${dt.dotDangKyId}">Đợt #1</span></td>
+                            <td>
+                                <span class="status-pill"
+                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : 'background:#eaf2fa; color:#214967;')}"
+                                      th:text="${dt.trangThai}">CONG_BO</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/de-tai/chi-tiet/{id}(id=${dt.id})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Xem chi tiết &amp; Phân công</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

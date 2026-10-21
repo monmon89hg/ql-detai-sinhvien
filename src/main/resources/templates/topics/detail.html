@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Chi tiết đề tài')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('topics')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Chi tiết đề tài')}"></div>
+
+        <div class="container">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+
+            <div class="page-heading">
+                <h1 th:text="${deTai.tenDeTai}">Tên đề tài</h1>
+                <p>Mã: <strong th:text="${deTai.maDeTai}">DT001</strong> | Đợt: <strong th:text="${dot.tenDot}">Đợt 1</strong> | Trạng thái: <span class="status-pill" th:text="${deTai.trangThai}">CONG_BO</span></p>
+            </div>
+
+            <!-- THÔNG TIN NỘI DUNG VÀ YÊU CẦU -->
+            <div class="placeholder" style="max-width: 100%; margin-bottom: 20px;">
+                <h3 style="margin-top:0; color:var(--primary);">Nội dung chi tiết</h3>
+                <p style="white-space: pre-line; color:#333;" th:text="${deTai.noiDung}">Nội dung tóm tắt...</p>
+
+                <h3 style="margin-top:20px; color:var(--primary);">Yêu cầu đối với sinh viên</h3>
+                <p style="white-space: pre-line; color:#555;" th:text="${deTai.yeuCau != null && !deTai.yeuCau.isBlank() ? deTai.yeuCau : 'Không có yêu cầu đặc biệt.'}">Yêu cầu...</p>
+
+                <div th:if="${deTai.lyDoTuChoi != null}" class="alert" style="margin-top: 15px;">
+                    <strong>Lý do từ chối:</strong> <span th:text="${deTai.lyDoTuChoi}"></span>
+                </div>
+            </div>
+
+            <!-- DANH SÁCH GIẢNG VIÊN ĐƯỢC PHÂN CÔNG -->
+            <div class="placeholder" style="max-width: 100%; margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; color:var(--primary);">Danh sách Giảng viên phân công</h3>
+                    <small style="color:#697f91;">(Tối đa 2 GVHD, GVHD không được làm Phản biện / Chấm độc lập)</small>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã giảng viên</th>
+                            <th>Vai trò phân công</th>
+                            <th>Thời gian phân công</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(phanCongs)}">
+                            <td colspan="4" style="text-align:center; padding: 15px; color:#869bab;">
+                                Chưa có giảng viên nào được phân công.
+                            </td>
+                        </tr>
+                        <tr th:each="pc : ${phanCongs}">
+                            <td><strong class="route-line" th:text="'GV #' + ${pc.giangVienId}">GV #1</strong></td>
+                            <td>
+                                <span class="status-pill"
+                                      th:style="${pc.loaiPhanCong == 'HUONG_DAN' ? 'background:#eaf2fa; color:#214967;' : 'background:#fef7e7; color:#815915;'}"
+                                      th:text="${pc.loaiPhanCong}">HUONG_DAN</span>
+                            </td>
+                            <td>
+                                <span style="font-size:12px;" th:text="${#temporals.format(pc.phanCongLuc, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td>
+                                <form th:action="@{/de-tai/phan-cong/{id}/xoa(id=${pc.id})}" method="post" style="display:inline;">
+                                    <input type="hidden" name="deTaiId" th:value="${deTai.id}">
+                                    <button type="submit" class="btn btn-outline" style="min-height:28px; padding:2px 8px; font-size:11px; color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Gỡ phân công giảng viên này?');">Gỡ bỏ</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- FORM PHÂN CÔNG THÊM GIẢNG VIÊN -->
+                <form th:action="@{/de-tai/{id}/phan-cong(id=${deTai.id})}" method="post" style="margin-top:20px; padding-top:15px; border-top:1px dashed var(--border); display:grid; grid-template-columns: 1fr 1fr 150px; gap:12px; align-items:end;">
+                    <div class="form-field" style="margin:0;">
+                        <label>Mã ID Giảng viên *</label>
+                        <input type="number" name="giangVienId" class="form-control" placeholder="Nhập ID giảng viên..." required>
+                    </div>
+
+                    <div class="form-field" style="margin:0;">
+                        <label>Vai trò phân công *</label>
+                        <select name="loaiPhanCong" class="form-control" required>
+                            <option value="HUONG_DAN">Giảng viên hướng dẫn (HUONG_DAN)</option>
+                            <option value="PHAN_BIEN">Giảng viên phản biện (PHAN_BIEN)</option>
+                            <option value="CHAM_DOC_LAP">Giảng viên chấm độc lập (CHAM_DOC_LAP)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="height:42px;">+ Phân công</button>
+                </form>
+            </div>
+
+            <div class="btn-row">
+                <a th:href="@{/de-tai}" class="btn btn-outline">Quay lại danh sách đề tài</a>
+                <a th:href="@{/de-tai/duyet}" class="btn btn-outline">Sang trang duyệt đề tài</a>
+            </div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

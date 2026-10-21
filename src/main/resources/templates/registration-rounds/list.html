@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý Đợt đăng ký')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('rounds')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Đợt đăng ký')}"></div>
+
+        <div class="container">
+            <!-- Thông báo thành công hoặc lỗi -->
+            <div th:replace="~{fragments/messages :: messages}"></div>
+
+            <div class="page-heading" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h1>Quản lý Đợt đăng ký</h1>
+                    <p>Thiết lập thời gian và theo dõi quy trình 2 giai đoạn (GV đề xuất & SV đăng ký).</p>
+                </div>
+                <div>
+                    <a th:href="@{/dot-dang-ky/tao}" class="btn btn-primary">
+                        + Tạo đợt đăng ký mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bảng danh sách đợt -->
+            <div class="placeholder" style="max-width: 100%;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đợt</th>
+                            <th>Tên đợt</th>
+                            <th>Loại đề tài</th>
+                            <th>Giai đoạn 1 (GV Đề xuất)</th>
+                            <th>Giai đoạn 2 (SV Đăng ký)</th>
+                            <th>Trạng thái tiến trình</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(dots)}">
+                            <td colspan="7" style="text-align:center; padding: 20px; color: #869bab;">
+                                Chưa có đợt đăng ký nào. Hãy tạo đợt đăng ký mới!
+                            </td>
+                        </tr>
+                        <tr th:each="dot : ${dots}">
+                            <td><strong class="route-line" th:text="${dot.maDot}">DOT-01</strong></td>
+                            <td th:text="${dot.tenDot}">Khóa luận HK1 2026</td>
+                            <td><span class="status-pill" th:text="${dot.loaiDeTai}">KLTN</span></td>
+                            <td>
+                                <span style="font-size:12px;" th:text="${#temporals.format(dot.batDauGv, 'dd/MM/yyyy HH:mm')} + ' - ' + ${#temporals.format(dot.ketThucGv, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td>
+                                <span style="font-size:12px;" th:text="${#temporals.format(dot.batDauSv, 'dd/MM/yyyy HH:mm')} + ' - ' + ${#temporals.format(dot.ketThucSv, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td>
+                                <span class="status-pill" style="background:#e8f4fc; color:#1f5e8d;"
+                                      th:text="${giaiDoanMap[dot.id]}">Giai đoạn 1: GV</span>
+                            </td>
+                            <td>
+                                <div class="btn-row">
+                                    <a th:href="@{/dot-dang-ky/sua/{id}(id=${dot.id})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Sửa</a>
+                                    
+                                    <form th:if="${dot.trangThai == 'NHAP'}" th:action="@{/dot-dang-ky/{id}/cong-bo(id=${dot.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-primary" style="min-height:30px; padding:4px 10px; font-size:12px;" onclick="return confirm('Bạn có chắc muốn công bố đợt này?');">Công bố</button>
+                                    </form>
+
+                                    <form th:if="${dot.trangThai == 'CONG_BO'}" th:action="@{/dot-dang-ky/{id}/dong(id=${dot.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Bạn có chắc muốn đóng đợt này?');">Đóng đợt</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>
