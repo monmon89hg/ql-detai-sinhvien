@@ -1,0 +1,9 @@
+
+.git
+**/target/
+**/.venv/
+**/.env
+**/.env.*
+**/application-local.properties
+**/application-local.yml
+**/application-local.yaml
