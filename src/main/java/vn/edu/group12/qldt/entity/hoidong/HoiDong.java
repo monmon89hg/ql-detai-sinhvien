@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.entity;
+package vn.edu.group12.qldt.entity.hoidong;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
-import vn.edu.group12.qldt.enums.TrangThaiHoiDong;
+import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
 
 @Entity
 @Table(name = "hoi_dong")

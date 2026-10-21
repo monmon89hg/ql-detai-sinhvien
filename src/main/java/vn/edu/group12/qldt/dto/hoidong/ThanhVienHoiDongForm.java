@@ -1,10 +1,10 @@
-package vn.edu.group12.qldt.dto;
+package vn.edu.group12.qldt.dto.hoidong;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import vn.edu.group12.qldt.enums.ChucDanhHoiDong;
+import vn.edu.group12.qldt.enums.hoidong.ChucDanhHoiDong;
 
 public class ThanhVienHoiDongForm {
 

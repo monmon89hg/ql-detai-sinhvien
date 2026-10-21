@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.dto;
+package vn.edu.group12.qldt.dto.hoidong;
 
 public interface GiangVienLuaChon {
 

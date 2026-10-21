@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.enums;
+package vn.edu.group12.qldt.enums.hoidong;
 
 public enum TrangThaiHoiDong {
     NHAP,

@@ -1,14 +1,14 @@
-package vn.edu.group12.qldt.repository;
+package vn.edu.group12.qldt.repository.hoidong;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import vn.edu.group12.qldt.entity.HoiDong;
+import vn.edu.group12.qldt.entity.hoidong.HoiDong;
 
 import java.util.List;
 
-import vn.edu.group12.qldt.dto.DotDangKyLuaChon;
+import vn.edu.group12.qldt.dto.hoidong.DotDangKyLuaChon;
 
 import java.util.Optional;
 
