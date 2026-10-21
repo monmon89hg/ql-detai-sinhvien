@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.controller;
+package vn.edu.group12.qldt.controller.hoidong;
 
 import jakarta.validation.Valid;
 
@@ -14,8 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import vn.edu.group12.qldt.service.HoiDongService;
-import vn.edu.group12.qldt.dto.HoiDongForm;
+import vn.edu.group12.qldt.service.hoidong.HoiDongService;
+import vn.edu.group12.qldt.dto.hoidong.HoiDongForm;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -25,11 +25,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
-import vn.edu.group12.qldt.service.ThanhVienHoiDongService;
-import vn.edu.group12.qldt.dto.ThanhVienHoiDongForm;
-import vn.edu.group12.qldt.entity.HoiDong;
-import vn.edu.group12.qldt.enums.ChucDanhHoiDong;
-import vn.edu.group12.qldt.enums.TrangThaiHoiDong;
+import vn.edu.group12.qldt.service.hoidong.ThanhVienHoiDongService;
+import vn.edu.group12.qldt.dto.hoidong.ThanhVienHoiDongForm;
+import vn.edu.group12.qldt.entity.hoidong.HoiDong;
+import vn.edu.group12.qldt.enums.hoidong.ChucDanhHoiDong;
+import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
 
 @Controller
 public class HoiDongController {

@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.service;
+package vn.edu.group12.qldt.service.hoidong;
 
 import java.util.List;
 
@@ -8,10 +8,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import vn.edu.group12.qldt.dto.ThanhVienHoiDongHienThi;
-import vn.edu.group12.qldt.repository.HoiDongRepository;
-import vn.edu.group12.qldt.repository.ThanhVienHoiDongRepository;
-import vn.edu.group12.qldt.dto.GiangVienLuaChon;
+import vn.edu.group12.qldt.dto.hoidong.ThanhVienHoiDongHienThi;
+import vn.edu.group12.qldt.repository.hoidong.HoiDongRepository;
+import vn.edu.group12.qldt.repository.hoidong.ThanhVienHoiDongRepository;
+import vn.edu.group12.qldt.dto.hoidong.GiangVienLuaChon;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -22,12 +22,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.validation.annotation.Validated;
 
-import vn.edu.group12.qldt.dto.ThanhVienHoiDongForm;
-import vn.edu.group12.qldt.entity.HoiDong;
-import vn.edu.group12.qldt.entity.ThanhVienHoiDong;
-import vn.edu.group12.qldt.entity.ThanhVienHoiDongId;
-import vn.edu.group12.qldt.enums.ChucDanhHoiDong;
-import vn.edu.group12.qldt.enums.TrangThaiHoiDong;
+import vn.edu.group12.qldt.dto.hoidong.ThanhVienHoiDongForm;
+import vn.edu.group12.qldt.entity.hoidong.HoiDong;
+import vn.edu.group12.qldt.entity.hoidong.ThanhVienHoiDong;
+import vn.edu.group12.qldt.entity.hoidong.ThanhVienHoiDongId;
+import vn.edu.group12.qldt.enums.hoidong.ChucDanhHoiDong;
+import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
 
 @Service
 @Validated

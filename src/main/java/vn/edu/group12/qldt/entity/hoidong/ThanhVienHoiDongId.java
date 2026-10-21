@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.entity;
+package vn.edu.group12.qldt.entity.hoidong;
 
 import java.io.Serializable;
 import java.util.Objects;

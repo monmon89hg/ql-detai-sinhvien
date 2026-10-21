@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.config;
+package vn.edu.group12.qldt.config.hoidong;
 
 import javax.sql.DataSource;
 

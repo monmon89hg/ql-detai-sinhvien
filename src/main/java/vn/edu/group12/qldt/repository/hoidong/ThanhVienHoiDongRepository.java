@@ -1,18 +1,18 @@
-package vn.edu.group12.qldt.repository;
+package vn.edu.group12.qldt.repository.hoidong;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import vn.edu.group12.qldt.entity.ThanhVienHoiDong;
-import vn.edu.group12.qldt.entity.ThanhVienHoiDongId;
-import vn.edu.group12.qldt.enums.ChucDanhHoiDong;
+import vn.edu.group12.qldt.entity.hoidong.ThanhVienHoiDong;
+import vn.edu.group12.qldt.entity.hoidong.ThanhVienHoiDongId;
+import vn.edu.group12.qldt.enums.hoidong.ChucDanhHoiDong;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import vn.edu.group12.qldt.dto.ThanhVienHoiDongHienThi;
-import vn.edu.group12.qldt.dto.GiangVienLuaChon;
+import vn.edu.group12.qldt.dto.hoidong.ThanhVienHoiDongHienThi;
+import vn.edu.group12.qldt.dto.hoidong.GiangVienLuaChon;
 
 public interface ThanhVienHoiDongRepository
         extends JpaRepository<ThanhVienHoiDong, ThanhVienHoiDongId> {
