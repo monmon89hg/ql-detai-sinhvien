@@ -185,7 +185,7 @@ def create_test_schema(args, password, suffix):
     with connect(args, password) as admin:
         query(admin, f"CREATE DATABASE {identifier(name)} CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci")
     connection = connect(args, password, name)
-    migrations = sorted((REPO / "src/main/resources/db/migration").glob("V[1-5]__*.sql"))
+    migrations = sorted((REPO / "backend/src/main/resources/db/migration").glob("V[1-5]__*.sql"))
     if len(migrations) != 5:
         raise ValueError("Exactly the approved V1-V5 files are required")
     for file in migrations:

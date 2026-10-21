@@ -2,7 +2,7 @@
 * text=auto eol=lf
 
 # Maven Wrapper cho Linux/macOS
-/mvnw text eol=lf
+/backend/mvnw text eol=lf
 
 # Script Windows dùng CRLF
 *.cmd text eol=crlf

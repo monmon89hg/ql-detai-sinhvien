@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/main/resources/static/images/ute_logo.png" alt="Logo HCMUTE" width="78">
+  <img src="frontend/static/images/ute_logo.png" alt="Logo HCMUTE" width="78">
 </p>
 
 <h1 align="center">Hệ thống quản lý đề tài sinh viên Khoa CNTT</h1>
@@ -54,29 +54,44 @@ Các đường dẫn chính trong cấu trúc dự án (một số thư mục đ
 
 ```text
 ql-detai-sinhvien/
-├── .mvn/                                  # Maven Wrapper
-├── mvnw
-├── mvnw.cmd
-├── pom.xml
-├── src/
-│   ├── main/
-│   │   ├── java/                          # Controller, Service, Repository, Entity...
-│   │   └── resources/
-│   │       ├── templates/
-│   │       │   ├── fragments/             # Header, Sidebar, Footer... dùng chung
-│   │       │   └── shared/dashboard.html  # Trang Dashboard chung
-│   │       ├── static/
-│   │       │   ├── css/                   # CSS dùng chung
-│   │       │   ├── js/                    # JavaScript dùng chung
-│   │       │   └── images/ute_logo.png    # Logo HCMUTE
-│   │       ├── db/migration/              # SQL migration Flyway
-│   │       └── application.properties     # Cấu hình Spring Boot
-│   └── test/                              # Mã kiểm thử
+├── frontend/
+│   ├── templates/                         # Thymeleaf, fragments và các trang nghiệp vụ
+│   └── static/                            # CSS, JavaScript, ảnh dùng chung
+├── backend/
+│   ├── .mvn/                              # Maven Wrapper
+│   ├── mvnw
+│   ├── mvnw.cmd
+│   ├── pom.xml
+│   └── src/
+│       ├── main/
+│       │   ├── java/                      # Controller, Service, Repository, Entity...
+│       │   └── resources/
+│       │       ├── db/migration/          # SQL migration Flyway
+│       │       ├── application.properties
+│       │       └── application-local.properties # Cấu hình riêng, không đưa lên Git
+│       └── test/                          # Mã kiểm thử
 ├── database/seed/                        # Demo seed, PDF fixtures, QA scripts
 ├── docs/
 │   └── QUY_UOC_TICH_HOP_UI.md             # Hướng dẫn dùng Base UI
 └── README.md
 ```
+
+Spring Boot tiếp tục render Thymeleaf và phục vụ CSS/JS trên cùng địa chỉ web.
+`backend/pom.xml` chép `frontend/templates` và `frontend/static` vào classpath khi build;
+đường dẫn view, fragments và URL `/css`, `/js`, `/images` được giữ nguyên.
+Frontend không cần server hay lệnh chạy riêng. Khi chỉnh HTML/CSS/JS, khởi động lại
+backend bằng Maven để chép phiên bản mới vào classpath; `spring.thymeleaf.cache=false`
+không tự đồng bộ file nguồn ngoài classpath. Khi đóng gói, giao diện nằm sẵn trong JAR.
+
+Kiểm tra tích hợp giao diện từ thư mục gốc repo:
+
+```powershell
+.\backend\mvnw.cmd -f backend/pom.xml "-Dtest=FrontendIntegrationTests" test
+```
+
+Bộ test này render các trang hội đồng thật, kiểm tra tài nguyên tĩnh, route phân công,
+CSRF và quyền truy cập; Service và DataSource được giả lập nên không kết nối hoặc sửa MySQL.
+Kiểm thử nghiệp vụ trên database thật vẫn cần chạy riêng với cấu hình local phù hợp.
 
 **Quy ước giao diện:** các trang nghiệp vụ sử dụng lại các Thymeleaf fragments và CSS chung; không tạo Header/Sidebar riêng cho từng phân hệ. Xem chi tiết tại [`docs/QUY_UOC_TICH_HOP_UI.md`](docs/QUY_UOC_TICH_HOP_UI.md) sau khi PR Base UI được merge.
 
@@ -114,7 +129,7 @@ git pull --ff-only origin develop
 Kiểm tra Maven Wrapper sau khi đã ở thư mục repository:
 
 ```powershell
-.\mvnw.cmd -v
+.\backend\mvnw.cmd -f backend/pom.xml -v
 ```
 
 ### Bước 3 — Tạo database local
@@ -131,7 +146,7 @@ Nếu tên database đã tồn tại, dùng một tên **mới, chưa có bảng
 
 ### Bước 4 — Chạy Spring Boot để Flyway tạo bảng
 
-Tạo file **`src/main/resources/application-local.properties`** (file này đã được `.gitignore` loại khỏi Git), với nội dung:
+Tạo file **`backend/src/main/resources/application-local.properties`** (file này đã được `.gitignore` loại khỏi Git), với nội dung:
 
 ```properties
 spring.datasource.url=jdbc:mysql://127.0.0.1:3306/qldt_local_demo
@@ -143,11 +158,32 @@ spring.jpa.hibernate.ddl-auto=validate
 
 Thay `MAT_KHAU_MYSQL_LOCAL` bằng mật khẩu MySQL trên **máy của bạn**; nếu dùng tên schema/user/port khác, sửa cho khớp. Không commit hoặc chia sẻ file này.
 
+Nếu đã có file cấu hình local trước khi tách thư mục, chuyển nguyên file vào vị trí mới;
+giữ nguyên URL, user, mật khẩu hoặc tham chiếu biến môi trường. Ví dụ MySQL 8.4 cài
+song song trên cổng `3307` thì URL vẫn dùng `127.0.0.1:3307/qldt_local_demo`.
+Nếu file dùng `${DB_USERNAME}` và `${DB_PASSWORD}`, đặt các biến trong chính phiên PowerShell chạy backend:
+
+```powershell
+$env:DB_USERNAME = "root"
+$taskDbPassword = Read-Host "Mật khẩu MySQL local" -AsSecureString
+$env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $taskDbPassword).Password
+```
+
 Chạy trong PowerShell, từ thư mục gốc repo:
 
 ```powershell
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+.\backend\mvnw.cmd -f backend/pom.xml spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
+
+Để dùng đăng nhập và phân quyền hội đồng local hiện tại, chạy với cả hai profile:
+
+```powershell
+.\backend\mvnw.cmd -f backend/pom.xml spring-boot:run "-Dspring-boot.run.profiles=local,hoi-dong-local"
+```
+
+Cũng có thể `cd backend` rồi chạy `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local,hoi-dong-local"`.
+Trở về thư mục gốc repo trước khi chạy các lệnh Python ở bước 5.
+Việc tách thư mục không tự kích hoạt tài khoản demo và không thay đổi dữ liệu MySQL.
 
 Khi Spring Boot khởi động thành công, Flyway sẽ áp dụng V1–V5. Nhấn **Ctrl+C** để dừng ứng dụng trước khi nạp dữ liệu mẫu.
 
