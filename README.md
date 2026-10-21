@@ -72,6 +72,7 @@ ql-detai-sinhvien/
 │   │       ├── db/migration/              # SQL migration Flyway
 │   │       └── application.properties     # Cấu hình Spring Boot
 │   └── test/                              # Mã kiểm thử
+├── database/seed/                        # Demo seed, PDF fixtures, QA scripts
 ├── docs/
 │   └── QUY_UOC_TICH_HOP_UI.md             # Hướng dẫn dùng Base UI
 └── README.md
@@ -79,86 +80,127 @@ ql-detai-sinhvien/
 
 **Quy ước giao diện:** các trang nghiệp vụ sử dụng lại các Thymeleaf fragments và CSS chung; không tạo Header/Sidebar riêng cho từng phân hệ. Xem chi tiết tại [`docs/QUY_UOC_TICH_HOP_UI.md`](docs/QUY_UOC_TICH_HOP_UI.md) sau khi PR Base UI được merge.
 
-## 5. Hướng dẫn chuẩn bị môi trường và chạy local
+## 5. Hướng dẫn cài đặt và chạy local
 
-### Bước 1 — Cài đặt công cụ
+Hướng dẫn dưới đây dùng **Windows PowerShell**, **MySQL 8.4** và nhánh `develop`. Các bước thực hiện trên **máy cá nhân**, không sử dụng database Railway.
 
-Cài các công cụ sau:
+### Bước 1 — Chuẩn bị
 
-1. **JDK 21** (kiểm tra đúng JDK, không chỉ JRE).
-2. **Git** và **VS Code** hoặc IntelliJ IDEA.
-3. **MySQL Server 8.4** (MySQL Workbench là công cụ hỗ trợ, không bắt buộc).
-
-Dự án sử dụng **Maven Wrapper** và Tomcat nhúng, nên thông thường không phải cài Maven hoặc Tomcat riêng.
-
-Mở terminal trong VS Code và kiểm tra:
+Cài đặt **JDK 21**, **Git**, **MySQL Server 8.4**, **Python 3.10+** và **MySQL Workbench** (để xem dữ liệu). Dự án dùng Maven Wrapper nên không cần cài Maven riêng.
 
 ```powershell
 java -version
 javac -version
 git --version
+py --version
 ```
 
-`java` và `javac` cần hiển thị phiên bản **21.x**. Nếu terminal không nhận lệnh sau khi cài đặt, hãy mở lại VS Code và kiểm tra biến môi trường `PATH`/`JAVA_HOME`.
-
-### Bước 2 — Clone repository
+### Bước 2 — Lấy source
 
 ```powershell
 git clone https://github.com/monmon89hg/ql-detai-sinhvien.git
 cd ql-detai-sinhvien
+git switch develop
 ```
 
-Kiểm tra Maven Wrapper sử dụng đúng Java:
+Nếu đã clone repo từ trước, hãy lưu an toàn các thay đổi chưa commit, rồi chạy trong thư mục repo:
+
+```powershell
+git fetch origin
+git switch develop
+git pull --ff-only origin develop
+```
+
+Kiểm tra Maven Wrapper sau khi đã ở thư mục repository:
 
 ```powershell
 .\mvnw.cmd -v
 ```
 
-Trên macOS/Linux, dùng `./mvnw` thay cho `.\mvnw.cmd`.
+### Bước 3 — Tạo database local
 
-### Bước 3 — Chuẩn bị MySQL
-
-Khởi động MySQL Server và tạo schema local nếu chưa có:
+Trong **MySQL Workbench**, kết nối MySQL trên máy và chạy:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS qldt
+CREATE DATABASE qldt_local_demo
   CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+  COLLATE utf8mb4_0900_ai_ci;
 ```
 
-**Chú ý:** SQL tạo bảng phải tuân theo migration Flyway đã thống nhất trong repo. Không chạy đồng thời script tạo bảng thủ công và migration Flyway trên cùng một schema chưa được quản lý phù hợp, để tránh lỗi bảng đã tồn tại hoặc sai lịch sử migration.
+Nếu tên database đã tồn tại, dùng một tên **mới, chưa có bảng**. Không chạy lại các file V1–V5 thủ công trên schema đã do Flyway quản lý.
 
-### Bước 4 — Cấu hình kết nối
+### Bước 4 — Chạy Spring Boot để Flyway tạo bảng
 
-Khi phần cấu hình backend được tích hợp, mỗi thành viên cần thiết lập kết nối MySQL cho máy của mình. Ví dụ các thuộc tính Spring Boot thường dùng:
+Tạo file **`src/main/resources/application-local.properties`** (file này đã được `.gitignore` loại khỏi Git), với nội dung:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/qldt
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/qldt_local_demo
+spring.datasource.username=root
+spring.datasource.password=MAT_KHAU_MYSQL_LOCAL
+spring.flyway.enabled=true
+spring.jpa.hibernate.ddl-auto=validate
 ```
 
-Đây là **ví dụ cấu hình**, cần đối chiếu với `application.properties`/profile thực tế của dự án trước khi sử dụng. Không commit mật khẩu MySQL, thông tin SMTP hoặc các tệp cấu hình chứa bí mật lên GitHub.
+Thay `MAT_KHAU_MYSQL_LOCAL` bằng mật khẩu MySQL trên **máy của bạn**; nếu dùng tên schema/user/port khác, sửa cho khớp. Không commit hoặc chia sẻ file này.
 
-Nếu project sử dụng các biến môi trường trên, trong PowerShell có thể thiết lập cho **phiên terminal hiện tại**:
+Chạy trong PowerShell, từ thư mục gốc repo:
 
 ```powershell
-$env:DB_USERNAME="root"
-$env:DB_PASSWORD="<mat-khau-mysql-cua-ban>"
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
 
-### Bước 5 — Build, kiểm thử và chạy ứng dụng
+Khi Spring Boot khởi động thành công, Flyway sẽ áp dụng V1–V5. Nhấn **Ctrl+C** để dừng ứng dụng trước khi nạp dữ liệu mẫu.
 
-Sau khi dependencies, cấu hình MySQL và migration đã hoàn thiện:
+Trong Workbench, schema do Flyway quản lý sẽ có **17 bảng nghiệp vụ + `flyway_schema_history`**. Có thể kiểm tra:
+
+```sql
+SELECT installed_rank, version, description, success
+FROM qldt_local_demo.flyway_schema_history
+ORDER BY installed_rank;
+```
+
+Kỳ vọng: **5 migration thành công**. Ở giai đoạn hiện tại, mở `http://localhost:8080/` có thể chưa có trang chủ; đây không phải dấu hiệu Flyway chạy lỗi.
+
+### Bước 5 — Nạp dữ liệu demo
+
+Bộ dữ liệu có **257 bản ghi demo + 5 vai trò V5 = 262 bản ghi**, gồm 6 PDF mẫu. Chỉ dùng trên **schema local mới** đã tạo ở bước 4.
 
 ```powershell
-.\mvnw.cmd clean test
-.\mvnw.cmd spring-boot:run
+py -m venv database\seed\.venv
+.\database\seed\.venv\Scripts\python.exe -m pip install -r database\seed\requirements.txt
+$fixtureRoot = Join-Path $env:USERPROFILE "qldt-private-fixtures"
+.\database\seed\.venv\Scripts\python.exe database\seed\fixture_tools.py provision --fixture-root "$fixtureRoot"
+.\database\seed\.venv\Scripts\python.exe database\seed\demo_seed.py seed --host 127.0.0.1 --port 3306 --user root --database qldt_local_demo --fixture-root "$fixtureRoot"
+.\database\seed\.venv\Scripts\python.exe database\seed\demo_seed.py validate --host 127.0.0.1 --port 3306 --user root --database qldt_local_demo --fixture-root "$fixtureRoot"
 ```
 
-Nếu ứng dụng dùng cổng mặc định của Spring Boot, có thể mở **http://localhost:8080**. Địa chỉ truy cập và tài khoản thử nghiệm sẽ được nhóm cập nhật theo cấu hình và dữ liệu mẫu thực tế.
+Thư mục PDF mẫu được tạo trong hồ sơ người dùng Windows, **bên ngoài repository**. Script sẽ hỏi mật khẩu MySQL local khi kết nối. Kết quả kiểm tra mẫu đạt **89 checks, 0 FAIL** trên dữ liệu chưa bị chỉnh sửa. **Không chạy trực tiếp `demo_data.sql` bằng Execute All trong Workbench**: script cần kiểm tra PDF và điều kiện an toàn trước khi commit.
 
-> **Quan trọng:** Việc có source code và Base UI không đồng nghĩa backend đã chạy thành công. Nếu lệnh build/chạy báo lỗi, cần kiểm tra log, JDK, dependency, kết nối MySQL, cấu hình Flyway và các migration trước khi kết luận ứng dụng hoạt động.
+### Bước 6 — Xem dữ liệu trong Workbench
+
+Refresh **SCHEMAS**, mở `qldt_local_demo` → **Tables**, hoặc chạy:
+
+```sql
+SELECT COUNT(*) AS so_bang_nghiep_vu
+FROM information_schema.tables
+WHERE table_schema = 'qldt_local_demo'
+  AND table_type = 'BASE TABLE'
+  AND table_name <> 'flyway_schema_history';
+
+SELECT COUNT(*) AS so_nguoi_dung_demo
+FROM qldt_local_demo.nguoi_dung
+WHERE ma_nguoi_dung LIKE 'DEMO_%';
+```
+
+Kỳ vọng: **17 bảng nghiệp vụ** và **47 người dùng demo**. Các tài khoản demo đang **khóa**, không dùng để đăng nhập website. Sáu PDF trong repo là **file kiểm thử local**, chưa phải kho lưu trữ báo cáo của ứng dụng.
+
+### Lưu ý
+
+- Chỉ nạp dữ liệu mẫu vào **MySQL local**, không nhập lên Railway hoặc database dùng chung.
+- Không sửa các migration V1–V5 đã áp dụng; khi cần thay đổi cấu trúc, tạo migration mới.
+- Nếu đã nạp seed phiên bản cũ hoặc database có dữ liệu quan trọng, **sao lưu và dùng schema QA mới**, không ghi đè tùy tiện.
+- Các chức năng đăng nhập, nhóm, upload báo cáo và chấm điểm phải được kiểm thử riêng khi các Controller/Service hoàn thiện.
+- Hướng dẫn chi tiết và báo cáo test: [`database/seed/README.md`](database/seed/README.md), [`database/seed/HANDOFF_VI.md`](database/seed/HANDOFF_VI.md).
 
 ## 6. Base UI chung và bản demo
 
@@ -169,41 +211,72 @@ Nếu ứng dụng dùng cổng mặc định của Spring Boot, có thể mở 
 
 ## 7. Quy trình làm việc nhóm với GitHub
 
-Nhóm theo dõi công việc qua **Issues**, phát triển trên nhánh riêng và tạo **Pull Request (PR) vào `main`**. Không push trực tiếp lên `main` khi đang làm tính năng.
+Nhóm áp dụng quy trình Git Flow đơn giản với hai nhánh dài hạn:
 
-### Bắt đầu một công việc
+- `main`: nhánh ổn định, dùng cho bản phát hành và nộp đồ án.
+- `develop`: nhánh tích hợp các chức năng, kiểm thử trước khi đưa lên `main`.
 
-Đảm bảo các thay đổi local đã được commit hoặc lưu lại, sau đó:
+**Không push trực tiếp vào `main` hoặc `develop`.** Mọi thay đổi phải được tích hợp qua Pull Request (PR).
+
+### 7.1. Quy ước đặt tên nhánh
+
+- `feat/*`: phát triển chức năng mới.
+- `fix/*`: sửa lỗi.
+- `docs/*`: cập nhật tài liệu.
+- `chore/*`: cấu hình, bảo trì, database migration.
+
+Mỗi nhánh làm việc được tạo từ `develop`.
+
+### 7.2. Bắt đầu công việc
+
+Đảm bảo đã lưu an toàn các thay đổi local trước khi chuyển nhánh.
 
 ```powershell
-git switch main
-git pull --ff-only origin main
+git fetch origin
+git switch develop
+git pull --ff-only origin develop
 git switch -c feat/ten-chuc-nang
 ```
 
-Ví dụ tên nhánh: `feat/shared-dashboard-ui`, `feat/student-groups`, `feat/topic-management`.
-
-### Commit và đẩy nhánh
+### 7.3. Commit và push
 
 ```powershell
 git status
-git add <duong-dan-file-can-commit>
+git add <duong-dan-file>
 git diff --cached
 git commit -m "feat: implement feature name"
 git push -u origin feat/ten-chuc-nang
 ```
 
-`<duong-dan-file-can-commit>` là chỗ cần thay bằng đường dẫn thật; chỉ đưa vào commit các file thuộc công việc mình làm.
+Chỉ commit các file liên quan đến công việc. Không commit mật khẩu, token hoặc thông tin kết nối nhạy cảm.
 
-### Tạo Pull Request
+### 7.4. Tạo Pull Request
 
-1. Trên GitHub, mở PR với **base: `main`** và **compare: nhánh đang làm**.
-2. Ghi rõ nội dung thay đổi, phần đã kiểm tra và những hạn chế còn lại (nếu có).
-3. Gắn Issue liên quan bằng `Closes #<so-issue>` (ví dụ `Closes #1`).
-4. Nhờ thành viên khác review, sau đó merge khi thống nhất.
-5. Các thành viên khác cập nhật `main` bằng `git pull --ff-only origin main` trước khi tiếp tục công việc mới.
+1. Tạo PR với **base: `develop`**, compare: nhánh đang làm.
+2. Mô tả các thay đổi, kiểm thử đã thực hiện và vấn đề còn tồn tại.
+3. Liên kết GitHub Issue liên quan.
+4. Yêu cầu ít nhất một thành viên khác review.
+5. Chỉ merge khi đã xử lý các nhận xét và kiểm thử phù hợp.
+6. Sau khi merge, cập nhật `develop` local trước khi bắt đầu công việc tiếp theo.
 
-Với thay đổi cơ sở dữ liệu, cần thống nhất thứ tự migration. **Không sửa migration đã áp dụng trên môi trường dùng chung**; tạo migration mới cho thay đổi tiếp theo.
+### 7.5. Tích hợp bản cuối vào main
+
+Khi các phân hệ đã hoàn thiện và kiểm thử tích hợp thành công:
+
+1. Tạo PR với **base: `main`**, compare: `develop`.
+2. Kiểm tra build, database migration và luồng nghiệp vụ.
+3. Nhờ thành viên khác review.
+4. Merge PR vào `main` sau khi nhóm thống nhất.
+5. Sử dụng `main` làm nguồn cho bản phát hành/nộp đồ án.
+
+Không phát triển chức năng trực tiếp trên `main`.
+
+### 7.6. Quy tắc database migration
+
+- Các migration Flyway được quản lý chung trong repository.
+- Không sửa migration đã áp dụng trên môi trường dùng chung.
+- Khi thay đổi schema, cần thống nhất với các thành viên có bảng liên quan.
+- Migration mới phải được kiểm thử trước khi merge vào `develop`.
 
 ## 8. Tài liệu và lưu ý
 
