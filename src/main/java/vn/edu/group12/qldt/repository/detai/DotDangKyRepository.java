@@ -1,8 +1,8 @@
-package vn.edu.group12.qldt.repository;
+package vn.edu.group12.qldt.repository.detai;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.edu.group12.qldt.model.DotDangKy;
+import vn.edu.group12.qldt.entity.detai.DotDangKy;
 
 import java.util.List;
 import java.util.Optional;

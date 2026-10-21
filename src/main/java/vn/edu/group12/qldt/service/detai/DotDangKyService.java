@@ -1,11 +1,11 @@
-package vn.edu.group12.qldt.service;
+package vn.edu.group12.qldt.service.detai;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.edu.group12.qldt.dto.DotDangKyDto;
-import vn.edu.group12.qldt.model.DotDangKy;
-import vn.edu.group12.qldt.repository.DotDangKyRepository;
+import vn.edu.group12.qldt.dto.detai.DotDangKyDto;
+import vn.edu.group12.qldt.entity.detai.DotDangKy;
+import vn.edu.group12.qldt.repository.detai.DotDangKyRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

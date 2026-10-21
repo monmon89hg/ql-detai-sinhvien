@@ -1,4 +1,4 @@
-package vn.edu.group12.qldt.model;
+package vn.edu.group12.qldt.entity.detai;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

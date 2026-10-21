@@ -1,8 +1,8 @@
-package vn.edu.group12.qldt.repository;
+package vn.edu.group12.qldt.repository.detai;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.edu.group12.qldt.model.DeTaiGiangVien;
+import vn.edu.group12.qldt.entity.detai.DeTaiGiangVien;
 
 import java.util.List;
 
