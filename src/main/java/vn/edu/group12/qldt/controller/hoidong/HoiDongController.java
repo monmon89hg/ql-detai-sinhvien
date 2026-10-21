@@ -30,18 +30,26 @@ import vn.edu.group12.qldt.dto.hoidong.ThanhVienHoiDongForm;
 import vn.edu.group12.qldt.entity.hoidong.HoiDong;
 import vn.edu.group12.qldt.enums.hoidong.ChucDanhHoiDong;
 import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
+import vn.edu.group12.qldt.service.hoidong.PhanCongHoiDongService;
+import vn.edu.group12.qldt.dto.hoidong.PhanCongHoiDongForm;
+
 
 @Controller
 public class HoiDongController {
 
     private final HoiDongService hoiDongService;
     private final ThanhVienHoiDongService thanhVienHoiDongService;
+    // Xử lý danh sách và nghiệp vụ phân công nhóm cho hội đồng.
+    private final PhanCongHoiDongService phanCongHoiDongService;
 
     public HoiDongController(
             HoiDongService hoiDongService,
-            ThanhVienHoiDongService thanhVienHoiDongService) {
+            ThanhVienHoiDongService thanhVienHoiDongService,
+            PhanCongHoiDongService phanCongHoiDongService) {
+
         this.hoiDongService = hoiDongService;
         this.thanhVienHoiDongService = thanhVienHoiDongService;
+        this.phanCongHoiDongService = phanCongHoiDongService;
     }
 
     @GetMapping("/hoi-dong")
@@ -79,6 +87,36 @@ public class HoiDongController {
             HoiDong hoiDong = hoiDongService.layChiTiet(maHoiDong);
 
             model.addAttribute("hoiDong", hoiDong);
+
+            // Luôn hiển thị các nhóm đã được giao cho hội đồng.
+            model.addAttribute(
+                "danhSachNhomDaPhanCong",
+                phanCongHoiDongService.layDanhSachDaPhanCong(maHoiDong)
+            );
+
+            // Chỉ trưởng khoa được phân công khi hội đồng sẵn sàng.
+            boolean coQuyenPhanCong =
+                request.isUserInRole("TRUONG_KHOA")
+                    && hoiDong.getTrangThai() == TrangThaiHoiDong.SAN_SANG;
+
+            model.addAttribute("coQuyenPhanCong", coQuyenPhanCong);
+
+            if (coQuyenPhanCong) {
+                model.addAttribute(
+                    "danhSachNhomCoThePhanCong",
+                    phanCongHoiDongService
+                        .layDanhSachCoThePhanCong(maHoiDong)
+                );
+
+                // Giữ lựa chọn cũ nếu lần gửi form trước có lỗi.
+                if (!model.containsAttribute("phanCongHoiDongForm")) {
+                    model.addAttribute(
+                        "phanCongHoiDongForm",
+                        new PhanCongHoiDongForm()
+                    );
+                }
+            }
+
 
             model.addAttribute(
                 "danhSachThanhVien",
@@ -321,6 +359,68 @@ public class HoiDongController {
                     + "đã thay đổi hoặc không hợp lệ."
             );
         }
+
+        return "redirect:/hoi-dong/{maHoiDong}";
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/phan-cong")
+    public String phanCongHoiDong(
+            @PathVariable("maHoiDong") String maHoiDong,
+            @Valid @ModelAttribute("phanCongHoiDongForm")
+                PhanCongHoiDongForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+
+        // Dùng mã này để tạo URL quay lại đúng hội đồng.
+        redirectAttributes.addAttribute("maHoiDong", maHoiDong);
+
+        if (!bindingResult.hasErrors()) {
+            try {
+                phanCongHoiDongService.phanCong(maHoiDong, form);
+
+                redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Phân công hội đồng cho nhóm thành công."
+                );
+
+                return "redirect:/hoi-dong/{maHoiDong}";
+
+            } catch (EntityNotFoundException ex) {
+                // Hội đồng không tồn tại: trả HTTP 404.
+                throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    ex.getMessage(),
+                    ex
+                );
+
+            } catch (IllegalArgumentException ex) {
+                // Nhóm hoặc hội đồng không đáp ứng điều kiện nghiệp vụ.
+                redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    ex.getMessage()
+                );
+
+            } catch (DataIntegrityViolationException ex) {
+                // Database chặn dữ liệu trùng hoặc tham chiếu không hợp lệ.
+                redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Không thể phân công vì dữ liệu đã thay đổi "
+                        + "hoặc nhóm đã được phân công. "
+                        + "Vui lòng tải lại trang và kiểm tra."
+                );
+            }
+        }
+
+        // Khi lỗi, giữ lại nhóm đã chọn và các lỗi Validation.
+        redirectAttributes.addFlashAttribute(
+            "phanCongHoiDongForm",
+            form
+        );
+
+        redirectAttributes.addFlashAttribute(
+            BindingResult.MODEL_KEY_PREFIX + "phanCongHoiDongForm",
+            bindingResult
+        );
 
         return "redirect:/hoi-dong/{maHoiDong}";
     }
