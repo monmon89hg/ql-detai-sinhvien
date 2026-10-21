@@ -228,6 +228,91 @@
                         </form>
                     </section>
 
+                    <!-- Danh sách nhóm đã được phân công cho hội đồng đang xem. -->
+                    <section class="section">
+                        <h2 class="section-title">Nhóm đã được phân công</h2>
+
+                        <p th:if="${#lists.isEmpty(danhSachNhomDaPhanCong)}">
+                            Hội đồng chưa được phân công nhóm nào.
+                        </p>
+
+                        <table
+                            class="data-table"
+                            th:unless="${#lists.isEmpty(danhSachNhomDaPhanCong)}"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">STT</th>
+                                    <th scope="col">Mã nhóm</th>
+                                    <th scope="col">Tên nhóm</th>
+                                    <th scope="col">Mã đề tài</th>
+                                    <th scope="col">Tên đề tài</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="nhom, viTri : ${danhSachNhomDaPhanCong}">
+                                    <td th:text="${viTri.count}"></td>
+                                    <td th:text="${nhom.maNhom}"></td>
+                                    <td th:text="${nhom.tenNhom}"></td>
+                                    <td th:text="${nhom.maDeTai}"></td>
+                                    <td th:text="${nhom.tenDeTai}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <!-- Chỉ hiện form khi trưởng khoa được phép phân công. -->
+                    <section class="section" th:if="${coQuyenPhanCong}">
+                        <h2 class="section-title">Phân công nhóm cho hội đồng</h2>
+
+                        <p th:if="${#lists.isEmpty(danhSachNhomCoThePhanCong)}">
+                            Không có nhóm đủ điều kiện để phân công cho hội đồng này.
+                        </p>
+
+                        <form
+                            th:unless="${#lists.isEmpty(danhSachNhomCoThePhanCong)}"
+                            th:action="@{/hoi-dong/{maHoiDong}/phan-cong(
+                                maHoiDong=${hoiDong.maHoiDong}
+                            )}"
+                            th:object="${phanCongHoiDongForm}"
+                            method="post"
+                        >
+                            <!-- Xếp nhãn và ô chọn theo chiều dọc, có khoảng cách. -->
+                            <div class="form-field">
+                                <label for="maNhom">Nhóm sinh viên *</label>
+
+                                <select
+                                    class="form-control"
+                                    id="maNhom"
+                                    th:field="*{maNhom}"
+                                    required
+                                >
+                                    <option value="">-- Chọn nhóm sinh viên --</option>
+
+                                    <option
+                                        th:each="nhom : ${danhSachNhomCoThePhanCong}"
+                                        th:value="${nhom.maNhom}"
+                                        th:text="${nhom.maNhom + ' - ' + nhom.tenNhom
+                                            + ' | ' + nhom.tenDeTai}"
+                                    ></option>
+                                </select>
+
+                                <p
+                                    class="field-error"
+                                    th:if="${#fields.hasErrors('maNhom')}"
+                                    th:errors="*{maNhom}"
+                                ></p>
+                            </div>
+
+                            <div class="btn-row">
+                                <button type="submit" class="btn btn-primary">
+                                    Phân công
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
                     <div th:replace="~{fragments/footer :: footer}"></div>
                 </div>
             </main>
