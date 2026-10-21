@@ -46,9 +46,15 @@ build/
 /src/main/resources/application-local.yml
 /src/main/resources/application-local.yaml
 /src/main/resources/application-local.properties
+/backend/src/main/resources/application-local.yml
+/backend/src/main/resources/application-local.yaml
+/backend/src/main/resources/application-local.properties
 
 /uploads/
 /logs/
+/backend/uploads/
+/backend/logs/
+/backend/.mvn/timing.properties
 *.log
 /database/private-backups/
 

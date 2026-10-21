@@ -27,6 +27,8 @@ Các route ở đây chỉ là **đề xuất dùng chung**; chưa có Controlle
 
 ## 2. Tích hợp Thymeleaf
 
+- Sửa HTML tại `frontend/templates/`, CSS/JS/ảnh tại `frontend/static/`; mã Java nằm trong `backend/src/main/java/`.
+- Maven trong `backend/` đưa hai thư mục giao diện vào classpath và JAR. Không cần đổi tên view hoặc URL tài nguyên sau khi di chuyển; chạy lại backend để nhận HTML/CSS/JS mới.
 - Trong trang thật, áp dụng `th:replace="~{fragments/head :: head('Tên trang')}"` cho `<head>`.
 - Chèn header `th:replace="~{fragments/header :: header}"`, sidebar `th:replace="~{fragments/sidebar :: sidebar('menu-key')}"`.
 - Sử dụng `fragments/breadcrumb.html`, `fragments/footer.html`, `fragments/messages.html`.
