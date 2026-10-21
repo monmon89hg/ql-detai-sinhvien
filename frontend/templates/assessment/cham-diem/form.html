@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Phiếu chấm hội đồng')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div
+                th:replace="~{fragments/sidebar :: sidebar('grading')}"
+            ></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Phiếu chấm hội đồng')}"
+                ></div>
+
+                <div class="container">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading">
+                        <h1>Phiếu chấm hội đồng</h1>
+                        <p>Nhập điểm và nhận xét cho nhóm được phân công.</p>
+                    </div>
+
+                    <!-- Thông tin nhóm lấy từ backend sau khi kiểm tra quyền. -->
+                    <section class="section">
+                        <h2 class="section-title">Thông tin nhóm</h2>
+
+                        <table class="data-table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Mã nhóm</th>
+                                    <td th:text="${nhom.maNhom}"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Tên nhóm</th>
+                                    <td th:text="${nhom.tenNhom}"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Mã đề tài</th>
+                                    <td th:text="${nhom.maDeTai}"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Tên đề tài</th>
+                                    <td th:text="${nhom.tenDeTai}"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Hội đồng</th>
+                                    <td
+                                        th:text="${nhom.maHoiDong + ' - ' + nhom.tenHoiDong}"
+                                    ></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Trạng thái phiếu</th>
+                                    <td
+                                        th:text="${trangThaiPhieu.name() == 'DA_NOP'
+                                            ? 'Đã nộp' : 'Nháp (chưa nộp)'}"
+                                    ></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section class="section">
+                        <h2 class="section-title">Điểm và nhận xét</h2>
+
+                        <p th:if="${coTheChinhSua}">
+                            Điểm từ 0 đến 10, tối đa 2 chữ số thập phân.
+                            Khi nộp phiếu, bạn phải nhập đủ điểm và nhận xét.
+                            Phiếu đã nộp không thể chỉnh sửa.
+                        </p>
+
+                        <p class="notice" th:unless="${coTheChinhSua}">
+                            Phiếu đã được nộp. Bạn chỉ có thể xem lại nội dung.
+                        </p>
+
+                        <!-- Mặc định gửi đến chức năng lưu nháp. -->
+                        <form
+                            th:action="@{/cham-diem/{maNhom}/luu-nhap(maNhom=${nhom.maNhom})}"
+                            th:object="${phieuChamDiemForm}"
+                            method="post"
+                        >
+                            <div class="form-field">
+                                <label for="diem">Điểm</label>
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    th:field="*{diem}"
+                                    min="0"
+                                    max="10"
+                                    step="0.01"
+                                    th:readonly="${!coTheChinhSua}"
+                                >
+                                <small
+                                    th:if="${#fields.hasErrors('diem')}"
+                                    th:errors="*{diem}"
+                                ></small>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="nhanXet">Nhận xét</label>
+                                <textarea
+                                    class="form-control"
+                                    th:field="*{nhanXet}"
+                                    rows="6"
+                                    th:readonly="${!coTheChinhSua}"
+                                ></textarea>
+                                <small
+                                    th:if="${#fields.hasErrors('nhanXet')}"
+                                    th:errors="*{nhanXet}"
+                                ></small>
+                            </div>
+
+                            <div class="btn-row">
+                                <button
+                                    class="btn btn-outline"
+                                    type="submit"
+                                    th:if="${coTheChinhSua}"
+                                >
+                                    Lưu nháp
+                                </button>
+
+                                <!-- Nút Nộp dùng đường dẫn xử lý riêng. -->
+                                <button
+                                    class="btn btn-primary"
+                                    type="submit"
+                                    th:if="${coTheChinhSua}"
+                                    th:formaction="@{/cham-diem/{maNhom}/nop(maNhom=${nhom.maNhom})}"
+                                >
+                                    Nộp phiếu
+                                </button>
+
+                                <a
+                                    class="btn btn-outline"
+                                    th:href="@{/cham-diem}"
+                                >
+                                    Quay lại danh sách
+                                </a>
+                            </div>
+                        </form>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>

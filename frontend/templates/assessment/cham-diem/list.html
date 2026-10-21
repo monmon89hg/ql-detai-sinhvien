@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Chấm điểm hội đồng')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <!-- Dùng lại header và sidebar của giao diện chung. -->
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div
+                th:replace="~{fragments/sidebar :: sidebar('grading')}"
+            ></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Chấm điểm hội đồng')}"
+                ></div>
+
+                <div class="container">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading">
+                        <h1>Chấm điểm hội đồng</h1>
+                        <p>
+                            Xem các nhóm được phân công và mở phiếu để
+                            nhập điểm, nhận xét.
+                        </p>
+                    </div>
+
+                    <section class="section">
+                        <div class="section-top">
+                            <h2 class="section-title">
+                                Danh sách nhóm được chấm
+                            </h2>
+                        </div>
+
+                        <!-- Danh sách chỉ bao gồm các nhóm đang được phép chấm. -->
+                        <p th:if="${#lists.isEmpty(danhSachNhom)}">
+                            Hiện chưa có nhóm nào đang ở giai đoạn chấm
+                            thuộc phạm vi chấm của bạn.
+                        </p>
+
+                        <table
+                            class="data-table"
+                            th:unless="${#lists.isEmpty(danhSachNhom)}"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">STT</th>
+                                    <th scope="col">Nhóm sinh viên</th>
+                                    <th scope="col">Đề tài</th>
+                                    <th scope="col">Hội đồng</th>
+                                    <th scope="col">Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="nhom, viTri : ${danhSachNhom}">
+                                    <td th:text="${viTri.count}"></td>
+
+                                    <td>
+                                        <strong th:text="${nhom.maNhom}"></strong>
+                                        <div th:text="${nhom.tenNhom}"></div>
+                                    </td>
+
+                                    <td>
+                                        <strong th:text="${nhom.maDeTai}"></strong>
+                                        <div th:text="${nhom.tenDeTai}"></div>
+                                    </td>
+
+                                    <td>
+                                        <strong th:text="${nhom.maHoiDong}"></strong>
+                                        <div th:text="${nhom.tenHoiDong}"></div>
+                                    </td>
+
+                                    <td>
+                                        <a
+                                            class="btn btn-primary"
+                                            th:href="@{/cham-diem/{maNhom}(maNhom=${nhom.maNhom})}"
+                                        >
+                                            Mở phiếu
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>
