@@ -53,10 +53,12 @@ class PreviewSecurityTests {
             .andExpect(status().isForbidden());
     }
 
+    
     @Test
-    void previewUserCannotAccessUnapprovedRoute() throws Exception {
+    void previewUserCanRequestAnyGetRoute() throws Exception {
         mvc.perform(get("/admin/users")
                 .with(user("preview-test").roles("PREVIEW")))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
     }
+
 }

@@ -22,22 +22,27 @@ public class PreviewSecurityConfig {
     public SecurityFilterChain previewSecurityFilterChain(
             HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/css/**", "/js/**", "/images/**",
-                "/favicon.ico"
-            ).permitAll()
-            .requestMatchers(HttpMethod.GET,
-                "/", "/dashboard",
-                "/hoi-dong", "/hoi-dong/**",
-                "/de-tai", "/de-tai/**",
-                "/dot-dang-ky", "/dot-dang-ky/**"
-            ).authenticated()
-            .anyRequest().denyAll()
-        ).formLogin(form -> form
-            .defaultSuccessUrl("/dashboard", true)
-            .permitAll()
-        ).logout(logout -> logout.permitAll());
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/favicon.ico"
+                ).permitAll()
+
+                // Cho phép xem mọi trang GET sau khi đăng nhập
+                .requestMatchers(HttpMethod.GET, "/**")
+                    .authenticated()
+
+                // Tạm chặn thao tác thay đổi dữ liệu
+                .anyRequest().denyAll()
+            )
+            .formLogin(form -> form
+                .defaultSuccessUrl("/dashboard", true)
+                .permitAll()
+            )
+            .logout(logout -> logout.permitAll());
 
         return http.build();
     }
