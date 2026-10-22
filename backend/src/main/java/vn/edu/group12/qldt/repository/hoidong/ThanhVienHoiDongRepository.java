@@ -27,6 +27,13 @@ public interface ThanhVienHoiDongRepository
         ChucDanhHoiDong chucDanh
     );
 
+    // Xác nhận đúng giảng viên giữ chức danh trong hội đồng cụ thể.
+    boolean existsById_MaHoiDongAndId_MaGiangVienAndChucDanh(
+        String maHoiDong,
+        String maGiangVien,
+        ChucDanhHoiDong chucDanh
+    );
+
     @Query(
         value = """
             SELECT
