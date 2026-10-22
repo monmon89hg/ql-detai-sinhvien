@@ -237,7 +237,7 @@ class OfficialSecurityTests {
     @Test
     void unreviewedEndpointsAreDeniedForEveryRoleAndHttpVerb() throws Exception {
         for (String role : List.of("ADMIN", "TRUONG_KHOA", "TRUONG_BO_MON", "GIANG_VIEN", "SINH_VIEN")) {
-            for (String path : List.of("/unknown", "/nhom", "/dang-ky", "/bao-cao", "/admin/new-module", "/ket-qua/unknown/action")) {
+            for (String path : List.of("/unknown", "/dang-ky", "/admin/new-module", "/ket-qua/unknown/action")) {
                 mvc.perform(get(path).with(user("test").roles(role))).andExpect(status().isForbidden());
                 mvc.perform(post(path).with(csrf()).with(user("test").roles(role))).andExpect(status().isForbidden());
             }
@@ -246,6 +246,32 @@ class OfficialSecurityTests {
             .andExpect(status().isForbidden());
         mvc.perform(put("/de-tai/DT01/duyet").with(csrf()).with(user("dean").roles("TRUONG_KHOA")))
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void issue9RoutesUseOfficialRoleRules() throws Exception {
+        // Các URL của Nhóm đã được xét duyệt; chỉ cho phép đúng vai trò và đúng phương thức.
+        mvc.perform(get("/dang-ky-de-tai/duyet").with(user("sv").roles("SINH_VIEN")))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/dang-ky-de-tai/N01/duyet").with(csrf())
+                .with(user("sv").roles("SINH_VIEN")))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/nhom/tao").with(csrf())
+                .with(user("tk").roles("TRUONG_KHOA")))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/bao-cao/nop").with(csrf())
+                .with(user("gv").roles("GIANG_VIEN")))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/nhom/N01/xoa-tat-ca").with(csrf())
+                .with(user("sv").roles("SINH_VIEN")))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/nhom/tao").with(user("sv").roles("SINH_VIEN")))
+            .andExpect(status().isForbidden());
+        // MVC slice chưa nạp Controller của Issue #9: 404 chứng minh đã qua bộ lọc quyền.
+        mvc.perform(get("/nhom").with(user("sv").roles("SINH_VIEN")))
+            .andExpect(status().isNotFound());
+        mvc.perform(get("/dang-ky-de-tai/duyet").with(user("tk").roles("TRUONG_KHOA")))
+            .andExpect(status().isNotFound());
     }
 
     @Test

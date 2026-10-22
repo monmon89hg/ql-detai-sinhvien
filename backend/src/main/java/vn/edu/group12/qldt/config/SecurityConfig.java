@@ -85,10 +85,30 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi").hasRole("SINH_VIEN")
 
+                // TV3: nhóm sinh viên, đăng ký đề tài và nộp báo cáo.
+                // Kiểm tra quyền nhóm trưởng, thành viên và giảng viên tiếp tục ở tầng Service.
+                .requestMatchers(HttpMethod.GET, "/nhom/tao", "/nhom/cua-toi", "/bao-cao/nop")
+                    .hasRole("SINH_VIEN")
+                .requestMatchers(HttpMethod.GET, "/dang-ky-de-tai/duyet")
+                    .hasRole("TRUONG_KHOA")
+                .requestMatchers(HttpMethod.GET, "/nhom", "/nhom/{maNhom}",
+                        "/dang-ky-de-tai", "/bao-cao", "/bao-cao/{maNhom}/{phienBan}/tai")
+                    .authenticated()
+                .requestMatchers(HttpMethod.POST, "/dang-ky-de-tai/{maNhom}/duyet",
+                        "/dang-ky-de-tai/{maNhom}/tu-choi")
+                    .hasRole("TRUONG_KHOA")
+                .requestMatchers(HttpMethod.POST, "/nhom/tao",
+                        "/nhom/{maNhom}/yeu-cau",
+                        "/nhom/{maNhom}/yeu-cau/{maSinhVien}/duyet",
+                        "/nhom/{maNhom}/yeu-cau/{maSinhVien}/tu-choi",
+                        "/nhom/{maNhom}/thanh-vien/{maSinhVien}/xoa",
+                        "/nhom/{maNhom}/chot", "/dang-ky-de-tai", "/bao-cao/nop")
+                    .hasRole("SINH_VIEN")
+
                 .requestMatchers(HttpMethod.GET, "/", "/dashboard", "/thong-bao",
                         "/de-tai", "/de-tai/chi-tiet/{id}", "/dot-dang-ky")
                     .hasAnyRole("ADMIN", "TRUONG_KHOA", "TRUONG_BO_MON", "GIANG_VIEN", "SINH_VIEN")
-                // Includes unmerged Issue #9 routes until their own policy is reviewed.
+                // Mọi tuyến đường chưa được xét duyệt đều bị từ chối.
                 .anyRequest().denyAll()
             )
             .formLogin(form -> form
