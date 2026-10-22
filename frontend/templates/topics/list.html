@@ -30,9 +30,9 @@
                 <form th:action="@{/de-tai}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 120px; gap: 12px; align-items: end;">
                     <div class="form-field" style="margin: 0;">
                         <label>Đợt đăng ký</label>
-                        <select name="dotId" class="form-control">
+                        <select name="maDot" class="form-control">
                             <option value="">-- Tất cả đợt --</option>
-                            <option th:each="d : ${dots}" th:value="${d.id}" th:text="${d.tenDot}" th:selected="${d.id == selectedDotId}"></option>
+                            <option th:each="d : ${dots}" th:value="${d.maDot}" th:text="${d.tenDot}" th:selected="${d.maDot == selectedMaDot}"></option>
                         </select>
                     </div>
 
@@ -79,14 +79,14 @@
                             <td>
                                 <strong th:text="${dt.tenDeTai}">Hệ thống nhận diện biển số xe</strong>
                             </td>
-                            <td><span class="status-pill" th:text="'Đợt #' + ${dt.dotDangKyId}">Đợt #1</span></td>
+                            <td><span class="status-pill" th:text="${dt.maDot}">DOT-01</span></td>
                             <td>
                                 <span class="status-pill"
                                       th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : 'background:#eaf2fa; color:#214967;')}"
                                       th:text="${dt.trangThai}">CONG_BO</span>
                             </td>
                             <td>
-                                <a th:href="@{/de-tai/chi-tiet/{id}(id=${dt.id})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Xem chi tiết &amp; Phân công</a>
+                                <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Xem chi tiết &amp; Phân công</a>
                             </td>
                         </tr>
                     </tbody>

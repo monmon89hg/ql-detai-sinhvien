@@ -9,10 +9,7 @@ import java.time.LocalDateTime;
 public class DotDangKy {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "ma_dot", length = 30, nullable = false, unique = true)
+    @Column(name = "ma_dot", length = 30, nullable = false)
     private String maDot;
 
     @Column(name = "ten_dot", length = 150, nullable = false)
@@ -45,8 +42,8 @@ public class DotDangKy {
     @Column(name = "trang_thai", length = 15, nullable = false)
     private String trangThai = "NHAP"; // NHAP, CONG_BO, DONG
 
-    @Column(name = "nguoi_tao_id", nullable = false)
-    private Long nguoiTaoId;
+    @Column(name = "ma_nguoi_tao", length = 30, nullable = false)
+    private String maNguoiTao;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -59,9 +56,6 @@ public class DotDangKy {
     private Long version = 0L;
 
     public DotDangKy() {}
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
     public String getMaDot() { return maDot; }
     public void setMaDot(String maDot) { this.maDot = maDot; }
@@ -96,11 +90,15 @@ public class DotDangKy {
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
-    public Long getNguoiTaoId() { return nguoiTaoId; }
-    public void setNguoiTaoId(Long nguoiTaoId) { this.nguoiTaoId = nguoiTaoId; }
+    public String getMaNguoiTao() { return maNguoiTao; }
+    public void setMaNguoiTao(String maNguoiTao) { this.maNguoiTao = maNguoiTao; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
 }
