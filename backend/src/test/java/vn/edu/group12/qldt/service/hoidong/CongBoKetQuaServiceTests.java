@@ -44,6 +44,8 @@ class CongBoKetQuaServiceTests {
     @Mock private ThanhVienHoiDongRepository thanhVienHoiDongRepository;
     @Mock private KetQuaRepository ketQuaRepository;
     @Mock private TinhDiemTrungBinhService tinhDiemTrungBinhService;
+    @Mock
+    private TaoEmailThongBaoKetQuaService taoEmailThongBaoKetQuaService;
 
     @InjectMocks
     private TongHopKetQuaService tongHopKetQuaService;
@@ -92,6 +94,8 @@ class CongBoKetQuaServiceTests {
         verify(hoiDongDeTaiRepository).hoanThanhNhomKhiDangThucHien(
             "N01", ketQua.getCongBoLuc()
         );
+        // Công bố thành công phải tạo hàng chờ thông báo cho nhóm.
+        verify(taoEmailThongBaoKetQuaService).taoChoNhom("N01");
     }
 
     @Test
