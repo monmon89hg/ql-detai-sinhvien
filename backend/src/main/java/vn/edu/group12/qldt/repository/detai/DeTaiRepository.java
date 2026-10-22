@@ -10,30 +10,30 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DeTaiRepository extends JpaRepository<DeTai, Long> {
+public interface DeTaiRepository extends JpaRepository<DeTai, String> {
 
     Optional<DeTai> findByMaDeTai(String maDeTai);
 
     boolean existsByMaDeTai(String maDeTai);
 
     // Lấy đề tài của 1 đợt cụ thể
-    List<DeTai> findByDotDangKyId(Long dotDangKyId);
+    List<DeTai> findByMaDot(String maDot);
 
     // Lấy đề tài của 1 đợt theo trạng thái (ví dụ CONG_BO cho SV xem ở Giai đoạn 2)
-    List<DeTai> findByDotDangKyIdAndTrangThai(Long dotDangKyId, String trangThai);
+    List<DeTai> findByMaDotAndTrangThai(String maDot, String trangThai);
 
     // Lấy danh sách đề tài do chính 1 Giảng viên đề xuất
-    List<DeTai> findByNguoiDeXuatId(Long nguoiDeXuatId);
+    List<DeTai> findByMaNguoiDeXuat(String maNguoiDeXuat);
 
     // Tìm kiếm và lọc linh hoạt: theo đợt, bộ môn, trạng thái và từ khóa tìm kiếm
     @Query("SELECT d FROM DeTai d WHERE " +
-           "(:dotId IS NULL OR d.dotDangKyId = :dotId) AND " +
-           "(:boMonId IS NULL OR d.boMonId = :boMonId) AND " +
-           "(:trangThai IS NULL OR d.trangThai = :trangThai) AND " +
-           "(:keyword IS NULL OR LOWER(d.tenDeTai) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "(:maDot IS NULL OR :maDot = '' OR d.maDot = :maDot) AND " +
+           "(:maBoMon IS NULL OR :maBoMon = '' OR d.maBoMon = :maBoMon) AND " +
+           "(:trangThai IS NULL OR :trangThai = '' OR d.trangThai = :trangThai) AND " +
+           "(:keyword IS NULL OR :keyword = '' OR LOWER(d.tenDeTai) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR LOWER(d.maDeTai) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    List<DeTai> filterDeTai(@Param("dotId") Long dotId,
-                            @Param("boMonId") Long boMonId,
+    List<DeTai> filterDeTai(@Param("maDot") String maDot,
+                            @Param("maBoMon") String maBoMon,
                             @Param("trangThai") String trangThai,
                             @Param("keyword") String keyword);
 }

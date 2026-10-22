@@ -9,6 +9,7 @@ import vn.edu.group12.qldt.dto.detai.DotDangKyDto;
 import vn.edu.group12.qldt.entity.detai.DotDangKy;
 import vn.edu.group12.qldt.service.detai.DotDangKyService;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,38 +23,39 @@ public class DotDangKyController {
 
     // 1. Danh sách đợt đăng ký
     @GetMapping
-    public String listDotDangKy(Model model) {
+    public String listDotDangKy(Model model, Principal principal) {
         List<DotDangKy> list = dotDangKyService.getAllDotDangKy();
         
         // Tạo map lưu thông tin giai đoạn hiện tại của từng đợt để hiển thị trực quan
-        Map<Long, String> giaiDoanMap = new HashMap<>();
+        Map<String, String> giaiDoanMap = new HashMap<>();
         for (DotDangKy dot : list) {
-            giaiDoanMap.put(dot.getId(), dotDangKyService.getGiaiDoanHienTai(dot));
+            giaiDoanMap.put(dot.getMaDot(), dotDangKyService.getGiaiDoanHienTai(dot));
         }
 
         model.addAttribute("dots", list);
         model.addAttribute("giaiDoanMap", giaiDoanMap);
         model.addAttribute("activeMenu", "rounds");
-        model.addAttribute("currentUserName", "Trưởng khoa / Quản trị");
+        model.addAttribute("currentUserName", principal != null ? principal.getName() : "Trưởng khoa / Quản trị");
         return "registration-rounds/list";
     }
 
     // 2. Form tạo mới đợt đăng ký
     @GetMapping("/tao")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(Model model, Principal principal) {
         model.addAttribute("dotDto", new DotDangKyDto());
         model.addAttribute("activeMenu", "rounds");
-        model.addAttribute("currentUserName", "Trưởng khoa / Quản trị");
+        model.addAttribute("currentUserName", principal != null ? principal.getName() : "Trưởng khoa / Quản trị");
         return "registration-rounds/form";
     }
 
     // 3. Xử lý lưu tạo mới
     @PostMapping("/tao")
     public String createDotDangKy(@ModelAttribute("dotDto") DotDangKyDto dto,
+                                  Principal principal,
                                   RedirectAttributes redirectAttributes) {
         try {
-            Long nguoiTaoId = 1L; // Mặc định ID Trưởng khoa/Admin
-            dotDangKyService.createDotDangKy(dto, nguoiTaoId);
+            String maNguoiTao = principal != null ? principal.getName() : "DEMO_CB01";
+            dotDangKyService.createDotDangKy(dto, maNguoiTao);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo mới đợt đăng ký thành công!");
             return "redirect:/dot-dang-ky";
         } catch (IllegalArgumentException e) {
@@ -66,10 +68,10 @@ public class DotDangKyController {
     }
 
     // 4. Form chỉnh sửa đợt đăng ký
-    @GetMapping("/sua/{id}")
-    public String showEditForm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
+    @GetMapping("/sua/{maDot}")
+    public String showEditForm(@PathVariable("maDot") String maDot, Model model, Principal principal, RedirectAttributes redirectAttributes) {
         try {
-            DotDangKy dot = dotDangKyService.getDotDangKyById(id);
+            DotDangKy dot = dotDangKyService.getDotDangKyByMa(maDot);
             DotDangKyDto dto = new DotDangKyDto();
             dto.setMaDot(dot.getMaDot());
             dto.setTenDot(dot.getTenDot());
@@ -84,9 +86,9 @@ public class DotDangKyController {
             dto.setTrangThai(dot.getTrangThai());
 
             model.addAttribute("dotDto", dto);
-            model.addAttribute("dotId", id);
+            model.addAttribute("maDot", maDot);
             model.addAttribute("activeMenu", "rounds");
-            model.addAttribute("currentUserName", "Trưởng khoa / Quản trị");
+            model.addAttribute("currentUserName", principal != null ? principal.getName() : "Trưởng khoa / Quản trị");
             return "registration-rounds/form";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -94,30 +96,31 @@ public class DotDangKyController {
         }
     }
 
-    // 5. Xử lý cập nhật đợt đăng ký
-    @PostMapping("/sua/{id}")
-    public String updateDotDangKy(@PathVariable("id") Long id,
+    // 5. Xử lý cập nhật
+    @PostMapping("/sua/{maDot}")
+    public String updateDotDangKy(@PathVariable("maDot") String maDot,
                                   @ModelAttribute("dotDto") DotDangKyDto dto,
                                   RedirectAttributes redirectAttributes) {
         try {
-            dotDangKyService.updateDotDangKy(id, dto);
+            dto.setMaDot(maDot);
+            dotDangKyService.updateDotDangKy(maDot, dto);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật đợt đăng ký thành công!");
             return "redirect:/dot-dang-ky";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/dot-dang-ky/sua/" + id;
+            return "redirect:/dot-dang-ky/sua/" + maDot;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            return "redirect:/dot-dang-ky/sua/" + id;
+            return "redirect:/dot-dang-ky/sua/" + maDot;
         }
     }
 
     // 6. Công bố đợt đăng ký
-    @PostMapping("/{id}/cong-bo")
-    public String congBoDot(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/{maDot}/cong-bo")
+    public String publishDot(@PathVariable("maDot") String maDot, RedirectAttributes redirectAttributes) {
         try {
-            dotDangKyService.congBoDot(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Công bố đợt đăng ký thành công!");
+            dotDangKyService.congBoDot(maDot);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã công bố đợt đăng ký!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -125,11 +128,11 @@ public class DotDangKyController {
     }
 
     // 7. Đóng đợt đăng ký
-    @PostMapping("/{id}/dong")
-    public String dongDot(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/{maDot}/dong")
+    public String closeDot(@PathVariable("maDot") String maDot, RedirectAttributes redirectAttributes) {
         try {
-            dotDangKyService.dongDot(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã đóng đợt đăng ký thành công!");
+            dotDangKyService.dongDot(maDot);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã đóng đợt đăng ký!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }

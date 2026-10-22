@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DotDangKyRepository extends JpaRepository<DotDangKy, Long> {
+public interface DotDangKyRepository extends JpaRepository<DotDangKy, String> {
 
     Optional<DotDangKy> findByMaDot(String maDot);
 

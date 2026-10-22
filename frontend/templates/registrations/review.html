@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Duyệt đăng ký đề tài')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('approve-registration')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Duyệt đăng ký đề tài')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Duyệt đăng ký đề tài</h1><p>Xem và xử lý các đăng ký do nhóm trưởng gửi lên.</p></div>
+            </div>
+            
+<div class="sv-toolbar"><form method="get" th:action="@{/dang-ky-de-tai/duyet}" class="sv-filter-form">
+    <div class="sv-field sv-grow"><label for="tuKhoa">Tìm đăng ký</label>
+        <input class="form-control" name="tuKhoa" id="tuKhoa" th:value="${tuKhoa}" placeholder="Mã nhóm hoặc tên đề tài"></div>
+    <div class="sv-field"><label for="trangThai">Trạng thái</label><select class="form-control" name="trangThai" id="trangThai">
+        <option value="">Tất cả</option><option value="CHO_DUYET" th:selected="${trangThai == 'CHO_DUYET'}">Chờ duyệt</option>
+        <option value="DA_DUYET" th:selected="${trangThai == 'DA_DUYET'}">Đã duyệt</option>
+        <option value="TU_CHOI" th:selected="${trangThai == 'TU_CHOI'}">Từ chối</option></select></div>
+    <button class="btn btn-primary sv-filter-button" type="submit">Lọc</button>
+</form></div>
+<section class="sv-panel"><div class="sv-panel-heading"><h2>Danh sách đăng ký</h2></div>
+    <div class="sv-empty" th:if="${#lists.isEmpty(danhSachDangKy)}">Không có đăng ký nào phù hợp.</div>
+    <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachDangKy)}"><table class="data-table sv-table">
+        <thead><tr><th>Mã nhóm</th><th>Đề tài</th><th>Ngày đăng ký</th><th>Trạng thái</th><th>Quyết định</th></tr></thead>
+        <tbody><tr th:each="dk : ${danhSachDangKy}"><td><code th:text="${dk.maNhom}"></code></td>
+            <td><strong th:text="${dk.tenDeTai}"></strong></td>
+            <td th:text="${dk.dangKyLuc != null ? #temporals.format(dk.dangKyLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
+            <td><span class="sv-state" th:attr="data-state=${dk.trangThai}" th:text="${dk.trangThai}"></span></td>
+            <td><div class="sv-review-actions" th:if="${dk.trangThai == 'CHO_DUYET'}">
+                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/duyet(maNhom=${dk.maNhom})}" data-sv-confirm="Duyệt đăng ký của nhóm này?">
+                    <button class="btn btn-primary sv-btn-small" type="submit">Duyệt</button></form>
+                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/tu-choi(maNhom=${dk.maNhom})}" data-sv-form>
+                    <label th:for="|lyDo-${dk.maNhom}|" class="sr-only">Lý do từ chối</label>
+                    <input class="form-control sv-reason-input" th:id="|lyDo-${dk.maNhom}|" name="lyDoTuChoi" maxlength="1000" required placeholder="Lý do từ chối">
+                    <button class="btn btn-outline sv-btn-small" type="submit">Từ chối</button></form>
+                </div><span class="sv-help" th:unless="${dk.trangThai == 'CHO_DUYET'}">Đã xử lý</span></td>
+        </tr></tbody></table></div>
+</section>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>
