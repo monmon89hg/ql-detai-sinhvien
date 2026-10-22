@@ -35,18 +35,21 @@ public class TongHopKetQuaService {
     private final ThanhVienHoiDongRepository thanhVienHoiDongRepository;
     private final KetQuaRepository ketQuaRepository;
     private final TinhDiemTrungBinhService tinhDiemTrungBinhService;
+    private final TaoEmailThongBaoKetQuaService taoEmailThongBaoKetQuaService;
 
     public TongHopKetQuaService(
             HoiDongDeTaiRepository hoiDongDeTaiRepository,
             HoiDongRepository hoiDongRepository,
             ThanhVienHoiDongRepository thanhVienHoiDongRepository,
             KetQuaRepository ketQuaRepository,
-            TinhDiemTrungBinhService tinhDiemTrungBinhService) {
+            TinhDiemTrungBinhService tinhDiemTrungBinhService,
+            TaoEmailThongBaoKetQuaService taoEmailThongBaoKetQuaService) {
         this.hoiDongDeTaiRepository = hoiDongDeTaiRepository;
         this.hoiDongRepository = hoiDongRepository;
         this.thanhVienHoiDongRepository = thanhVienHoiDongRepository;
         this.ketQuaRepository = ketQuaRepository;
         this.tinhDiemTrungBinhService = tinhDiemTrungBinhService;
+        this.taoEmailThongBaoKetQuaService = taoEmailThongBaoKetQuaService;
     }
 
     // Chủ tịch chỉ thấy các nhóm thuộc hội đồng mình phụ trách.
@@ -295,8 +298,10 @@ public class TongHopKetQuaService {
         ketQua.setTrangThai(TrangThaiKetQua.CONG_BO);
         ketQua.setMaNguoiCongBo(maNguoiCongBo);
         ketQua.setCongBoLuc(congBoLuc);
-
-        return ketQuaRepository.saveAndFlush(ketQua);
+        // Lưu kết quả trước để bản ghi email có thể tham chiếu đến kết quả.
+        KetQua ketQuaDaLuu = ketQuaRepository.saveAndFlush(ketQua);
+        taoEmailThongBaoKetQuaService.taoChoNhom(maNhom);
+        return ketQuaDaLuu;
     }
 
     private String layMaNguoiDungDangNhap() {
