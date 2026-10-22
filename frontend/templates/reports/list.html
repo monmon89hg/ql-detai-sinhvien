@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Nộp báo cáo')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('report')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Nộp báo cáo')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Nộp báo cáo</h1><p>Theo dõi phiên bản PDF đã nộp và hạn nộp báo cáo.</p></div>
+            </div>
+            
+<section class="sv-panel"><div class="sv-panel-heading sv-heading-wrap"><h2>Thông tin nộp báo cáo</h2>
+    <a class="btn btn-primary" th:if="${coTheNopBaoCao}" th:href="@{/bao-cao/nop}">+ Nộp báo cáo mới</a></div>
+    <div class="sv-info" th:if="${nhomCuaToi == null}">Chưa có nhóm để nộp báo cáo.</div>
+    <dl class="sv-facts" th:if="${nhomCuaToi != null}"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi.tenNhom}"></dd></div>
+        <div><dt>Đề tài</dt><dd th:text="${tenDeTai ?: 'Chưa đăng ký'}"></dd></div>
+        <div><dt>Hạn nộp</dt><dd th:text="${hanNopBaoCao != null ? #temporals.format(hanNopBaoCao,'dd/MM/yyyy HH:mm') : 'Chưa có'}"></dd></div>
+        <div><dt>Trạng thái đăng ký</dt><dd th:text="${trangThaiDangKy ?: 'Chưa đăng ký'}"></dd></div></dl>
+</section>
+<section class="sv-panel"><div class="sv-panel-heading"><h2>Lịch sử các phiên bản</h2></div>
+    <div class="sv-empty" th:if="${#lists.isEmpty(danhSachBaoCao)}">
+        <strong>Chưa có báo cáo nào được nộp.</strong><p>Nhóm trưởng có thể nộp file PDF khi đủ điều kiện.</p></div>
+    <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachBaoCao)}"><table class="data-table sv-table">
+        <thead><tr><th>Phiên bản</th><th>Tên tệp</th><th>Kích thước</th><th>Thời gian nộp</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody><tr th:each="bc : ${danhSachBaoCao}"><td th:text="|v${bc.phienBan}|"></td>
+            <td th:text="${bc.tenFileGoc}"></td>
+            <td th:text="|${#numbers.formatDecimal(bc.kichThuocByte / 1024.0 / 1024.0, 1, 2)} MB|"></td>
+            <td th:text="${bc.nopLuc != null ? #temporals.format(bc.nopLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
+            <td><span class="sv-state" th:attr="data-state=${bc.trangThai}" th:text="${bc.trangThai}"></span></td>
+            <td><a class="btn btn-outline sv-btn-small" th:href="@{/bao-cao/{maNhom}/{phienBan}/tai(maNhom=${bc.maNhom},phienBan=${bc.phienBan})}">Tải PDF</a></td>
+        </tr></tbody></table></div>
+</section>
+<div class="sv-info sv-info-soft">Chỉ nhóm trưởng được gửi báo cáo. Tối đa 20 MiB, định dạng PDF. Các phiên bản cũ được giữ để theo dõi lịch sử; tệp cần được lưu qua hệ thống lưu trữ của Backend sau này.</div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>

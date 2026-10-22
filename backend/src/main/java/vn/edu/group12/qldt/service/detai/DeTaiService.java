@@ -27,19 +27,19 @@ public class DeTaiService {
         return deTaiRepository.findAll();
     }
 
-    public List<DeTai> filterDeTai(Long dotId, Long boMonId, String trangThai, String keyword) {
-        return deTaiRepository.filterDeTai(dotId, boMonId, trangThai, keyword);
+    public List<DeTai> filterDeTai(String maDot, String maBoMon, String trangThai, String keyword) {
+        return deTaiRepository.filterDeTai(maDot, maBoMon, trangThai, keyword);
     }
 
-    public DeTai getDeTaiById(Long id) {
-        return deTaiRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đề tài với ID: " + id));
+    public DeTai getDeTaiByMa(String maDeTai) {
+        return deTaiRepository.findById(maDeTai)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đề tài với mã: " + maDeTai));
     }
 
     // Giảng viên đề xuất đề tài trong Giai đoạn 1
     @Transactional
-    public DeTai deXuatDeTai(DeTaiDto dto, Long giangVienId) {
-        DotDangKy dot = dotDangKyService.getDotDangKyById(dto.getDotDangKyId());
+    public DeTai deXuatDeTai(DeTaiDto dto, String maGiangVien) {
+        DotDangKy dot = dotDangKyService.getDotDangKyByMa(dto.getMaDot());
 
         // Kiểm tra thời gian: Chỉ được đề xuất trong Giai đoạn 1 của đợt
         if (!dotDangKyService.isGiaiDoan1(dot)) {
@@ -58,28 +58,28 @@ public class DeTaiService {
 
         DeTai deTai = new DeTai();
         deTai.setMaDeTai(maDeTai);
-        deTai.setDotDangKyId(dto.getDotDangKyId());
-        deTai.setBoMonId(dto.getBoMonId() != null ? dto.getBoMonId() : 1L);
+        deTai.setMaDot(dto.getMaDot());
+        deTai.setMaBoMon(dto.getMaBoMon() != null && !dto.getMaBoMon().isBlank() ? dto.getMaBoMon() : "DEMO_CNPM");
         deTai.setTenDeTai(dto.getTenDeTai());
         deTai.setNoiDung(dto.getNoiDung());
         deTai.setYeuCau(dto.getYeuCau());
-        deTai.setNguoiDeXuatId(giangVienId);
+        deTai.setMaNguoiDeXuat(maGiangVien);
         deTai.setTrangThai("CHO_DUYET");
 
         DeTai saved = deTaiRepository.save(deTai);
 
         // Tự động phân công GV đề xuất làm Giảng viên hướng dẫn 1
-        deTaiGiangVienService.phanCong(saved.getId(), giangVienId, "HUONG_DAN", giangVienId);
+        deTaiGiangVienService.phanCong(saved.getMaDeTai(), maGiangVien, "HUONG_DAN", maGiangVien);
 
         return saved;
     }
 
     // Trưởng khoa duyệt đề tài
     @Transactional
-    public DeTai duyetDeTai(Long deTaiId, Long nguoiDuyetId) {
-        DeTai deTai = getDeTaiById(deTaiId);
+    public DeTai duyetDeTai(String maDeTai, String maNguoiDuyet) {
+        DeTai deTai = getDeTaiByMa(maDeTai);
         deTai.setTrangThai("DA_DUYET");
-        deTai.setNguoiDuyetId(nguoiDuyetId);
+        deTai.setMaNguoiDuyet(maNguoiDuyet);
         deTai.setDuyetLuc(LocalDateTime.now());
         deTai.setLyDoTuChoi(null);
         return deTaiRepository.save(deTai);
@@ -87,28 +87,28 @@ public class DeTaiService {
 
     // Trưởng khoa từ chối đề tài (BẮT BUỘC có lý do)
     @Transactional
-    public DeTai tuChoiDeTai(Long deTaiId, String lyDoTuChoi, Long nguoiDuyetId) {
+    public DeTai tuChoiDeTai(String maDeTai, String lyDoTuChoi, String maNguoiDuyet) {
         if (lyDoTuChoi == null || lyDoTuChoi.trim().isEmpty()) {
             throw new IllegalArgumentException("Bắt buộc phải nhập lý do từ chối đề tài!");
         }
-        DeTai deTai = getDeTaiById(deTaiId);
+        DeTai deTai = getDeTaiByMa(maDeTai);
         deTai.setTrangThai("TU_CHOI");
         deTai.setLyDoTuChoi(lyDoTuChoi.trim());
-        deTai.setNguoiDuyetId(nguoiDuyetId);
+        deTai.setMaNguoiDuyet(maNguoiDuyet);
         deTai.setDuyetLuc(LocalDateTime.now());
         return deTaiRepository.save(deTai);
     }
 
     // Công bố danh sách đề tài (Chỉ công bố đề tài đã duyệt và đã có GVHD)
     @Transactional
-    public DeTai congBoDeTai(Long deTaiId) {
-        DeTai deTai = getDeTaiById(deTaiId);
+    public DeTai congBoDeTai(String maDeTai) {
+        DeTai deTai = getDeTaiByMa(maDeTai);
         if (!"DA_DUYET".equals(deTai.getTrangThai())) {
             throw new IllegalArgumentException("Chỉ được công bố đề tài đã ở trạng thái 'DA_DUYET'!");
         }
 
         // Ràng buộc: Đề tài phải có ít nhất 1 GVHD trước khi công bố
-        long countGvhd = deTaiGiangVienService.countGvhd(deTaiId);
+        long countGvhd = deTaiGiangVienService.countGvhd(maDeTai);
         if (countGvhd < 1) {
             throw new IllegalArgumentException("Đề tài chưa có Giảng viên hướng dẫn nên không thể công bố!");
         }
@@ -119,11 +119,11 @@ public class DeTaiService {
     }
 
     // Danh sách đề tài cho Sinh viên xem và chọn (Chỉ lấy đề tài ĐÃ CÔNG BỐ trong Giai đoạn 2)
-    public List<DeTai> getDeTaiChoSinhVien(Long dotId) {
-        DotDangKy dot = dotDangKyService.getDotDangKyById(dotId);
+    public List<DeTai> getDeTaiChoSinhVien(String maDot) {
+        DotDangKy dot = dotDangKyService.getDotDangKyByMa(maDot);
         if (!dotDangKyService.isGiaiDoan2(dot)) {
             throw new IllegalArgumentException("Đợt đăng ký hiện chưa hoặc đã qua Giai đoạn 2! Sinh viên chỉ được xem và chọn đề tài trong Giai đoạn 2.");
         }
-        return deTaiRepository.findByDotDangKyIdAndTrangThai(dotId, "CONG_BO");
+        return deTaiRepository.findByMaDotAndTrangThai(maDot, "CONG_BO");
     }
 }

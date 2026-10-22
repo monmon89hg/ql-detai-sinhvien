@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head(${dotId != null ? 'Chỉnh sửa Đợt đăng ký' : 'Tạo mới Đợt đăng ký'})}"></head>
+<head th:replace="~{fragments/head :: head(${maDot != null ? 'Chỉnh sửa Đợt đăng ký' : 'Tạo mới Đợt đăng ký'})}"></head>
 <body>
 <a class="skip" href="#content">Bỏ qua điều hướng</a>
 <div th:replace="~{fragments/header :: header}"></div>
@@ -16,18 +16,18 @@
             <div th:replace="~{fragments/messages :: messages}"></div>
 
             <div class="page-heading">
-                <h1 th:text="${dotId != null ? 'Chỉnh sửa Đợt đăng ký' : 'Tạo mới Đợt đăng ký'}">Thiết lập Đợt đăng ký</h1>
+                <h1 th:text="${maDot != null ? 'Chỉnh sửa Đợt đăng ký' : 'Tạo mới Đợt đăng ký'}">Thiết lập Đợt đăng ký</h1>
                 <p>Quy tắc: Thời gian GV đề xuất (Giai đoạn 1) phải kết thúc trước hoặc cùng lúc bắt đầu SV đăng ký (Giai đoạn 2).</p>
             </div>
 
             <div class="placeholder" style="max-width: 800px;">
-                <form th:action="${dotId != null} ? @{/dot-dang-ky/sua/{id}(id=${dotId})} : @{/dot-dang-ky/tao}"
+                <form th:action="${maDot != null} ? @{/dot-dang-ky/sua/{maDot}(maDot=${maDot})} : @{/dot-dang-ky/tao}"
                       th:object="${dotDto}" method="post">
                     
                     <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px;">
                         <div class="form-field">
                             <label><strong>Mã đợt *</strong></label>
-                            <input type="text" class="form-control" th:field="*{maDot}" placeholder="VD: DOT_2026_HK1" required>
+                            <input type="text" class="form-control" th:field="*{maDot}" placeholder="VD: DOT_2026_HK1" th:readonly="${maDot != null}" required>
                         </div>
                         <div class="form-field">
                             <label><strong>Tên đợt đăng ký *</strong></label>

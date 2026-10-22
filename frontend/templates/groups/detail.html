@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Chi tiết nhóm sinh viên')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('find-group')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Chi tiết nhóm sinh viên')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Chi tiết nhóm sinh viên</h1><p>Xem thông tin nhóm, thành viên và điều kiện tham gia.</p></div>
+            </div>
+            
+<div class="sv-panel" th:if="${nhom != null}">
+    <div class="sv-panel-heading sv-heading-wrap">
+        <div><h2 th:text="${nhom.tenNhom}">Tên nhóm</h2>
+            <p class="sv-help">Mã nhóm: <code th:text="${nhom.maNhom}">NHOM01</code></p></div>
+        <span class="sv-state" th:attr="data-state=${nhom.trangThai}" th:text="${nhom.trangThai}">ĐANG LẬP</span>
+    </div>
+    <dl class="sv-facts"><div><dt>Đợt đăng ký</dt><dd th:text="${nhom.tenDot}">Đợt</dd></div>
+        <div><dt>Số thành viên chính thức</dt><dd th:text="|${nhom.soThanhVien}/5|">3/5</dd></div>
+        <div><dt>Nhóm trưởng</dt><dd th:text="${nhom.tenNhomTruong}">Nhóm trưởng</dd></div>
+        <div><dt>Trạng thái</dt><dd th:text="${nhom.trangThai}">ĐANG LẬP</dd></div></dl>
+    <div class="sv-panel-heading"><h2>Thành viên của nhóm</h2></div>
+    <div class="sv-empty" th:if="${#lists.isEmpty(danhSachThanhVien)}">Chưa có thành viên chính thức.</div>
+    <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachThanhVien)}"><table class="data-table sv-table">
+        <thead><tr><th>Mã sinh viên</th><th>Họ và tên</th><th>Vai trò</th></tr></thead>
+        <tbody><tr th:each="tv : ${danhSachThanhVien}"><td th:text="${tv.maSinhVien}"></td>
+            <td th:text="${tv.hoTen}"></td><td th:text="${tv.laNhomTruong ? 'Nhóm trưởng' : 'Thành viên'}"></td></tr></tbody></table></div>
+    <form th:if="${coTheGuiYeuCau}" th:action="@{/nhom/{maNhom}/yeu-cau(maNhom=${nhom.maNhom})}" method="post" data-sv-form>
+        <div class="sv-actions"><button class="btn btn-primary" type="submit">Gửi yêu cầu tham gia</button>
+            <span class="sv-help">Nhóm trưởng sẽ xem và phản hồi yêu cầu.</span></div>
+    </form>
+</div>
+<div class="sv-empty" th:if="${nhom == null}">Không tìm thấy thông tin nhóm.</div>
+<div class="sv-actions"><a class="btn btn-outline" th:href="@{/nhom}">Về danh sách nhóm</a></div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>

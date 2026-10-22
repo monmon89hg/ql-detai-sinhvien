@@ -10,6 +10,9 @@ import vn.edu.group12.qldt.dto.hoidong.NhomPhanCongLuaChon;
 import vn.edu.group12.qldt.entity.hoidong.HoiDongDeTai;
 
 import java.util.Optional;
+import java.time.LocalDateTime;
+import org.springframework.data.jpa.repository.Modifying;
+import vn.edu.group12.qldt.dto.hoidong.NhomKetQuaHienThi;
 
 public interface HoiDongDeTaiRepository
         extends JpaRepository<HoiDongDeTai, String> {
@@ -97,5 +100,143 @@ public interface HoiDongDeTaiRepository
     Optional<String> khoaDangKyTheoMaNhom(
         @Param("maNhom") String maNhom
     );
+
+    // Đọc trạng thái sau khi transaction đã khóa đăng ký của nhóm.
+    @Query(
+        value = """
+            SELECT dk.trang_thai
+            FROM dang_ky_de_tai dk
+            WHERE dk.ma_nhom = :maNhom
+            """,
+        nativeQuery = true
+    )
+    Optional<String> timTrangThaiDangKyTheoMaNhom(
+        @Param("maNhom") String maNhom
+    );
+
+    // Chỉ hoàn thành đăng ký còn ở giai đoạn chấm.
+    @Modifying
+    @Query(
+        value = """
+            UPDATE dang_ky_de_tai
+            SET trang_thai = 'HOAN_THANH',
+                ket_thuc_luc = :congBoLuc,
+                version = version + 1
+            WHERE ma_nhom = :maNhom
+                AND trang_thai = 'DANG_CHAM'
+            """,
+        nativeQuery = true
+    )
+    int hoanThanhDangKyKhiDangCham(
+        @Param("maNhom") String maNhom,
+        @Param("congBoLuc") LocalDateTime congBoLuc
+    );
+
+    // Chỉ hoàn thành nhóm đang thực hiện đề tài.
+    @Modifying
+    @Query(
+        value = """
+            UPDATE nhom_sinh_vien
+            SET trang_thai = 'HOAN_THANH',
+                ket_thuc_luc = :congBoLuc,
+                version = version + 1
+            WHERE ma_nhom = :maNhom
+                AND trang_thai = 'DANG_THUC_HIEN'
+            """,
+        nativeQuery = true
+    )
+    int hoanThanhNhomKhiDangThucHien(
+        @Param("maNhom") String maNhom,
+        @Param("congBoLuc") LocalDateTime congBoLuc
+    );
+
+    // Đọc lại mã hội đồng từ database sau khi đã giữ khóa.
+    @Query(
+        value = """
+            SELECT pc.ma_hoi_dong
+            FROM hoi_dong_de_tai pc
+            WHERE pc.ma_nhom = :maNhom
+            """,
+        nativeQuery = true
+    )
+    Optional<String> timMaHoiDongHienTai(
+        @Param("maNhom") String maNhom
+    );
+
+    // Chỉ lấy các nhóm thuộc hội đồng mà giảng viên là chủ tịch.
+    @Query(
+        value = """
+            SELECT
+                nh.ma_nhom AS maNhom,
+                nh.ten_nhom AS tenNhom,
+                dt.ma_de_tai AS maDeTai,
+                dt.ten_de_tai AS tenDeTai,
+                hd.ma_hoi_dong AS maHoiDong,
+                hd.ten_hoi_dong AS tenHoiDong,
+                kq.trang_thai AS trangThaiKetQua,
+                kq.diem_cuoi AS diemCuoi
+            FROM hoi_dong_de_tai pc
+            JOIN hoi_dong hd
+                ON hd.ma_hoi_dong = pc.ma_hoi_dong
+            JOIN thanh_vien_hoi_dong tv
+                ON tv.ma_hoi_dong = hd.ma_hoi_dong
+            JOIN dang_ky_de_tai dk
+                ON dk.ma_nhom = pc.ma_nhom
+            JOIN nhom_sinh_vien nh
+                ON nh.ma_nhom = dk.ma_nhom
+            JOIN de_tai dt
+                ON dt.ma_de_tai = dk.ma_de_tai
+            JOIN dot_dang_ky dot
+                ON dot.ma_dot = hd.ma_dot
+            LEFT JOIN ket_qua kq
+                ON kq.ma_nhom = pc.ma_nhom
+            WHERE tv.ma_giang_vien = :maGiangVien
+                AND tv.chuc_danh = 'CHU_TICH'
+                AND dk.trang_thai IN ('DANG_CHAM', 'HOAN_THANH')
+                AND nh.ma_dot = hd.ma_dot
+                AND dt.ma_dot = hd.ma_dot
+                AND dot.loai_de_tai = 'KLTN'
+            ORDER BY hd.ma_hoi_dong, nh.ma_nhom
+            """,
+        nativeQuery = true
+    )
+    List<NhomKetQuaHienThi> layDanhSachNhomChoChuTich(
+        @Param("maGiangVien") String maGiangVien
+    );
+
+    // Trưởng khoa xem các nhóm đã phân công hội đồng và trạng thái kết quả.
+    @Query(
+        value = """
+            SELECT
+                nh.ma_nhom AS maNhom,
+                nh.ten_nhom AS tenNhom,
+                dt.ma_de_tai AS maDeTai,
+                dt.ten_de_tai AS tenDeTai,
+                hd.ma_hoi_dong AS maHoiDong,
+                hd.ten_hoi_dong AS tenHoiDong,
+                kq.trang_thai AS trangThaiKetQua,
+                kq.diem_cuoi AS diemCuoi
+            FROM hoi_dong_de_tai pc
+            JOIN hoi_dong hd
+                ON hd.ma_hoi_dong = pc.ma_hoi_dong
+            JOIN dang_ky_de_tai dk
+                ON dk.ma_nhom = pc.ma_nhom
+            JOIN nhom_sinh_vien nh
+                ON nh.ma_nhom = dk.ma_nhom
+            JOIN de_tai dt
+                ON dt.ma_de_tai = dk.ma_de_tai
+            JOIN dot_dang_ky dot
+                ON dot.ma_dot = hd.ma_dot
+            LEFT JOIN ket_qua kq
+                ON kq.ma_nhom = pc.ma_nhom
+            WHERE dk.trang_thai IN ('DANG_CHAM', 'HOAN_THANH')
+                AND nh.ma_dot = hd.ma_dot
+                AND dt.ma_dot = hd.ma_dot
+                AND dot.loai_de_tai = 'KLTN'
+            ORDER BY hd.ma_hoi_dong, nh.ma_nhom
+            """,
+        nativeQuery = true
+    )
+    List<NhomKetQuaHienThi> layDanhSachNhomChoTruongKhoa();
 
 }

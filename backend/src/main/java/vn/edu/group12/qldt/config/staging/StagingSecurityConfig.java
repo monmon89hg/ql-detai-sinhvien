@@ -5,8 +5,9 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,12 +15,12 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Shared integration-testing environment with real MySQL users and CSRF.
- * New mutation routes are blocked until they receive an explicit role rule.
+ * Tai khoan QA dung MySQL that. Neu bat them profile qa-open, moi tai khoan
+ * dang nhap duoc vao cac route hien co de kiem tra giao dien/tich hop.
+ * Mac dinh staging van phan quyen theo vai tro nhu cu.
  */
 @Configuration
 @Profile("staging & !preview & !hoi-dong-local")
-@EnableMethodSecurity
 public class StagingSecurityConfig {
 
     @Bean
@@ -45,13 +46,24 @@ public class StagingSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain stagingSecurityFilterChain(HttpSecurity http)
-            throws Exception {
-        http
-            .authorizeHttpRequests(auth -> auth
+    public SecurityFilterChain stagingSecurityFilterChain(
+            HttpSecurity http, Environment environment) throws Exception {
+
+        boolean qaOpen = environment.acceptsProfiles(Profiles.of("qa-open"));
+
+        if (qaOpen) {
+            // QA: tai khoan da dang nhap co the truy cap cac route da co Controller.
+            // KHONG mo truy cap an danh va KHONG tat CSRF.
+            http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico")
                     .permitAll()
-                // Existing council and assessment routes: enforce their roles for reads and writes.
+                .anyRequest().authenticated()
+            );
+        } else {
+            // Staging thong thuong: bao toan phan quyen theo role.
+            http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico")
+                    .permitAll()
                 .requestMatchers(HttpMethod.GET, "/hoi-dong", "/hoi-dong/**")
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.POST, "/hoi-dong", "/hoi-dong/**")
@@ -60,7 +72,6 @@ public class StagingSecurityConfig {
                     .hasRole("GIANG_VIEN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem", "/cham-diem/**")
                     .hasRole("GIANG_VIEN")
-                // Proposal belongs to teaching staff, approvals and period setup to the dean.
                 .requestMatchers(HttpMethod.GET, "/de-tai/de-xuat")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
                 .requestMatchers(HttpMethod.POST, "/de-tai/de-xuat")
@@ -72,17 +83,16 @@ public class StagingSecurityConfig {
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/admin/**")
                     .hasRole("ADMIN")
-                // Browse other pages as an authenticated tester; no anonymous data access.
                 .requestMatchers(HttpMethod.GET, "/**").authenticated()
-                // Future forms/APIs must register explicit write permissions first.
                 .anyRequest().denyAll()
-            )
-            .formLogin(form -> form
-                .defaultSuccessUrl("/dashboard", true)
-                .permitAll()
-            )
-            .logout(logout -> logout.permitAll());
-        // Keep CSRF enabled for browser form submissions.
+            );
+        }
+
+        http.formLogin(form -> form
+            .defaultSuccessUrl("/dashboard", true)
+            .permitAll()
+        ).logout(logout -> logout.permitAll());
+
         return http.build();
     }
 }
