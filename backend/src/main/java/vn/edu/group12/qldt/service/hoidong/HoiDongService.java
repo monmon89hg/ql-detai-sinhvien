@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.service.hoidong;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -8,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -44,6 +45,7 @@ public class HoiDongService {
     }
 
 
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<HoiDong> layDanhSach() {
         return hoiDongRepository.findAll(
@@ -73,10 +75,7 @@ public class HoiDongService {
         String tenHoiDong = form.getTenHoiDong().trim();
         String maDot = form.getMaDot().trim();
 
-        String maNguoiTao = SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+        String maNguoiTao = CurrentUser.maNguoiDung();
 
         if (hoiDongRepository.demTruongKhoaHoatDong(maNguoiTao) == 0) {
             throw new AccessDeniedException(
@@ -117,10 +116,7 @@ public class HoiDongService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public HoiDong chuyenSangSanSang(@NotBlank String maHoiDong) {
 
-        String maNguoiThaoTac = SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+        String maNguoiThaoTac = CurrentUser.maNguoiDung();
 
         if (hoiDongRepository.demTruongKhoaHoatDong(maNguoiThaoTac) == 0) {
             throw new AccessDeniedException(

@@ -2,7 +2,6 @@ package vn.edu.group12.qldt;
 
 import java.util.List;
 
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import vn.edu.group12.qldt.config.hoidong.HoiDongLocalSecurityConfig;
+import vn.edu.group12.qldt.config.SecurityConfig;
+import vn.edu.group12.qldt.config.auth.PasswordConfig;
+import vn.edu.group12.qldt.service.auth.CustomUserDetailsService;
+import vn.edu.group12.qldt.repository.admin.NguoiDungRepository;
+import vn.edu.group12.qldt.repository.admin.NguoiDungVaiTroRepository;
 import vn.edu.group12.qldt.controller.hoidong.HoiDongController;
 import vn.edu.group12.qldt.dto.hoidong.NhomPhanCongLuaChon;
 import vn.edu.group12.qldt.entity.hoidong.HoiDong;
@@ -38,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // Render the real templates and serve the real assets without accessing MySQL.
 @WebMvcTest(HoiDongController.class)
-@Import(HoiDongLocalSecurityConfig.class)
+@Import({SecurityConfig.class, PasswordConfig.class, CustomUserDetailsService.class})
 @ActiveProfiles("hoi-dong-local")
 class FrontendIntegrationTests {
 
@@ -55,7 +58,10 @@ class FrontendIntegrationTests {
     private PhanCongHoiDongService phanCongHoiDongService;
 
     @MockitoBean
-    private DataSource dataSource;
+    private NguoiDungRepository nguoiDungRepository;
+
+    @MockitoBean
+    private NguoiDungVaiTroRepository nguoiDungVaiTroRepository;
 
     @Test
     void staticAssetsKeepTheirPublicUrls() throws Exception {

@@ -6,7 +6,6 @@ import vn.edu.group12.qldt.repository.admin.NguoiDungRepository;
 import vn.edu.group12.qldt.repository.admin.NguoiDungVaiTroRepository;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -55,10 +54,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         boolean taiKhoanHoatDong =
                 "HOAT_DONG".equals(nguoiDung.getTrangThai());
 
-        return User.withUsername(nguoiDung.getEmail())
-                .password(nguoiDung.getMatKhauHash())
-                .authorities(authorities)
-                .disabled(!taiKhoanHoatDong)
-                .build();
+        return new QldtUserDetails(
+                nguoiDung.getMaNguoiDung(), nguoiDung.getEmail(),
+                nguoiDung.getMatKhauHash(), taiKhoanHoatDong, authorities);
     }
 }

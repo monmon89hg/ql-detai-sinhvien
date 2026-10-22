@@ -2,6 +2,7 @@ package vn.edu.group12.qldt.service.detai;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.group12.qldt.dto.detai.DotDangKyDto;
 import vn.edu.group12.qldt.entity.detai.DotDangKy;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA', 'TRUONG_BO_MON', 'GIANG_VIEN', 'SINH_VIEN')")
 public class DotDangKyService {
 
     @Autowired
@@ -25,6 +27,7 @@ public class DotDangKyService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đợt đăng ký với mã: " + maDot));
     }
 
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public DotDangKy createDotDangKy(DotDangKyDto dto, String maNguoiTao) {
         validateBusinessRules(dto);
@@ -41,6 +44,7 @@ public class DotDangKyService {
         return dotDangKyRepository.save(dot);
     }
 
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public DotDangKy updateDotDangKy(String maDot, DotDangKyDto dto) {
         validateBusinessRules(dto);
@@ -54,6 +58,7 @@ public class DotDangKyService {
         return dotDangKyRepository.save(dot);
     }
 
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public void congBoDot(String maDot) {
         DotDangKy dot = getDotDangKyByMa(maDot);
@@ -61,6 +66,7 @@ public class DotDangKyService {
         dotDangKyRepository.save(dot);
     }
 
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public void dongDot(String maDot) {
         DotDangKy dot = getDotDangKyByMa(maDot);

@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.controller.detai;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -92,7 +94,7 @@ public class DeTaiController {
                                Principal principal,
                                RedirectAttributes redirectAttributes) {
         try {
-            String maGiangVien = principal != null ? principal.getName() : "DEMO_GV01";
+            String maGiangVien = CurrentUser.maNguoiDung();
             deTaiService.deXuatDeTai(dto, maGiangVien);
             redirectAttributes.addFlashAttribute("successMessage", "Đề xuất đề tài thành công! Đề tài đang chờ Trưởng khoa duyệt.");
             return "redirect:/de-tai";
@@ -124,7 +126,7 @@ public class DeTaiController {
                                Principal principal,
                                RedirectAttributes redirectAttributes) {
         try {
-            String maNguoiDuyet = principal != null ? principal.getName() : "DEMO_CB02";
+            String maNguoiDuyet = CurrentUser.maNguoiDung();
             deTaiService.duyetDeTai(maDeTai, maNguoiDuyet);
             redirectAttributes.addFlashAttribute("successMessage", "Đã duyệt đề tài thành công!");
         } catch (Exception e) {
@@ -140,7 +142,7 @@ public class DeTaiController {
                               Principal principal,
                               RedirectAttributes redirectAttributes) {
         try {
-            String maNguoiDuyet = principal != null ? principal.getName() : "DEMO_CB02";
+            String maNguoiDuyet = CurrentUser.maNguoiDung();
             deTaiService.tuChoiDeTai(maDeTai, lyDoTuChoi, maNguoiDuyet);
             redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối đề tài!");
         } catch (Exception e) {
@@ -169,7 +171,7 @@ public class DeTaiController {
                                  Principal principal,
                                  RedirectAttributes redirectAttributes) {
         try {
-            String maNguoiPhanCong = principal != null ? principal.getName() : "DEMO_CB02";
+            String maNguoiPhanCong = CurrentUser.maNguoiDung();
             deTaiGiangVienService.phanCong(maDeTai, maGiangVien, loaiPhanCong, maNguoiPhanCong);
             redirectAttributes.addFlashAttribute("successMessage", "Phân công giảng viên thành công!");
         } catch (IllegalArgumentException e) {
