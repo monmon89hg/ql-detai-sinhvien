@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.service.hoidong;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import java.util.List;
 
 import java.time.LocalDateTime;
@@ -9,7 +11,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Isolation;
 
 import vn.edu.group12.qldt.dto.hoidong.PhanCongHoiDongForm;
@@ -79,10 +80,7 @@ public class PhanCongHoiDongService {
             @NotNull @Valid PhanCongHoiDongForm form) {
 
         // Lấy tài khoản đăng nhập từ hệ thống bảo mật.
-        String maNguoiPhanCong = SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+        String maNguoiPhanCong = CurrentUser.maNguoiDung();
 
         if (hoiDongRepository
                 .demTruongKhoaHoatDong(maNguoiPhanCong) == 0) {

@@ -2,6 +2,7 @@ package vn.edu.group12.qldt.service.detai;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.group12.qldt.dto.detai.DeTaiDto;
 import vn.edu.group12.qldt.entity.detai.DeTai;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA', 'TRUONG_BO_MON', 'GIANG_VIEN', 'SINH_VIEN')")
 public class DeTaiService {
 
     @Autowired
@@ -37,6 +39,7 @@ public class DeTaiService {
     }
 
     // Giảng viên đề xuất đề tài trong Giai đoạn 1
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_BO_MON')")
     @Transactional
     public DeTai deXuatDeTai(DeTaiDto dto, String maGiangVien) {
         DotDangKy dot = dotDangKyService.getDotDangKyByMa(dto.getMaDot());
@@ -69,12 +72,13 @@ public class DeTaiService {
         DeTai saved = deTaiRepository.save(deTai);
 
         // Tự động phân công GV đề xuất làm Giảng viên hướng dẫn 1
-        deTaiGiangVienService.phanCong(saved.getMaDeTai(), maGiangVien, "HUONG_DAN", maGiangVien);
+        deTaiGiangVienService.phanCongNguoiDeXuat(saved.getMaDeTai());
 
         return saved;
     }
 
     // Trưởng khoa duyệt đề tài
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public DeTai duyetDeTai(String maDeTai, String maNguoiDuyet) {
         DeTai deTai = getDeTaiByMa(maDeTai);
@@ -86,6 +90,7 @@ public class DeTaiService {
     }
 
     // Trưởng khoa từ chối đề tài (BẮT BUỘC có lý do)
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public DeTai tuChoiDeTai(String maDeTai, String lyDoTuChoi, String maNguoiDuyet) {
         if (lyDoTuChoi == null || lyDoTuChoi.trim().isEmpty()) {
@@ -100,6 +105,7 @@ public class DeTaiService {
     }
 
     // Công bố danh sách đề tài (Chỉ công bố đề tài đã duyệt và đã có GVHD)
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional
     public DeTai congBoDeTai(String maDeTai) {
         DeTai deTai = getDeTaiByMa(maDeTai);

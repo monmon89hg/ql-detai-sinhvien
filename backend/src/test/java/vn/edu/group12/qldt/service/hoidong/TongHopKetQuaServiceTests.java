@@ -20,8 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import static vn.edu.group12.qldt.support.SecurityTestUsers.authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import vn.edu.group12.qldt.dto.hoidong.KetQuaTinhDiem;
@@ -62,11 +61,7 @@ class TongHopKetQuaServiceTests {
     void dangNhapGiangVien() {
         // Giả lập tài khoản GV03 đang đăng nhập.
         SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                "GV03",
-                "khong_dung_mat_khau_that",
-                List.of(new SimpleGrantedAuthority("ROLE_GIANG_VIEN"))
-            )
+            authentication("GV03", "GIANG_VIEN")
         );
     }
 

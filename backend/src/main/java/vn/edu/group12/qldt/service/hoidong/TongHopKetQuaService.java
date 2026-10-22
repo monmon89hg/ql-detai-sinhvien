@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.service.hoidong;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -317,6 +319,6 @@ public class TongHopKetQuaService {
             );
         }
 
-        return authentication.getName();
+        return CurrentUser.maNguoiDung();
     }
 }

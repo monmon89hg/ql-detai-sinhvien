@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.service.hoidong;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -347,7 +349,7 @@ public class ChamDiemHoiDongService {
             );
         }
 
-        String maGiangVien = authentication.getName();
+        String maGiangVien = CurrentUser.maNguoiDung();
 
         // Kiểm tra lại database vì tài khoản có thể bị khóa sau khi đăng nhập.
         if (thanhVienHoiDongRepository
