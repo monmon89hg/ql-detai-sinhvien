@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <body>
         <aside th:fragment="sidebar(activeMenu)" class="sidebar" id="main-navigation" aria-label="Điều hướng chính">
             <div class="side-group">
@@ -207,7 +207,7 @@
                 <a
                     class="side-link"
                     href="/nhom/tao"
-                    th:href="@{/nhom/tao}"
+                    th:href="@{/nhom/tao}" sec:authorize="hasRole('SINH_VIEN')"
                     th:classappend="${activeMenu == 'create-group'} ? ' is-active' : ''"
                 >
                     <svg
@@ -229,7 +229,7 @@
                 <a
                     class="side-link"
                     href="/nhom/cua-toi"
-                    th:href="@{/nhom/cua-toi}"
+                    th:href="@{/nhom/cua-toi}" sec:authorize="hasRole('SINH_VIEN')"
                     th:classappend="${activeMenu == 'my-group'} ? ' is-active' : ''"
                 >
                     <svg
@@ -273,7 +273,7 @@
                 <a
                     class="side-link"
                     href="/dang-ky-de-tai/duyet"
-                    th:href="@{/dang-ky-de-tai/duyet}"
+                    th:href="@{/dang-ky-de-tai/duyet}" sec:authorize="hasRole('TRUONG_KHOA')"
                     th:classappend="${activeMenu == 'approve-registration'} ? ' is-active' : ''"
                 >
                     <svg

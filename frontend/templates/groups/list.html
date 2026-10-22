@@ -55,6 +55,11 @@
         </tr></tbody></table></div>
 </section>
 
+<nav class="sv-actions" aria-label="Phân trang">
+    <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/nhom(trang=${trang - 1},tuKhoa=${tuKhoa},maDot=${maDot},trangThai=${trangThai})}">Trang trước</a>
+    <span class="sv-help" th:text="|Trang ${trang + 1}|"></span>
+    <a class="btn btn-outline" th:if="${coTrangSau}" th:href="@{/nhom(trang=${trang + 1},tuKhoa=${tuKhoa},maDot=${maDot},trangThai=${trangThai})}">Trang sau</a>
+</nav>
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </main>

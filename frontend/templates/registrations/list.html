@@ -49,14 +49,18 @@
                 <form method="post" th:if="${duDieuKienDangKy and laNhomTruong and dangKyHienTai == null}"
                     th:action="@{/dang-ky-de-tai}" data-sv-confirm="Gửi đăng ký đề tài này cho nhóm?">
                     <input type="hidden" name="maDeTai" th:value="${dt.maDeTai}">
-                    <input type="hidden" name="maNhom" th:value="${nhomCuaToi.maNhom}">
                     <button class="btn btn-primary sv-btn-small" type="submit">Đăng ký</button></form>
                 <span class="sv-help" th:unless="${duDieuKienDangKy and laNhomTruong and dangKyHienTai == null}">Chỉ xem</span>
             </td></tr></tbody>
         </table></div>
 </section>
-<div class="sv-info"><strong>Quy định:</strong> Nhóm có 3–5 thành viên chính thức, đúng một nhóm trưởng và đang trong thời gian đăng ký. Mỗi nhóm chỉ có tối đa một bản ghi đăng ký đề tài; việc đăng ký lại khi bị từ chối cần theo chính sách của nhóm.</div>
+<div class="sv-info"><strong>Quy định:</strong> Nhóm có 3–5 thành viên chính thức, đúng một nhóm trưởng và đang trong thời gian đăng ký. Mỗi nhóm chỉ có tối đa một bản ghi đăng ký đề tài; đăng ký bị từ chối được giữ lại và không tạo bản ghi thứ hai.</div>
 
+<nav class="sv-actions" aria-label="Phân trang">
+    <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/dang-ky-de-tai(trang=${trang - 1},tuKhoa=${tuKhoa},maDot=${maDot})}">Trang trước</a>
+    <span class="sv-help" th:text="|Trang ${trang + 1}|"></span>
+    <a class="btn btn-outline" th:if="${coTrangSau}" th:href="@{/dang-ky-de-tai(trang=${trang + 1},tuKhoa=${tuKhoa},maDot=${maDot})}">Trang sau</a>
+</nav>
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </main>
