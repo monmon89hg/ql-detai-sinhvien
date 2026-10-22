@@ -16,7 +16,7 @@ import vn.edu.group12.qldt.dto.hoidong.KetQuaTraCuuHienThi;
 public interface KetQuaRepository extends JpaRepository<KetQua, String> {
 
     // Khóa chính là mã nhóm; JpaRepository đã có findById và save.
-    // Chỉ lấy thành viên đã chốt và còn tham gia nhóm.
+    // Lấy thành viên đã chốt, gồm cả sinh viên đã kết thúc tham gia nhóm.
     @Query(
         value = """
             SELECT
@@ -27,7 +27,7 @@ public interface KetQuaRepository extends JpaRepository<KetQua, String> {
             JOIN nguoi_dung nd
                 ON nd.ma_nguoi_dung = tv.ma_sinh_vien
             WHERE tv.ma_nhom = :maNhom
-                AND tv.trang_thai = 'THAM_GIA'
+                AND tv.trang_thai IN ('THAM_GIA', 'KET_THUC')
                 AND tv.la_thanh_vien_chot = 1
             ORDER BY tv.ma_sinh_vien
             """,
