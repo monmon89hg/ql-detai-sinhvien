@@ -3,8 +3,8 @@ package vn.edu.group12.qldt.dto.detai;
 public class DeTaiDto {
 
     private String maDeTai;
-    private Long dotDangKyId;
-    private Long boMonId;
+    private String maDot;
+    private String maBoMon;
     private String tenDeTai;
     private String noiDung;
     private String yeuCau;
@@ -14,11 +14,11 @@ public class DeTaiDto {
     public String getMaDeTai() { return maDeTai; }
     public void setMaDeTai(String maDeTai) { this.maDeTai = maDeTai; }
 
-    public Long getDotDangKyId() { return dotDangKyId; }
-    public void setDotDangKyId(Long dotDangKyId) { this.dotDangKyId = dotDangKyId; }
+    public String getMaDot() { return maDot; }
+    public void setMaDot(String maDot) { this.maDot = maDot; }
 
-    public Long getBoMonId() { return boMonId; }
-    public void setBoMonId(Long boMonId) { this.boMonId = boMonId; }
+    public String getMaBoMon() { return maBoMon; }
+    public void setMaBoMon(String maBoMon) { this.maBoMon = maBoMon; }
 
     public String getTenDeTai() { return tenDeTai; }
     public void setTenDeTai(String tenDeTai) { this.tenDeTai = tenDeTai; }

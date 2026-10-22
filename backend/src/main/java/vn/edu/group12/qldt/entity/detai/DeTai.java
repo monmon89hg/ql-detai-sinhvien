@@ -8,17 +8,14 @@ import java.time.LocalDateTime;
 public class DeTai {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "ma_de_tai", length = 30, nullable = false, unique = true)
+    @Column(name = "ma_de_tai", length = 30, nullable = false)
     private String maDeTai;
 
-    @Column(name = "dot_dang_ky_id", nullable = false)
-    private Long dotDangKyId;
+    @Column(name = "ma_dot", length = 30, nullable = false)
+    private String maDot;
 
-    @Column(name = "bo_mon_id", nullable = false)
-    private Long boMonId;
+    @Column(name = "ma_bo_mon", length = 20, nullable = false)
+    private String maBoMon;
 
     @Column(name = "ten_de_tai", length = 255, nullable = false)
     private String tenDeTai;
@@ -29,14 +26,14 @@ public class DeTai {
     @Column(name = "yeu_cau", columnDefinition = "TEXT")
     private String yeuCau;
 
-    @Column(name = "nguoi_de_xuat_id", nullable = false)
-    private Long nguoiDeXuatId;
+    @Column(name = "ma_nguoi_de_xuat", length = 30, nullable = false)
+    private String maNguoiDeXuat;
 
     @Column(name = "trang_thai", length = 20, nullable = false)
     private String trangThai = "NHAP"; // NHAP, CHO_DUYET, DA_DUYET, TU_CHOI, CONG_BO, NGUNG_NHAN
 
-    @Column(name = "nguoi_duyet_id")
-    private Long nguoiDuyetId;
+    @Column(name = "ma_nguoi_duyet", length = 30)
+    private String maNguoiDuyet;
 
     @Column(name = "duyet_luc")
     private LocalDateTime duyetLuc;
@@ -59,17 +56,14 @@ public class DeTai {
 
     public DeTai() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
     public String getMaDeTai() { return maDeTai; }
     public void setMaDeTai(String maDeTai) { this.maDeTai = maDeTai; }
 
-    public Long getDotDangKyId() { return dotDangKyId; }
-    public void setDotDangKyId(Long dotDangKyId) { this.dotDangKyId = dotDangKyId; }
+    public String getMaDot() { return maDot; }
+    public void setMaDot(String maDot) { this.maDot = maDot; }
 
-    public Long getBoMonId() { return boMonId; }
-    public void setBoMonId(Long boMonId) { this.boMonId = boMonId; }
+    public String getMaBoMon() { return maBoMon; }
+    public void setMaBoMon(String maBoMon) { this.maBoMon = maBoMon; }
 
     public String getTenDeTai() { return tenDeTai; }
     public void setTenDeTai(String tenDeTai) { this.tenDeTai = tenDeTai; }
@@ -80,14 +74,14 @@ public class DeTai {
     public String getYeuCau() { return yeuCau; }
     public void setYeuCau(String yeuCau) { this.yeuCau = yeuCau; }
 
-    public Long getNguoiDeXuatId() { return nguoiDeXuatId; }
-    public void setNguoiDeXuatId(Long nguoiDeXuatId) { this.nguoiDeXuatId = nguoiDeXuatId; }
+    public String getMaNguoiDeXuat() { return maNguoiDeXuat; }
+    public void setMaNguoiDeXuat(String maNguoiDeXuat) { this.maNguoiDeXuat = maNguoiDeXuat; }
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
-    public Long getNguoiDuyetId() { return nguoiDuyetId; }
-    public void setNguoiDuyetId(Long nguoiDuyetId) { this.nguoiDuyetId = nguoiDuyetId; }
+    public String getMaNguoiDuyet() { return maNguoiDuyet; }
+    public void setMaNguoiDuyet(String maNguoiDuyet) { this.maNguoiDuyet = maNguoiDuyet; }
 
     public LocalDateTime getDuyetLuc() { return duyetLuc; }
     public void setDuyetLuc(LocalDateTime duyetLuc) { this.duyetLuc = duyetLuc; }
@@ -99,7 +93,10 @@ public class DeTai {
     public void setCongBoLuc(LocalDateTime congBoLuc) { this.congBoLuc = congBoLuc; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }

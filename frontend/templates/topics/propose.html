@@ -25,9 +25,9 @@
                     
                     <div class="form-field">
                         <label><strong>Chọn Đợt đăng ký (Đang trong Giai đoạn 1) *</strong></label>
-                        <select class="form-control" th:field="*{dotDangKyId}" required>
+                        <select class="form-control" th:field="*{maDot}" required>
                             <option value="">-- Chọn đợt đăng ký --</option>
-                            <option th:each="d : ${dots}" th:value="${d.id}" th:text="${d.tenDot} + ' (' + ${d.maDot} + ')'"></option>
+                            <option th:each="d : ${dots}" th:value="${d.maDot}" th:text="${d.tenDot} + ' (' + ${d.maDot} + ')'"></option>
                         </select>
                     </div>
 
@@ -37,8 +37,8 @@
                             <input type="text" class="form-control" th:field="*{maDeTai}" placeholder="VD: DT_CNTT_01">
                         </div>
                         <div class="form-field">
-                            <label>Bộ môn quản lý (ID)</label>
-                            <input type="number" class="form-control" th:field="*{boMonId}" value="1" placeholder="Mã ID bộ môn">
+                            <label>Mã Bộ môn quản lý *</label>
+                            <input type="text" class="form-control" th:field="*{maBoMon}" value="DEMO_CNPM" placeholder="VD: DEMO_CNPM, DEMO_HTTT, DEMO_KHMT" required>
                         </div>
                     </div>
 

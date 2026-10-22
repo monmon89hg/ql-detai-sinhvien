@@ -20,13 +20,13 @@ public class DotDangKyService {
         return dotDangKyRepository.findAllByOrderByCreatedAtDesc();
     }
 
-    public DotDangKy getDotDangKyById(Long id) {
-        return dotDangKyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đợt đăng ký với ID: " + id));
+    public DotDangKy getDotDangKyByMa(String maDot) {
+        return dotDangKyRepository.findById(maDot)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đợt đăng ký với mã: " + maDot));
     }
 
     @Transactional
-    public DotDangKy createDotDangKy(DotDangKyDto dto, Long nguoiTaoId) {
+    public DotDangKy createDotDangKy(DotDangKyDto dto, String maNguoiTao) {
         validateBusinessRules(dto);
 
         if (dotDangKyRepository.existsByMaDot(dto.getMaDot())) {
@@ -35,20 +35,17 @@ public class DotDangKyService {
 
         DotDangKy dot = new DotDangKy();
         mapDtoToEntity(dto, dot);
-        dot.setNguoiTaoId(nguoiTaoId);
+        dot.setMaNguoiTao(maNguoiTao);
         dot.setTrangThai("NHAP");
 
         return dotDangKyRepository.save(dot);
     }
 
     @Transactional
-    public DotDangKy updateDotDangKy(Long id, DotDangKyDto dto) {
+    public DotDangKy updateDotDangKy(String maDot, DotDangKyDto dto) {
         validateBusinessRules(dto);
 
-        DotDangKy dot = getDotDangKyById(id);
-        if (!dot.getMaDot().equals(dto.getMaDot()) && dotDangKyRepository.existsByMaDot(dto.getMaDot())) {
-            throw new IllegalArgumentException("Mã đợt đăng ký '" + dto.getMaDot() + "' đã tồn tại!");
-        }
+        DotDangKy dot = getDotDangKyByMa(maDot);
 
         mapDtoToEntity(dto, dot);
         if (dto.getTrangThai() != null && !dto.getTrangThai().isBlank()) {
@@ -58,15 +55,15 @@ public class DotDangKyService {
     }
 
     @Transactional
-    public void congBoDot(Long id) {
-        DotDangKy dot = getDotDangKyById(id);
+    public void congBoDot(String maDot) {
+        DotDangKy dot = getDotDangKyByMa(maDot);
         dot.setTrangThai("CONG_BO");
         dotDangKyRepository.save(dot);
     }
 
     @Transactional
-    public void dongDot(Long id) {
-        DotDangKy dot = getDotDangKyById(id);
+    public void dongDot(String maDot) {
+        DotDangKy dot = getDotDangKyByMa(maDot);
         dot.setTrangThai("DONG");
         dotDangKyRepository.save(dot);
     }
@@ -128,34 +125,33 @@ public class DotDangKyService {
         dot.setNgayBaoCaoHd(dto.getNgayBaoCaoHd());
     }
 
-    // Helper kiểm tra giai đoạn hiện tại để hiển thị giao diện
-    public String getGiaiDoanHienTai(DotDangKy dot) {
-        LocalDateTime now = LocalDateTime.now();
-        if ("DONG".equals(dot.getTrangThai())) {
-            return "Đã đóng";
-        }
-        if (now.isBefore(dot.getBatDauGv())) {
-            return "Chưa mở (Sắp diễn ra)";
-        }
-        if (!now.isAfter(dot.getKetThucGv())) {
-            return "Giai đoạn 1: GV đề xuất đề tài";
-        }
-        if (now.isBefore(dot.getBatDauSv())) {
-            return "Chờ mở Giai đoạn 2 (SV)";
-        }
-        if (!now.isAfter(dot.getKetThucSv())) {
-            return "Giai đoạn 2: SV đăng ký đề tài";
-        }
-        return "Hết hạn đăng ký";
-    }
-
+    // Kiểm tra đợt có đang ở Giai đoạn 1 (Giảng viên đề xuất đề tài) không
     public boolean isGiaiDoan1(DotDangKy dot) {
         LocalDateTime now = LocalDateTime.now();
-        return !now.isBefore(dot.getBatDauGv()) && !now.isAfter(dot.getKetThucGv());
+        return (now.isEqual(dot.getBatDauGv()) || now.isAfter(dot.getBatDauGv()))
+                && (now.isEqual(dot.getKetThucGv()) || now.isBefore(dot.getKetThucGv()));
     }
 
+    // Kiểm tra đợt có đang ở Giai đoạn 2 (Sinh viên xem & chọn đề tài) không
     public boolean isGiaiDoan2(DotDangKy dot) {
         LocalDateTime now = LocalDateTime.now();
-        return !now.isBefore(dot.getBatDauSv()) && !now.isAfter(dot.getKetThucSv());
+        return (now.isEqual(dot.getBatDauSv()) || now.isAfter(dot.getBatDauSv()))
+                && (now.isEqual(dot.getKetThucSv()) || now.isBefore(dot.getKetThucSv()));
+    }
+
+    // Hiển thị trạng thái tiến trình giai đoạn của đợt
+    public String getGiaiDoanHienTai(DotDangKy dot) {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(dot.getBatDauGv())) {
+            return "Chưa bắt đầu (Sắp diễn ra)";
+        } else if (isGiaiDoan1(dot)) {
+            return "Giai đoạn 1: GV đề xuất đề tài";
+        } else if (now.isAfter(dot.getKetThucGv()) && now.isBefore(dot.getBatDauSv())) {
+            return "Thời gian chờ công bố (TK xét duyệt)";
+        } else if (isGiaiDoan2(dot)) {
+            return "Giai đoạn 2: SV chọn đề tài";
+        } else {
+            return "Đã kết thúc đăng ký";
+        }
     }
 }

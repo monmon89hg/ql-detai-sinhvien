@@ -7,21 +7,14 @@ import java.time.LocalDateTime;
 @Table(name = "de_tai_giang_vien")
 public class DeTaiGiangVien {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "de_tai_id", nullable = false)
-    private Long deTaiId;
-
-    @Column(name = "giang_vien_id", nullable = false)
-    private Long giangVienId;
+    @EmbeddedId
+    private DeTaiGiangVienId id;
 
     @Column(name = "loai_phan_cong", length = 20, nullable = false)
     private String loaiPhanCong; // HUONG_DAN, PHAN_BIEN, CHAM_DOC_LAP
 
-    @Column(name = "nguoi_phan_cong_id", nullable = false)
-    private Long nguoiPhanCongId;
+    @Column(name = "ma_nguoi_phan_cong", length = 30, nullable = false)
+    private String maNguoiPhanCong;
 
     @Column(name = "phan_cong_luc", nullable = false)
     private LocalDateTime phanCongLuc = LocalDateTime.now();
@@ -38,26 +31,40 @@ public class DeTaiGiangVien {
 
     public DeTaiGiangVien() {}
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public DeTaiGiangVien(DeTaiGiangVienId id, String loaiPhanCong, String maNguoiPhanCong) {
+        this.id = id;
+        this.loaiPhanCong = loaiPhanCong;
+        this.maNguoiPhanCong = maNguoiPhanCong;
+        this.phanCongLuc = LocalDateTime.now();
+    }
 
-    public Long getDeTaiId() { return deTaiId; }
-    public void setDeTaiId(Long deTaiId) { this.deTaiId = deTaiId; }
-
-    public Long getGiangVienId() { return giangVienId; }
-    public void setGiangVienId(Long giangVienId) { this.giangVienId = giangVienId; }
+    public DeTaiGiangVienId getId() { return id; }
+    public void setId(DeTaiGiangVienId id) { this.id = id; }
 
     public String getLoaiPhanCong() { return loaiPhanCong; }
     public void setLoaiPhanCong(String loaiPhanCong) { this.loaiPhanCong = loaiPhanCong; }
 
-    public Long getNguoiPhanCongId() { return nguoiPhanCongId; }
-    public void setNguoiPhanCongId(Long nguoiPhanCongId) { this.nguoiPhanCongId = nguoiPhanCongId; }
+    public String getMaNguoiPhanCong() { return maNguoiPhanCong; }
+    public void setMaNguoiPhanCong(String maNguoiPhanCong) { this.maNguoiPhanCong = maNguoiPhanCong; }
 
     public LocalDateTime getPhanCongLuc() { return phanCongLuc; }
     public void setPhanCongLuc(LocalDateTime phanCongLuc) { this.phanCongLuc = phanCongLuc; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
+
+    // Convenience delegates
+    public String getMaDeTai() {
+        return id != null ? id.getMaDeTai() : null;
+    }
+
+    public String getMaGiangVien() {
+        return id != null ? id.getMaGiangVien() : null;
+    }
 }

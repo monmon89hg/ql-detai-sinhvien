@@ -56,7 +56,7 @@
                             </td>
                         </tr>
                         <tr th:each="pc : ${phanCongs}">
-                            <td><strong class="route-line" th:text="'GV #' + ${pc.giangVienId}">GV #1</strong></td>
+                            <td><strong class="route-line" th:text="${pc.maGiangVien}">DEMO_GV01</strong></td>
                             <td>
                                 <span class="status-pill"
                                       th:style="${pc.loaiPhanCong == 'HUONG_DAN' ? 'background:#eaf2fa; color:#214967;' : 'background:#fef7e7; color:#815915;'}"
@@ -66,8 +66,8 @@
                                 <span style="font-size:12px;" th:text="${#temporals.format(pc.phanCongLuc, 'dd/MM/yyyy HH:mm')}"></span>
                             </td>
                             <td>
-                                <form th:action="@{/de-tai/phan-cong/{id}/xoa(id=${pc.id})}" method="post" style="display:inline;">
-                                    <input type="hidden" name="deTaiId" th:value="${deTai.id}">
+                                <form th:action="@{/de-tai/phan-cong/{maGiangVien}/xoa(maGiangVien=${pc.maGiangVien})}" method="post" style="display:inline;">
+                                    <input type="hidden" name="maDeTai" th:value="${deTai.maDeTai}">
                                     <button type="submit" class="btn btn-outline" style="min-height:28px; padding:2px 8px; font-size:11px; color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Gỡ phân công giảng viên này?');">Gỡ bỏ</button>
                                 </form>
                             </td>
@@ -76,10 +76,10 @@
                 </table>
 
                 <!-- FORM PHÂN CÔNG THÊM GIẢNG VIÊN -->
-                <form th:action="@{/de-tai/{id}/phan-cong(id=${deTai.id})}" method="post" style="margin-top:20px; padding-top:15px; border-top:1px dashed var(--border); display:grid; grid-template-columns: 1fr 1fr 150px; gap:12px; align-items:end;">
+                <form th:action="@{/de-tai/{maDeTai}/phan-cong(maDeTai=${deTai.maDeTai})}" method="post" style="margin-top:20px; padding-top:15px; border-top:1px dashed var(--border); display:grid; grid-template-columns: 1fr 1fr 150px; gap:12px; align-items:end;">
                     <div class="form-field" style="margin:0;">
-                        <label>Mã ID Giảng viên *</label>
-                        <input type="number" name="giangVienId" class="form-control" placeholder="Nhập ID giảng viên..." required>
+                        <label>Mã Giảng viên *</label>
+                        <input type="text" name="maGiangVien" class="form-control" placeholder="Nhập mã GV (VD: DEMO_GV01)..." required>
                     </div>
 
                     <div class="form-field" style="margin:0;">
