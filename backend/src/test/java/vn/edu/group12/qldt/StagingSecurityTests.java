@@ -94,6 +94,30 @@ class StagingSecurityTests {
     }
 
     @Test
+    void resultActionsRequireTheirRespectiveRoles() throws Exception {
+        // MVC slice không nạp controller kết quả: 404 nghĩa là đã qua lớp lọc quyền.
+        mvc.perform(post("/ket-qua/N01/tong-hop")
+                .with(user("LECTURER_TEST").roles("GIANG_VIEN"))
+                .with(csrf()))
+            .andExpect(status().isNotFound());
+
+        mvc.perform(post("/ket-qua/N01/tong-hop")
+                .with(user("STUDENT_TEST").roles("SINH_VIEN"))
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+
+        mvc.perform(post("/ket-qua/N01/cong-bo")
+                .with(user("DEAN_TEST").roles("TRUONG_KHOA"))
+                .with(csrf()))
+            .andExpect(status().isNotFound());
+
+        mvc.perform(post("/ket-qua/N01/cong-bo")
+                .with(user("LECTURER_TEST").roles("GIANG_VIEN"))
+                .with(csrf()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
     void unknownWriteEndpointIsClosedByDefault() throws Exception {
         mvc.perform(post("/unregistered-action")
                 .with(user("DEAN_TEST").roles("TRUONG_KHOA"))
