@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.group12.qldt.domain.nhom.NghiepVuNhomException;
 import vn.edu.group12.qldt.domain.nhom.NhomBaoCaoModels.*;
 import vn.edu.group12.qldt.repository.nhom.NhomDanhMucRepository;
+import vn.edu.group12.qldt.service.auth.CurrentUser;
 
 @Service
 public class QuyenNhomService {
@@ -24,7 +25,7 @@ public class QuyenNhomService {
             throw new NghiepVuNhomException(
                     NghiepVuNhomException.Loai.KHONG_DANG_NHAP, "Vui lòng đăng nhập để tiếp tục.");
         }
-        return taiKhoan(auth.getName(), false);
+        return taiKhoan(CurrentUser.maNguoiDung(), false);
     }
 
     public NguoiDung taiKhoan(String ma, boolean khoa) {

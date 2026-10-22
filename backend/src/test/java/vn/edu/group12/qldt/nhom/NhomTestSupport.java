@@ -9,6 +9,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+import vn.edu.group12.qldt.service.auth.QldtUserDetails;
 
 import vn.edu.group12.qldt.domain.nhom.NghiepVuNhomException;
 import vn.edu.group12.qldt.storage.nhom.ReportStorageService;
@@ -156,12 +160,26 @@ final class NhomTestSupport {
         }
     }
 
+    static QldtUserDetails testDetails(String ma, String role) {
+        return new QldtUserDetails(
+                ma,
+                ma + "@example.invalid",
+                HASH,
+                true,
+                AuthorityUtils.createAuthorityList("ROLE_" + role));
+    }
+
+    static RequestPostProcessor testUser(String ma, String role) {
+        return SecurityMockMvcRequestPostProcessors.user(testDetails(ma, role));
+    }
+
     static <T> T as(String user, String role, Supplier<T> action) {
         var old = SecurityContextHolder.getContext();
         var ctx = SecurityContextHolder.createEmptyContext();
+        var principal = testDetails(user, role);
         ctx.setAuthentication(
                 UsernamePasswordAuthenticationToken.authenticated(
-                        user, "", AuthorityUtils.createAuthorityList("ROLE_" + role)));
+                        principal, "", principal.getAuthorities()));
         SecurityContextHolder.setContext(ctx);
         try {
             return action.get();

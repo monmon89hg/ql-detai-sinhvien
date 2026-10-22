@@ -193,7 +193,7 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
             var result =
                     sendForm(
                             "/login",
-                            Map.of("username", user, "password", PASSWORD, "_csrf", token));
+                            Map.of("email", user + "@example.invalid", "matKhau", PASSWORD, "_csrf", token));
             assertThat(result.statusCode()).isEqualTo(302);
             assertThat(result.headers().firstValue("Location").orElse("")).endsWith("/dashboard");
         }

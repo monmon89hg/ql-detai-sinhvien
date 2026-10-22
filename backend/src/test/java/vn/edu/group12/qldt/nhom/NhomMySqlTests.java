@@ -40,7 +40,7 @@ import java.util.concurrent.*;
             "spring.jpa.show-sql=false"
         })
 @AutoConfigureMockMvc
-@ActiveProfiles({"staging", "qa-open"})
+@ActiveProfiles("staging")
 @Import(Config.class)
 @EnabledIfEnvironmentVariable(
         named = "NHOM_TEST_DB_URL",
@@ -48,6 +48,7 @@ import java.util.concurrent.*;
 class NhomMySqlTests extends NhomMySqlTestBase {
     @Autowired JdbcTemplate jdbc;
     @Autowired NhomService nhom;
+    @Autowired QuyenNhomService quyen;
     @Autowired DangKyDeTaiService dangKy;
     @Autowired BaoCaoService baoCao;
     @Autowired MockMvc mvc;
@@ -110,6 +111,15 @@ class NhomMySqlTests extends NhomMySqlTestBase {
         assertThatThrownBy(action::run)
                 .isInstanceOfSatisfying(
                         NghiepVuNhomException.class, e -> assertThat(e.getLoai()).isEqualTo(loai));
+    }
+
+    @Test
+    void taiKhoanDangNhapBangEmailNhungNghiepVuDungMaNguoiDung() {
+        String ma = f.sv(1);
+        assertThat(testDetails(ma, "SINH_VIEN").getUsername())
+                .isEqualTo(ma + "@example.invalid");
+        assertThat(as(ma, "SINH_VIEN", () -> quyen.hienTai().maNguoiDung()))
+                .isEqualTo(ma);
     }
 
     @Test
@@ -481,7 +491,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                 NOW);
         assertThat(as(f.lecturer, "GIANG_VIEN", () -> baoCao.tai(ma, 1)).bytes())
                 .isEqualTo(pdf("bí mật"));
-        mvc.perform(get("/bao-cao/{ma}/1/tai", ma).with(user(f.sv(9)).roles("SINH_VIEN")))
+        mvc.perform(get("/bao-cao/{ma}/1/tai", ma).with(testUser(f.sv(9), "SINH_VIEN")))
                 .andExpect(status().isForbidden());
     }
 
@@ -501,11 +511,11 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         "/dang-ky-de-tai/" + ma + "/tu-choi",
                         "/bao-cao/nop");
         for (String url : urls) {
-            mvc.perform(post(url).with(user(f.sv(1)).roles("SINH_VIEN")))
+            mvc.perform(post(url).with(testUser(f.sv(1), "SINH_VIEN")))
                     .andExpect(status().isForbidden());
             mvc.perform(
                             post(url)
-                                    .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                    .with(testUser(f.sv(1), "SINH_VIEN"))
                                     .with(csrf().useInvalidToken()))
                     .andExpect(status().isForbidden());
         }
@@ -528,7 +538,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         "a".repeat(64),
                         NOW,
                         "HOP_LE"));
-        mvc.perform(get("/bao-cao/{ma}/1/tai", ma).with(user(f.sv(1)).roles("SINH_VIEN")))
+        mvc.perform(get("/bao-cao/{ma}/1/tai", ma).with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isNotFound())
                 .andExpect(
                         content()
@@ -569,19 +579,19 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         get("/nhom")
                                 .param("tuKhoa", f.sv(1))
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN")))
+                                .with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("groups/list"))
                 .andExpect(content().string(containsString(ma)));
-        mvc.perform(get("/nhom/{ma}", ma).with(user(f.sv(3)).roles("SINH_VIEN")))
+        mvc.perform(get("/nhom/{ma}", ma).with(testUser(f.sv(3), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("groups/detail"));
-        mvc.perform(get("/nhom/tao").with(user(f.sv(9)).roles("SINH_VIEN")))
+        mvc.perform(get("/nhom/tao").with(testUser(f.sv(9), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("groups/form"))
                 .andExpect(content().string(containsString("name=\"tenNhom\"")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")));
-        mvc.perform(get("/nhom/cua-toi").with(user(f.sv(1)).roles("SINH_VIEN")))
+        mvc.perform(get("/nhom/cua-toi").with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("groups/cua-toi"))
                 .andExpect(content().string(containsString("/yeu-cau/" + f.sv(2) + "/duyet")));
@@ -591,7 +601,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
         mvc.perform(
                         get("/dang-ky-de-tai")
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN")))
+                                .with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("registrations/list"))
                 .andExpect(content().string(containsString("name=\"maDeTai\"")))
@@ -601,7 +611,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                                 .param("maDeTai", f.topic)
                                 .param("maNhom", "nhom-gia")
                                 .param("maNguoiDangKy", f.sv(9))
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/dang-ky-de-tai"));
@@ -609,16 +619,16 @@ class NhomMySqlTests extends NhomMySqlTestBase {
         mvc.perform(
                         get("/dang-ky-de-tai/duyet")
                                 .param("tuKhoa", ma)
-                                .with(user(f.dean).roles("TRUONG_KHOA")))
+                                .with(testUser(f.dean, "TRUONG_KHOA")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("registrations/review"));
         as(f.dean, "TRUONG_KHOA", () -> dangKy.duyet(ma));
         nop(pdf("lịch sử"));
-        mvc.perform(get("/bao-cao").with(user(f.sv(1)).roles("SINH_VIEN")))
+        mvc.perform(get("/bao-cao").with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("reports/list"))
                 .andExpect(content().string(containsString("/bao-cao/" + ma + "/1/tai")));
-        mvc.perform(get("/bao-cao/nop").with(user(f.sv(1)).roles("SINH_VIEN")))
+        mvc.perform(get("/bao-cao/nop").with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("reports/form"))
                 .andExpect(content().string(containsString("name=\"tepBaoCao\"")));
@@ -630,7 +640,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         post("/nhom/tao")
                                 .param("tenNhom", "")
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("groups/form"))
@@ -641,7 +651,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                                 .param("tenNhom", "Nhóm HTTP")
                                 .param("maDot", f.dot)
                                 .param("maNguoiTao", f.sv(2))
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nhom/cua-toi"))
@@ -651,15 +661,15 @@ class NhomMySqlTests extends NhomMySqlTestBase {
     }
 
     @Test
-    void qaOpenVanCamDuyetVaGhiNhomCuaNguoiKhac() throws Exception {
+    void phanQuyenVanCamDuyetVaGhiNhomCuaNguoiKhac() throws Exception {
         String ma = chot();
         as(f.sv(1), "SINH_VIEN", () -> dangKy.dangKy(f.topic));
         mvc.perform(
                         post("/dang-ky-de-tai/{ma}/duyet", ma)
-                                .with(user(f.sv(9)).roles("TRUONG_KHOA"))
+                                .with(testUser(f.sv(9), "TRUONG_KHOA"))
                                 .with(csrf()))
                 .andExpect(status().isForbidden());
-        mvc.perform(post("/nhom/{ma}/chot", ma).with(user(f.sv(9)).roles("SINH_VIEN")).with(csrf()))
+        mvc.perform(post("/nhom/{ma}/chot", ma).with(testUser(f.sv(9), "SINH_VIEN")).with(csrf()))
                 .andExpect(status().isForbidden());
         assertThat(repo.dangKy(ma).orElseThrow().trangThai()).isEqualTo("CHO_DUYET");
     }
@@ -672,7 +682,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         get("/nhom")
                                 .param("tuKhoa", f.prefix)
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN")))
+                                .with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("coTrangSau", true))
                 .andExpect(model().attribute("danhSachNhom", org.hamcrest.Matchers.hasSize(20)));
@@ -681,7 +691,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                                 .param("tuKhoa", f.prefix)
                                 .param("maDot", f.dot)
                                 .param("trang", "1")
-                                .with(user(f.sv(1)).roles("SINH_VIEN")))
+                                .with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("danhSachNhom", org.hamcrest.Matchers.hasSize(3)));
     }
@@ -693,7 +703,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
         yeuCau(ma, 3);
         mvc.perform(
                         post("/nhom/{ma}/yeu-cau/{sv}/tu-choi", ma, f.sv(3))
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nhom/cua-toi"));
@@ -701,7 +711,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                 .isEqualTo("TU_CHOI");
         mvc.perform(
                         post("/nhom/{ma}/thanh-vien/{sv}/xoa", ma, f.sv(2))
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nhom/cua-toi"));
@@ -716,20 +726,20 @@ class NhomMySqlTests extends NhomMySqlTestBase {
         mvc.perform(
                         post("/dang-ky-de-tai/{ma}/tu-choi", ma)
                                 .param("lyDoTuChoi", "   ")
-                                .with(user(f.dean).roles("TRUONG_KHOA"))
+                                .with(testUser(f.dean, "TRUONG_KHOA"))
                                 .with(csrf()))
                 .andExpect(status().isBadRequest());
         mvc.perform(
                         post("/dang-ky-de-tai/{ma}/tu-choi", ma)
                                 .param("lyDoTuChoi", "Cần bổ sung phạm vi")
-                                .with(user(f.dean).roles("TRUONG_KHOA"))
+                                .with(testUser(f.dean, "TRUONG_KHOA"))
                                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/dang-ky-de-tai/duyet"));
         mvc.perform(
                         get("/dang-ky-de-tai")
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN")))
+                                .with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Cần bổ sung phạm vi")));
         assertThat(repo.dangKy(ma).orElseThrow().trangThai()).isEqualTo("TU_CHOI");
@@ -749,7 +759,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                 "UPDATE nhom_sinh_vien SET trang_thai='HOAN_THANH',ket_thuc_luc=? WHERE ma_nhom=?",
                 NOW,
                 ma);
-        mvc.perform(get("/bao-cao").with(user(f.sv(1)).roles("SINH_VIEN")))
+        mvc.perform(get("/bao-cao").with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("/bao-cao/" + ma + "/1/tai")))
                 .andExpect(model().attribute("coTheNopBaoCao", false));
@@ -765,7 +775,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         post("/nhom/tao")
                                 .param("tenNhom", "Tài khoản khóa")
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().isForbidden());
         assertThat(repo.nhomHienTai(f.sv(1))).isEmpty();

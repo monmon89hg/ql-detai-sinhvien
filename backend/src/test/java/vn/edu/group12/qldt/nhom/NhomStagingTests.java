@@ -50,13 +50,13 @@ class NhomStagingTests extends NhomMySqlTestBase {
                         post("/nhom/tao")
                                 .param("tenNhom", "Nhóm staging")
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN")))
+                                .with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isForbidden());
         mvc.perform(
                         post("/nhom/tao")
                                 .param("tenNhom", "Nhóm staging")
                                 .param("maDot", f.dot)
-                                .with(user(f.sv(1)).roles("SINH_VIEN"))
+                                .with(testUser(f.sv(1), "SINH_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nhom/cua-toi"));
@@ -66,13 +66,13 @@ class NhomStagingTests extends NhomMySqlTestBase {
 
     @Test
     void sinhVienKhongDuocVaoTrangDuyetVaGiangVienKhongTaoNhom() throws Exception {
-        mvc.perform(get("/dang-ky-de-tai/duyet").with(user(f.sv(1)).roles("SINH_VIEN")))
+        mvc.perform(get("/dang-ky-de-tai/duyet").with(testUser(f.sv(1), "SINH_VIEN")))
                 .andExpect(status().isForbidden());
         mvc.perform(
                         post("/nhom/tao")
                                 .param("tenNhom", "Không hợp lệ")
                                 .param("maDot", f.dot)
-                                .with(user(f.lecturer).roles("GIANG_VIEN"))
+                                .with(testUser(f.lecturer, "GIANG_VIEN"))
                                 .with(csrf()))
                 .andExpect(status().isForbidden());
     }
@@ -82,7 +82,7 @@ class NhomStagingTests extends NhomMySqlTestBase {
         mvc.perform(
                         get("/dang-ky-de-tai/duyet")
                                 .param("tuKhoa", f.prefix)
-                                .with(user(f.dean).roles("TRUONG_KHOA")))
+                                .with(testUser(f.dean, "TRUONG_KHOA")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("registrations/review"));
     }
