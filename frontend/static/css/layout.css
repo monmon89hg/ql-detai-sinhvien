@@ -289,3 +289,21 @@
         font-size: 21px
     }
 }
+
+.logout-form {
+    margin: 0;
+}
+
+.logout-button {
+    border: 1px solid #d8e7f0;
+    border-radius: 6px;
+    padding: 7px 10px;
+    background: transparent;
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}

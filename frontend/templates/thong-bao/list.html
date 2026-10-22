@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Thông báo')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('thong-bao')}"></aside>
+
+    <main class="main-content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Thông báo', 'Danh sách thông báo')}"></div>
+
+        <section class="page-heading">
+            <div>
+                <h1>Thông báo</h1>
+                <p>Các thông báo đã công bố dành cho bạn.</p>
+            </div>
+        </section>
+
+        <section th:if="${thongBaos.empty}" class="card empty-state">
+            Hiện chưa có thông báo nào.
+        </section>
+
+        <section th:each="thongBao : ${thongBaos.content}"
+                 class="card notification-card">
+            <div class="notification-header">
+                <h2 th:text="${thongBao.tieuDe}"></h2>
+                <time th:if="${thongBao.congBoLuc != null}"
+                      th:datetime="${thongBao.congBoLuc}"
+                      th:text="${#temporals.format(thongBao.congBoLuc, 'dd/MM/yyyy HH:mm')}">
+                </time>
+            </div>
+
+            <p class="notification-meta">
+                <span th:text="|Người đăng: ${thongBao.tenNguoiDang}|"></span>
+                <span th:if="${thongBao.maDot != null}"
+                      th:text="| · Đợt: ${thongBao.maDot}|"></span>
+            </p>
+
+            <div class="notification-content"
+                 th:text="${thongBao.noiDung}">
+            </div>
+        </section>
+
+        <nav class="pagination"
+             th:if="${thongBaos.totalPages > 1}"
+             aria-label="Phân trang">
+            <a th:if="${thongBaos.hasPrevious()}"
+               th:href="@{/thong-bao(page=${thongBaos.number - 1})}">
+                Trang trước
+            </a>
+
+            <span th:text="|Trang ${thongBaos.number + 1} / ${thongBaos.totalPages}|"></span>
+
+            <a th:if="${thongBaos.hasNext()}"
+               th:href="@{/thong-bao(page=${thongBaos.number + 1})}">
+                Trang sau
+            </a>
+        </nav>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+</body>
+</html>
