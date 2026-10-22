@@ -60,6 +60,11 @@ public class StagingSecurityConfig {
                     .hasRole("GIANG_VIEN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem", "/cham-diem/**")
                     .hasRole("GIANG_VIEN")
+                // Chủ tịch tổng hợp; trưởng khoa công bố kết quả.
+                .requestMatchers(HttpMethod.POST, "/ket-qua/*/tong-hop")
+                    .hasRole("GIANG_VIEN")
+                .requestMatchers(HttpMethod.POST, "/ket-qua/*/cong-bo")
+                    .hasRole("TRUONG_KHOA")
                 // Proposal belongs to teaching staff, approvals and period setup to the dean.
                 .requestMatchers(HttpMethod.GET, "/de-tai/de-xuat")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
