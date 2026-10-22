@@ -307,3 +307,99 @@
 .logout-button:hover {
     background: rgba(255, 255, 255, 0.12);
 }
+
+/* Trang đăng nhập */
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.login-container {
+    width: min(100%, 440px);
+}
+
+.login-card {
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 36px #173f5d18;
+}
+
+.login-card h1 {
+    margin-bottom: 22px;
+    text-align: center;
+    color: var(--header-deep);
+}
+
+.login-card .form-field {
+    margin: 0 0 16px;
+}
+
+.login-card .form-field label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.login-card .form-field input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.login-card .form-field input:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-color: var(--primary);
+}
+
+.login-card button[type="submit"] {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 4px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+}
+
+.login-card button[type="submit"]:hover {
+    background: var(--primary-hover);
+}
+
+.login-card .message {
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.login-card .message-error {
+    color: #913434;
+    background: #fff1f1;
+    border: 1px solid #f1c9c9;
+}
+
+.login-card .message-success {
+    color: #176345;
+    background: #eaf7ef;
+    border: 1px solid #bfe4cd;
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 16px;
+    }
+
+    .login-card {
+        padding: 24px 20px;
+    }
+}
