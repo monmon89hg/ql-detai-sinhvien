@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Tạo nhóm sinh viên')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('create-group')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Tạo nhóm sinh viên')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Tạo nhóm sinh viên</h1><p>Lập nhóm mới trong một đợt đăng ký đang mở.</p></div>
+            </div>
+            
+<div class="sv-panel sv-panel-form">
+    <div class="sv-info"><strong>Lưu ý:</strong> Mỗi sinh viên chỉ được tham gia một nhóm đang hoạt động. Người tạo nhóm được xác định từ tài khoản đăng nhập, không nhập mã sinh viên thủ công.</div>
+    <form th:action="@{/nhom/tao}" th:object="${taoNhomForm}" method="post" data-sv-form>
+        <div class="sv-two-col">
+            <div class="form-field"><label for="tenNhom">Tên nhóm <span class="sv-required">*</span></label>
+                <input class="form-control" id="tenNhom" th:field="*{tenNhom}" maxlength="100" required
+                    placeholder="Ví dụ: Nhóm nghiên cứu phần mềm">
+                <small>Tối đa 100 ký tự.</small>
+                <small class="sv-field-error" th:if="${#fields.hasErrors('tenNhom')}" th:errors="*{tenNhom}"></small>
+            </div>
+            <div class="form-field"><label for="maDot">Đợt đăng ký <span class="sv-required">*</span></label>
+                <select class="form-control" id="maDot" th:field="*{maDot}" required>
+                    <option value="">-- Chọn đợt --</option>
+                    <option th:each="dot : ${danhSachDot}" th:value="${dot.maDot}" th:text="${dot.tenDot}">Tên đợt</option>
+                </select>
+                <small class="sv-field-error" th:if="${#fields.hasErrors('maDot')}" th:errors="*{maDot}"></small>
+            </div>
+        </div>
+        <div class="sv-info sv-info-soft">Sau khi tạo nhóm, mời các thành viên gửi yêu cầu tham gia. Nhóm trưởng sẽ xét duyệt các yêu cầu tại <strong>Nhóm của tôi</strong>.</div>
+        <div class="sv-actions"><button class="btn btn-primary" type="submit">Tạo nhóm</button>
+            <a class="btn btn-outline" th:href="@{/nhom}">Quay lại</a></div>
+    </form>
+</div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>
