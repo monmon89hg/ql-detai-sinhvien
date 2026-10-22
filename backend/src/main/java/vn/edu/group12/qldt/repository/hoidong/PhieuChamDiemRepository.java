@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import vn.edu.group12.qldt.dto.hoidong.NhomChamDiemHienThi;
 import vn.edu.group12.qldt.entity.hoidong.PhieuChamDiem;
 import vn.edu.group12.qldt.entity.hoidong.PhieuChamDiemId;
+import vn.edu.group12.qldt.dto.hoidong.PhieuChamYeuCau;
+import java.util.Optional;
 
 public interface PhieuChamDiemRepository
         extends JpaRepository<PhieuChamDiem, PhieuChamDiemId> {
@@ -79,6 +81,71 @@ public interface PhieuChamDiemRepository
     long demPhanCongHuongDan(
         @Param("maNhom") String maNhom,
         @Param("maGiangVien") String maGiangVien
+    );
+
+    // Xác định các phiếu phải có theo loại đợt và phân công chấm.
+    @Query(
+        value = """
+            SELECT
+                gv.ma_giang_vien AS maGiangVien,
+                gv.loai_phan_cong AS loaiPhieu
+            FROM dang_ky_de_tai dk
+            JOIN de_tai dt
+                ON dt.ma_de_tai = dk.ma_de_tai
+            JOIN dot_dang_ky dot
+                ON dot.ma_dot = dt.ma_dot
+            JOIN de_tai_giang_vien gv
+                ON gv.ma_de_tai = dt.ma_de_tai
+            WHERE dk.ma_nhom = :maNhom
+                AND (
+                    (dot.loai_de_tai IN ('MON_HOC', 'NCKH')
+                        AND gv.loai_phan_cong = 'CHAM_DOC_LAP')
+                    OR
+                    (dot.loai_de_tai IN ('TLCN', 'KLTN')
+                        AND gv.loai_phan_cong = 'PHAN_BIEN')
+                )
+
+            UNION ALL
+
+            SELECT
+                tv.ma_giang_vien AS maGiangVien,
+                'HOI_DONG' AS loaiPhieu
+            FROM dang_ky_de_tai dk
+            JOIN de_tai dt
+                ON dt.ma_de_tai = dk.ma_de_tai
+            JOIN dot_dang_ky dot
+                ON dot.ma_dot = dt.ma_dot
+            JOIN hoi_dong_de_tai pc
+                ON pc.ma_nhom = dk.ma_nhom
+            JOIN hoi_dong hd
+                ON hd.ma_hoi_dong = pc.ma_hoi_dong
+                AND hd.ma_dot = dot.ma_dot
+            JOIN thanh_vien_hoi_dong tv
+                ON tv.ma_hoi_dong = hd.ma_hoi_dong
+            WHERE dk.ma_nhom = :maNhom
+                AND dot.loai_de_tai = 'KLTN'
+            """,
+        nativeQuery = true
+    )
+    List<PhieuChamYeuCau> layPhieuChamYeuCau(
+        @Param("maNhom") String maNhom
+    );
+
+    // Lấy loại đợt của đề tài mà nhóm đã đăng ký.
+    @Query(
+        value = """
+            SELECT dot.loai_de_tai
+            FROM dang_ky_de_tai dk
+            JOIN de_tai dt
+                ON dt.ma_de_tai = dk.ma_de_tai
+            JOIN dot_dang_ky dot
+                ON dot.ma_dot = dt.ma_dot
+            WHERE dk.ma_nhom = :maNhom
+            """,
+        nativeQuery = true
+    )
+    Optional<String> timLoaiDotTheoMaNhom(
+        @Param("maNhom") String maNhom
     );
 
 }
