@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Tra cứu kết quả')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('my-result')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Tra cứu kết quả')}"></div>
+
+        <div class="container">
+            <div class="page-heading">
+                <h1>Tra cứu kết quả</h1>
+                <p>Xem kết quả đã công bố của nhóm bạn theo đợt đăng ký.</p>
+            </div>
+
+            <section class="section">
+                <div class="section-top">
+                    <h2 class="section-title">Chọn đợt đăng ký</h2>
+                </div>
+
+                <p th:if="${#lists.isEmpty(danhSachDot)}">
+                    Bạn chưa có kết quả nào được công bố.
+                </p>
+
+                <form th:unless="${#lists.isEmpty(danhSachDot)}"
+                    th:action="@{/ket-qua/cua-toi}"
+                    method="get"
+                    class="btn-row"
+                    style="align-items: flex-end;">
+                    <div class="form-field"
+                        style="margin: 0; min-width: 280px; max-width: 420px; flex: 1;">
+                        <label for="maDot">Đợt đăng ký</label>
+                        <select id="maDot" name="maDot" class="form-control" required>
+                            <option th:each="dot : ${danhSachDot}"
+                                    th:value="${dot.maDot}"
+                                    th:text="${dot.tenDot}"
+                                    th:selected="${dot.maDot == maDotDuocChon}">
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tra cứu</button>
+                </form>
+            </section>
+
+            <section class="section" th:if="${maDotDuocChon != null}">
+                <div class="section-top">
+                    <h2 class="section-title">Kết quả đã công bố</h2>
+                </div>
+
+                <p th:if="${#lists.isEmpty(danhSachKetQua)}">
+                    Không có kết quả đã công bố trong đợt này.
+                </p>
+
+                <table class="data-table"
+                       th:unless="${#lists.isEmpty(danhSachKetQua)}">
+                    <thead>
+                    <tr>
+                        <th>Nhóm</th>
+                        <th>Đề tài</th>
+                        <th>Điểm cuối</th>
+                        <th>Nhận xét tổng hợp</th>
+                        <th>Thời gian công bố</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ketQua : ${danhSachKetQua}">
+                        <td>
+                            <strong th:text="${ketQua.maNhom}"></strong><br>
+                            <span th:text="${ketQua.tenNhom}"></span>
+                        </td>
+                        <td>
+                            <strong th:text="${ketQua.maDeTai}"></strong><br>
+                            <span th:text="${ketQua.tenDeTai}"></span>
+                        </td>
+                        <td th:text="${ketQua.diemCuoi}"></td>
+                        <td th:text="${ketQua.nhanXetTongHop != null
+                                ? ketQua.nhanXetTongHop : '—'}"></td>
+                        <td th:text="${ketQua.congBoLuc != null
+                                ? #temporals.format(ketQua.congBoLuc, 'dd/MM/yyyy HH:mm')
+                                : '—'}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>
