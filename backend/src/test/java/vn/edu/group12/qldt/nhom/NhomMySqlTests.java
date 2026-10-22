@@ -62,7 +62,7 @@ class NhomMySqlTests extends NhomMySqlTestBase {
                         jdbc.queryForObject(
                                 "SELECT COUNT(*) FROM flyway_schema_history WHERE success=1",
                                 Integer.class))
-                .isEqualTo(5);
+                .isEqualTo(6);
         f = new Fixture(jdbc);
         storage.reset();
     }
