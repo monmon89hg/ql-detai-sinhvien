@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.controller.detai;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,7 +56,7 @@ public class DotDangKyController {
                                   Principal principal,
                                   RedirectAttributes redirectAttributes) {
         try {
-            String maNguoiTao = principal != null ? principal.getName() : "DEMO_CB01";
+            String maNguoiTao = CurrentUser.maNguoiDung();
             dotDangKyService.createDotDangKy(dto, maNguoiTao);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo mới đợt đăng ký thành công!");
             return "redirect:/dot-dang-ky";

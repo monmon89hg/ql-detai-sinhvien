@@ -39,4 +39,4 @@ jobs:
           cache-dependency-path: backend/pom.xml
 
       - name: Build and test Spring Boot
-        run: mvn -B -ntp -f backend/pom.xml "-Dtest=FrontendIntegrationTests,PreviewSecurityTests,StagingSecurityTests" clean verify
+        run: mvn -B -ntp -f backend/pom.xml "-Dtest=FrontendIntegrationTests,OfficialSecurityTests,SecurityProfilesTests,SecurityMethodAuthorizationTests,AuthIdentityTests,CongBoKetQuaServiceTests,TongHopKetQuaServiceTests,TraCuuKetQuaServiceTests" clean verify

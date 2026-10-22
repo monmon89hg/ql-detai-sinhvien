@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.service.hoidong;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -54,6 +56,6 @@ public class TraCuuKetQuaService {
             throw new AccessDeniedException("Bạn cần đăng nhập để xem kết quả.");
         }
 
-        return authentication.getName();
+        return CurrentUser.maNguoiDung();
     }
 }

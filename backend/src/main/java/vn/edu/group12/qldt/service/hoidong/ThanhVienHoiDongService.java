@@ -1,5 +1,7 @@
 package vn.edu.group12.qldt.service.hoidong;
 
+import vn.edu.group12.qldt.service.auth.CurrentUser;
+
 import java.util.List;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,7 +20,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.validation.annotation.Validated;
 
@@ -67,10 +68,7 @@ public class ThanhVienHoiDongService {
             @NotBlank String maHoiDong,
             @NotNull @Valid ThanhVienHoiDongForm form) {
 
-        String maNguoiThaoTac = SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+        String maNguoiThaoTac = CurrentUser.maNguoiDung();
 
         if (hoiDongRepository.demTruongKhoaHoatDong(maNguoiThaoTac) == 0) {
             throw new AccessDeniedException(
@@ -145,10 +143,7 @@ public class ThanhVienHoiDongService {
             @NotBlank String maHoiDong,
             @NotBlank String maGiangVien) {
 
-        String maNguoiThaoTac = SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
+        String maNguoiThaoTac = CurrentUser.maNguoiDung();
 
         if (hoiDongRepository.demTruongKhoaHoatDong(maNguoiThaoTac) == 0) {
             throw new AccessDeniedException(
