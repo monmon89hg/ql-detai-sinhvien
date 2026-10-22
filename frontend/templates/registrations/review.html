@@ -29,7 +29,8 @@
     <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachDangKy)}"><table class="data-table sv-table">
         <thead><tr><th>Mã nhóm</th><th>Đề tài</th><th>Ngày đăng ký</th><th>Trạng thái</th><th>Quyết định</th></tr></thead>
         <tbody><tr th:each="dk : ${danhSachDangKy}"><td><code th:text="${dk.maNhom}"></code></td>
-            <td><strong th:text="${dk.tenDeTai}"></strong></td>
+            <td><strong th:text="${dk.tenDeTai}"></strong>
+                <a class="sv-help" th:if="${dk.trangThai != 'CHO_DUYET' and dk.trangThai != 'TU_CHOI'}" th:href="@{/bao-cao(maNhom=${dk.maNhom})}">Xem báo cáo</a></td>
             <td th:text="${dk.dangKyLuc != null ? #temporals.format(dk.dangKyLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
             <td><span class="sv-state" th:attr="data-state=${dk.trangThai}" th:text="${dk.trangThai}"></span></td>
             <td><div class="sv-review-actions" th:if="${dk.trangThai == 'CHO_DUYET'}">
@@ -43,6 +44,11 @@
         </tr></tbody></table></div>
 </section>
 
+<nav class="sv-actions" aria-label="Phân trang">
+    <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/dang-ky-de-tai/duyet(trang=${trang - 1},tuKhoa=${tuKhoa},trangThai=${trangThai})}">Trang trước</a>
+    <span class="sv-help" th:text="|Trang ${trang + 1}|"></span>
+    <a class="btn btn-outline" th:if="${coTrangSau}" th:href="@{/dang-ky-de-tai/duyet(trang=${trang + 1},tuKhoa=${tuKhoa},trangThai=${trangThai})}">Trang sau</a>
+</nav>
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </main>

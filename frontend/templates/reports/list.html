@@ -36,8 +36,13 @@
             <td><a class="btn btn-outline sv-btn-small" th:href="@{/bao-cao/{maNhom}/{phienBan}/tai(maNhom=${bc.maNhom},phienBan=${bc.phienBan})}">Tải PDF</a></td>
         </tr></tbody></table></div>
 </section>
-<div class="sv-info sv-info-soft">Chỉ nhóm trưởng được gửi báo cáo. Tối đa 20 MiB, định dạng PDF. Các phiên bản cũ được giữ để theo dõi lịch sử; tệp cần được lưu qua hệ thống lưu trữ của Backend sau này.</div>
+<div class="sv-info sv-info-soft">Chỉ nhóm trưởng được gửi báo cáo. Tối đa 20 MiB, định dạng PDF. Các phiên bản cũ được giữ để theo dõi lịch sử; tệp được tải qua hệ thống có kiểm tra quyền truy cập.</div>
 
+<nav class="sv-actions" aria-label="Phân trang">
+    <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/bao-cao(trang=${trang - 1},maNhom=${nhomCuaToi != null ? nhomCuaToi.maNhom : null})}">Trang trước</a>
+    <span class="sv-help" th:text="|Trang ${trang + 1}|"></span>
+    <a class="btn btn-outline" th:if="${coTrangSau}" th:href="@{/bao-cao(trang=${trang + 1},maNhom=${nhomCuaToi != null ? nhomCuaToi.maNhom : null})}">Trang sau</a>
+</nav>
             <div th:replace="~{fragments/footer :: footer}"></div>
         </div>
     </main>
