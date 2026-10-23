@@ -54,6 +54,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		<!-- AOP dùng chung cho tất cả Service của nhóm (Spring Boot 4). -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aspectj</artifactId>
+		</dependency>
 
 		<!-- Hỗ trợ gửi email thông báo kết quả qua SMTP. -->
 		<dependency>
