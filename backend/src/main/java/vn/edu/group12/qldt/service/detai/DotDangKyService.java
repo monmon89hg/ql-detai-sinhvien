@@ -50,6 +50,9 @@ public class DotDangKyService {
         validateBusinessRules(dto);
 
         DotDangKy dot = getDotDangKyByMa(maDot);
+        if ("DONG".equals(dot.getTrangThai())) {
+            throw new IllegalStateException("Không thể chỉnh sửa đợt đăng ký đã đóng!");
+        }
 
         mapDtoToEntity(dto, dot);
         if (dto.getTrangThai() != null && !dto.getTrangThai().isBlank()) {
@@ -62,6 +65,9 @@ public class DotDangKyService {
     @Transactional
     public void congBoDot(String maDot) {
         DotDangKy dot = getDotDangKyByMa(maDot);
+        if (!"NHAP".equals(dot.getTrangThai())) {
+            throw new IllegalStateException("Chỉ có thể công bố đợt đăng ký khi đang ở trạng thái 'NHAP'! Trạng thái hiện tại: " + dot.getTrangThai());
+        }
         dot.setTrangThai("CONG_BO");
         dotDangKyRepository.save(dot);
     }
@@ -70,6 +76,9 @@ public class DotDangKyService {
     @Transactional
     public void dongDot(String maDot) {
         DotDangKy dot = getDotDangKyByMa(maDot);
+        if (!"CONG_BO".equals(dot.getTrangThai())) {
+            throw new IllegalStateException("Chỉ có thể đóng đợt đăng ký khi đang ở trạng thái 'CONG_BO'! Trạng thái hiện tại: " + dot.getTrangThai());
+        }
         dot.setTrangThai("DONG");
         dotDangKyRepository.save(dot);
     }

@@ -82,6 +82,9 @@ public class DeTaiService {
     @Transactional
     public DeTai duyetDeTai(String maDeTai, String maNguoiDuyet) {
         DeTai deTai = getDeTaiByMa(maDeTai);
+        if (!"CHO_DUYET".equals(deTai.getTrangThai())) {
+            throw new IllegalStateException("Chỉ có thể duyệt đề tài khi đang ở trạng thái 'CHO_DUYET'! Trạng thái hiện tại: " + deTai.getTrangThai());
+        }
         deTai.setTrangThai("DA_DUYET");
         deTai.setMaNguoiDuyet(maNguoiDuyet);
         deTai.setDuyetLuc(LocalDateTime.now());
@@ -97,6 +100,9 @@ public class DeTaiService {
             throw new IllegalArgumentException("Bắt buộc phải nhập lý do từ chối đề tài!");
         }
         DeTai deTai = getDeTaiByMa(maDeTai);
+        if (!"CHO_DUYET".equals(deTai.getTrangThai())) {
+            throw new IllegalStateException("Chỉ có thể từ chối đề tài khi đang ở trạng thái 'CHO_DUYET'! Trạng thái hiện tại: " + deTai.getTrangThai());
+        }
         deTai.setTrangThai("TU_CHOI");
         deTai.setLyDoTuChoi(lyDoTuChoi.trim());
         deTai.setMaNguoiDuyet(maNguoiDuyet);
@@ -110,13 +116,18 @@ public class DeTaiService {
     public DeTai congBoDeTai(String maDeTai) {
         DeTai deTai = getDeTaiByMa(maDeTai);
         if (!"DA_DUYET".equals(deTai.getTrangThai())) {
-            throw new IllegalArgumentException("Chỉ được công bố đề tài đã ở trạng thái 'DA_DUYET'!");
+            throw new IllegalStateException("Chỉ được công bố đề tài đã ở trạng thái 'DA_DUYET'! Trạng thái hiện tại: " + deTai.getTrangThai());
+        }
+
+        DotDangKy dot = dotDangKyService.getDotDangKyByMa(deTai.getMaDot());
+        if ("DONG".equals(dot.getTrangThai())) {
+            throw new IllegalStateException("Không thể công bố đề tài thuộc đợt đăng ký đã đóng!");
         }
 
         // Ràng buộc: Đề tài phải có ít nhất 1 GVHD trước khi công bố
         long countGvhd = deTaiGiangVienService.countGvhd(maDeTai);
         if (countGvhd < 1) {
-            throw new IllegalArgumentException("Đề tài chưa có Giảng viên hướng dẫn nên không thể công bố!");
+            throw new IllegalStateException("Đề tài chưa có Giảng viên hướng dẫn nên không thể công bố!");
         }
 
         deTai.setTrangThai("CONG_BO");
