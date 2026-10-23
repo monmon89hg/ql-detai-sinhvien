@@ -2,7 +2,9 @@ package vn.edu.group12.qldt.service.detai;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.group12.qldt.dto.detai.DeTaiDto;
 import vn.edu.group12.qldt.entity.detai.DeTai;
@@ -142,5 +144,103 @@ public class DeTaiService {
             throw new IllegalArgumentException("Đợt đăng ký hiện chưa hoặc đã qua Giai đoạn 2! Sinh viên chỉ được xem và chọn đề tài trong Giai đoạn 2.");
         }
         return deTaiRepository.findByMaDotAndTrangThai(maDot, "CONG_BO");
+    }
+
+    // Giảng viên đề xuất hoặc Trưởng khoa/Admin chỉnh sửa thông tin đề tài
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_BO_MON', 'TRUONG_KHOA', 'ADMIN')")
+    @Transactional
+    public DeTai capNhatDeTai(String maDeTai, DeTaiDto dto, String maNguoiCapNhat) {
+        DeTai deTai = getDeTaiByMa(maDeTai);
+
+        boolean laTruongKhoaHoacAdmin = SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TRUONG_KHOA") || a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!laTruongKhoaHoacAdmin && !deTai.getMaNguoiDeXuat().equals(maNguoiCapNhat)) {
+            throw new AccessDeniedException("Bạn không có quyền chỉnh sửa đề tài do người khác đề xuất!");
+        }
+
+        if ("NGUNG_NHAN".equals(deTai.getTrangThai())) {
+            throw new IllegalStateException("Đề tài đã ngừng nhận, không thể chỉnh sửa!");
+        }
+
+        long soDangKy = deTaiRepository.countDangKyByMaDeTai(maDeTai);
+        if ("CONG_BO".equals(deTai.getTrangThai()) && soDangKy > 0) {
+            throw new IllegalStateException("Đề tài đã có sinh viên/nhóm đăng ký! Không thể chỉnh sửa, vui lòng dùng cơ chế Ngừng nhận đề tài.");
+        }
+
+        if (dto.getTenDeTai() != null && !dto.getTenDeTai().isBlank()) {
+            deTai.setTenDeTai(dto.getTenDeTai().trim());
+        }
+        if (dto.getNoiDung() != null && !dto.getNoiDung().isBlank()) {
+            deTai.setNoiDung(dto.getNoiDung().trim());
+        }
+        if (dto.getYeuCau() != null) {
+            deTai.setYeuCau(dto.getYeuCau().trim());
+        }
+        if (dto.getMaBoMon() != null && !dto.getMaBoMon().isBlank()) {
+            deTai.setMaBoMon(dto.getMaBoMon().trim());
+        }
+
+        // Nếu đề tài đang bị từ chối mà giảng viên sửa lại nội dung, tự động chuyển về CHO_DUYET để Trưởng khoa xem lại
+        if ("TU_CHOI".equals(deTai.getTrangThai())) {
+            deTai.setTrangThai("CHO_DUYET");
+            deTai.setLyDoTuChoi(null);
+        } else if ("DA_DUYET".equals(deTai.getTrangThai()) && !laTruongKhoaHoacAdmin) {
+            deTai.setTrangThai("CHO_DUYET");
+        }
+
+        return deTaiRepository.save(deTai);
+    }
+
+    // Cơ chế ngừng nhận đăng ký thay vì xóa vật lý đề tài đã có dữ liệu
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN', 'GIANG_VIEN', 'TRUONG_BO_MON')")
+    @Transactional
+    public DeTai ngungNhanDeTai(String maDeTai, String maNguoiThucHien) {
+        DeTai deTai = getDeTaiByMa(maDeTai);
+
+        boolean laTruongKhoaHoacAdmin = SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TRUONG_KHOA") || a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!laTruongKhoaHoacAdmin && !deTai.getMaNguoiDeXuat().equals(maNguoiThucHien)) {
+            throw new AccessDeniedException("Bạn không có quyền chuyển trạng thái đề tài này!");
+        }
+
+        if ("NGUNG_NHAN".equals(deTai.getTrangThai())) {
+            throw new IllegalStateException("Đề tài này hiện đã ở trạng thái ngừng nhận đăng ký!");
+        }
+
+        deTai.setTrangThai("NGUNG_NHAN");
+        return deTaiRepository.save(deTai);
+    }
+
+    // Cơ chế xóa an toàn / ngừng hủy: Bảo vệ dữ liệu liên quan, chống xóa vật lý
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN', 'GIANG_VIEN', 'TRUONG_BO_MON')")
+    @Transactional
+    public String xoaHoacHuyDeTai(String maDeTai, String maNguoiThucHien) {
+        DeTai deTai = getDeTaiByMa(maDeTai);
+
+        boolean laTruongKhoaHoacAdmin = SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TRUONG_KHOA") || a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!laTruongKhoaHoacAdmin && !deTai.getMaNguoiDeXuat().equals(maNguoiThucHien)) {
+            throw new AccessDeniedException("Bạn không có quyền xóa hoặc hủy đề tài này!");
+        }
+
+        // Kiểm tra xem đề tài đã có dữ liệu liên quan chưa (đăng ký của sinh viên)
+        long soDangKy = deTaiRepository.countDangKyByMaDeTai(maDeTai);
+        if (soDangKy > 0 || "CONG_BO".equals(deTai.getTrangThai())) {
+            // TUYỆT ĐỐI KHÔNG XÓA VẬT LÝ: Tự động chuyển sang NGUNG_NHAN để bảo toàn dữ liệu lịch sử
+            deTai.setTrangThai("NGUNG_NHAN");
+            deTaiRepository.save(deTai);
+            return "Đề tài đã có dữ liệu liên quan hoặc đã công bố nên hệ thống tự động chuyển sang trạng thái NGỪNG NHẬN thay vì xóa vật lý.";
+        }
+
+        // Nếu chưa có sinh viên đăng ký và đang ở giai đoạn đề xuất/nháp: Xóa phân công giảng viên rồi xóa vật lý an toàn
+        deTaiGiangVienService.xoaTatCaPhanCongCuaDeTai(maDeTai);
+        deTaiRepository.delete(deTai);
+        return "Đã xóa đề tài thành công!";
     }
 }
