@@ -1,36 +1,31 @@
-
-name: CI - Spring Boot Build & Test
+name: CI - Quality Gates
 
 on:
   push:
-    branches:
-      - develop
-      - main
-      - "feat/**"
-      - "fix/**"
-      - "refactor/**"
-      - "chore/**"
-      - "docs/**"
-
+    branches: [develop, main, "feat/**", "fix/**", "refactor/**", "chore/**", "docs/**"]
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
-    name: Build and UI Integration Test
+    name: Build, Unit, MVC and Security
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+    timeout-minutes: 25
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Setup Java 21
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -38,5 +33,102 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
 
-      - name: Build and test Spring Boot
-        run: mvn -B -ntp -f backend/pom.xml "-Dtest=FrontendIntegrationTests,OfficialSecurityTests,SecurityProfilesTests,SecurityMethodAuthorizationTests,AuthIdentityTests,CongBoKetQuaServiceTests,TongHopKetQuaServiceTests,TraCuuKetQuaServiceTests" clean verify
+      - name: Check test report sanitizer
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+
+      - name: Test and package with Maven Wrapper
+        run: sh backend/mvnw -B -ntp -f backend/pom.xml clean verify
+
+      - name: Summarize tests without sensitive output
+        if: always()
+        run: python3 .github/scripts/summarize_tests.py --reports backend/target/surefire-reports --output test-results/unit-web
+
+      - name: Upload sanitized results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-web-results
+          path: test-results/unit-web/
+          if-no-files-found: error
+          retention-days: 7
+
+  mysql-integration:
+    name: Database & End-to-End Integration (MySQL 8.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: qldt_ci
+          # Root chỉ bootstrap container tạm, không dùng cho Railway/production.
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - "127.0.0.1:3306:3306"
+        options: >-
+          --health-cmd="mysql -u root -D qldt_ci -e 'SELECT 1'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+          --health-start-period=30s
+    env:
+      CI_DB_PORT: "3306"
+      CI_DB_USERNAME: ci
+      NHOM_TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/nhom_test_ci?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh
+      NHOM_TEST_DB_USERNAME: ci
+    steps:
+      - name: Bootstrap two isolated CI schemas and a temporary user
+        env:
+          MYSQL_CONTAINER: ${{ job.services.mysql.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          db_password="$(openssl rand -hex 24)"
+          echo "::add-mask::$db_password"
+          printf 'CI_DB_PASSWORD=%s\nNHOM_TEST_DB_PASSWORD=%s\n' "$db_password" "$db_password" >> "$GITHUB_ENV"
+          printf "CREATE DATABASE IF NOT EXISTS nhom_test_ci CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\nCREATE USER 'ci'@'%%' IDENTIFIED BY '%s';\nGRANT ALL PRIVILEGES ON qldt_ci.* TO 'ci'@'%%';\nGRANT ALL PRIVILEGES ON nhom_test_ci.* TO 'ci'@'%%';\n" "$db_password" |
+            docker exec -i "$MYSQL_CONTAINER" mysql --user=root
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Run real MySQL, Flyway, group and HTTP integration tests
+        run: sh backend/mvnw -B -ntp -f backend/pom.xml -Pci-mysql clean verify
+
+      - name: Summarize tests without sensitive output
+        if: always()
+        run: python3 .github/scripts/summarize_tests.py --reports backend/target/surefire-reports --output test-results/mysql
+
+      - name: Upload sanitized results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysql-results
+          path: test-results/mysql/
+          if-no-files-found: error
+          retention-days: 7
+
+  quality-gate:
+    name: CI Quality Gate
+    if: always()
+    needs: [build-and-test, mysql-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require both jobs to succeed
+        env:
+          BUILD_RESULT: ${{ needs.build-and-test.result }}
+          MYSQL_RESULT: ${{ needs.mysql-integration.result }}
+        run: |
+          test "$BUILD_RESULT" = success
+          test "$MYSQL_RESULT" = success
