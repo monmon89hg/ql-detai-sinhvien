@@ -321,16 +321,11 @@ Không phát triển chức năng trực tiếp trên `main`.
 - Các tài liệu Use Case, rubric và minh chứng kiểm thử sẽ được quản lý và cập nhật theo sản phẩm thực tế.
 - Không commit mật khẩu, dữ liệu thật của sinh viên, file upload nhạy cảm hay thông tin bí mật.
 
+## 9. Tài liệu phân tích và thiết kế
 
-## 9. Tích hợp Nhóm sinh viên, đăng ký đề tài và báo cáo — issue #9
-
-Nhánh `feat/nhom-dang-ky-bao-cao` bổ sung 19 endpoint nhóm sinh viên,
-đăng ký đề tài và báo cáo PDF, sử dụng schema V1–V5 cùng các trang Thymeleaf đã có.
-Các truy vấn nghiệp vụ sử dụng mã nghiệp vụ/khóa ghép của V3 và SQL đọc V2 độc lập với Entity TV2.
-
-Hướng dẫn kiểm thử, kết quả MySQL 8.4, cấu hình R2 và checklist staging nằm trong
-[`docs/ISSUE9_NHOM_DANG_KY_BAO_CAO_HANDOFF.md`](docs/ISSUE9_NHOM_DANG_KY_BAO_CAO_HANDOFF.md).
-PDF thật trên Cloudflare R2 và Render chưa được xác minh; issue #9 chưa đủ điều kiện đóng.
+- [Đặc tả yêu cầu FR/NFR](docs/DAC_TA_YEU_CAU_FR_NFR_NHOM12_FINAL.md) — 30 FR, 19 NFR.
+- [Đặc tả Use Case](docs/USE_CASE_NHOM12_FINAL.md).
+- [Quy ước tích hợp UI](docs/QUY_UOC_TICH_HOP_UI.md).
 
 ---
 
