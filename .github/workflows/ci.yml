@@ -53,7 +53,7 @@ jobs:
           retention-days: 7
 
   mysql-integration:
-    name: MySQL 8.4, Flyway, TV3 and HTTP E2E
+    name: Database & End-to-End Integration (MySQL 8.4)
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
