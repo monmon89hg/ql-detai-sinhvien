@@ -15,13 +15,7 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, Principal principal) {
-        model.addAttribute("currentUserName", principal.getName());
-        model.addAttribute(
-            "successMessage",
-            "Dashboard đã nhận dữ liệu từ backend!"
-        );
-
+    public String dashboard() {
         return "shared/dashboard";
     }
 }

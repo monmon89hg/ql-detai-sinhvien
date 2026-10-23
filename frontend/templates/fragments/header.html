@@ -57,7 +57,7 @@
                     </svg>
                 </span>
                 <span class="account-details">
-                    <strong th:text="${currentUserName ?: 'Tài khoản'}">Tài khoản</strong>
+                    <strong th:text="${@userAdvice.resolveName(currentUserName)}">Tài khoản</strong>
                     <span>Truy cập hệ thống</span>
                 </span>
                 
