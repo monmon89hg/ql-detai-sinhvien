@@ -1,0 +1,138 @@
+.notice-heading {
+    margin: 22px 0 18px;
+    border-bottom: 1px solid #c9cdd1;
+}
+
+.notice-heading h1 {
+    display: inline-block;
+    margin: 0 0 -1px;
+    padding: 8px 16px;
+    background: #075b8f;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.notice-panel {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.notice-tabs {
+    display: flex;
+    gap: 22px;
+    margin: -2px 0 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.notice-tab {
+    padding: 10px 8px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: #5d7184;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.notice-tab.is-active {
+    border-bottom-color: #d63384;
+    color: #075b8f;
+    font-weight: 700;
+}
+
+.notice-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0 0 16px;
+    padding: 0 12px;
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    color: #61778c;
+}
+
+.notice-search input {
+    width: 100%;
+    min-height: 42px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font: inherit;
+}
+
+.notice-table-wrap {
+    overflow-x: auto;
+}
+
+.notice-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.notice-table th,
+.notice-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #d8d8d8;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.notice-table th {
+    background: #075b8f;
+    color: #fff;
+    font-weight: 700;
+}
+
+.notice-table tbody tr:nth-child(even) {
+    background: #f4f4f4;
+}
+
+.notice-table td:first-child {
+    min-width: 280px;
+    color: #075b8f;
+}
+
+.notice-table td:nth-child(2) {
+    min-width: 150px;
+}
+
+.notice-table td:last-child {
+    min-width: 135px;
+    white-space: nowrap;
+}
+
+.notice-title {
+    display: block;
+    font-weight: 500;
+}
+
+.notice-content {
+    display: none;
+}
+
+.notice-empty {
+    padding: 20px 10px;
+    color: #65778a;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .notice-panel {
+        padding: 12px;
+    }
+
+    .notice-tabs {
+        gap: 8px;
+    }
+
+    .notice-tab {
+        padding-inline: 4px;
+        font-size: 11px;
+    }
+}
