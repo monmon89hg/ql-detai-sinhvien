@@ -20,7 +20,12 @@
 
                     <div class="page-heading">
                         <h1>Quản lý kết quả</h1>
-                        <p>Xem kết quả tổng hợp và công bố cho nhóm sinh viên.</p>
+                        <p th:if="${laAdmin}">
+                            Xem trạng thái công bố và điểm cuối của các nhóm.
+                        </p>
+                        <p th:unless="${laAdmin}">
+                            Xem kết quả tổng hợp và công bố cho nhóm sinh viên.
+                        </p>
                     </div>
 
                     <section class="section">
@@ -43,7 +48,8 @@
                                     <th scope="col">Hội đồng</th>
                                     <th scope="col">Trạng thái</th>
                                     <th scope="col">Điểm cuối</th>
-                                    <th scope="col">Thao tác</th>
+                                    <th scope="col" th:if="${laAdmin}">Quyền</th>
+                                    <th scope="col" th:unless="${laAdmin}">Thao tác</th>
                                 </tr>
                             </thead>
 
@@ -77,9 +83,8 @@
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
                                     <td>
-                                        <!-- Chỉ kết quả đã tổng hợp mới được công bố. -->
                                         <form
-                                            th:if="${nhom.trangThaiKetQua == 'DA_TONG_HOP'}"
+                                            th:if="${!laAdmin and nhom.trangThaiKetQua == 'DA_TONG_HOP'}"
                                             th:action="@{/ket-qua/{maNhom}/cong-bo(
                                                 maNhom=${nhom.maNhom})}"
                                             method="post"
@@ -94,8 +99,10 @@
                                                 Công bố
                                             </button>
                                         </form>
+
+                                        <span th:if="${laAdmin}">Chỉ xem</span>
                                         <span
-                                            th:unless="${nhom.trangThaiKetQua == 'DA_TONG_HOP'}"
+                                            th:if="${!laAdmin and nhom.trangThaiKetQua != 'DA_TONG_HOP'}"
                                         >
                                             —
                                         </span>

@@ -45,7 +45,7 @@ public class HoiDongService {
     }
 
 
-    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
     @Transactional(readOnly = true)
     public List<HoiDong> layDanhSach() {
         return hoiDongRepository.findAll(
@@ -53,7 +53,7 @@ public class HoiDongService {
         );
     }
 
-    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
     @Transactional(readOnly = true)
     public HoiDong layChiTiet(String maHoiDong) {
         return hoiDongRepository.findById(maHoiDong)

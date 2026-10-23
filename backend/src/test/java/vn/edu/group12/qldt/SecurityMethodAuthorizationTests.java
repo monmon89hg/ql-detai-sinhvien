@@ -67,7 +67,7 @@ class SecurityMethodAuthorizationTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"SINH_VIEN", "GIANG_VIEN", "TRUONG_BO_MON", "ADMIN"})
+    @ValueSource(strings = {"SINH_VIEN", "GIANG_VIEN", "TRUONG_BO_MON"})
     void nonDeanCannotCallDeanServicesDirectly(String role) {
         signIn("DB_USER", role);
         assertThatThrownBy(() -> topics.duyetDeTai("DT01", "DB_USER")).isInstanceOf(AccessDeniedException.class);
@@ -115,6 +115,18 @@ class SecurityMethodAuthorizationTests {
         signIn("DB_TK", "TRUONG_KHOA");
         councils.layDanhSach();
         verify(councilRepo).findAll(any(org.springframework.data.domain.Sort.class));
+    }
+
+    @Test
+    void adminCanReadCouncilListButCannotChangeCouncil() {
+        signIn("DB_ADMIN", "ADMIN");
+
+        councils.layDanhSach();
+        verify(councilRepo).findAll(any(org.springframework.data.domain.Sort.class));
+
+        assertThatThrownBy(() -> councils.chuyenSangSanSang("HD01"))
+            .isInstanceOf(AccessDeniedException.class);
+        verifyNoMoreInteractions(councilRepo);
     }
 
     @ParameterizedTest

@@ -62,7 +62,7 @@ public class PhanCongHoiDongService {
             .layDanhSachNhomCoThePhanCong(maHoiDong);
     }
 
-    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
     @Transactional(readOnly = true)
     public List<NhomPhanCongLuaChon> layDanhSachDaPhanCong(
             @NotBlank String maHoiDong) {

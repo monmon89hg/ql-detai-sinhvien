@@ -44,7 +44,7 @@ public class ThanhVienHoiDongService {
         this.thanhVienHoiDongRepository = thanhVienHoiDongRepository;
     }
 
-    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
     @Transactional(readOnly = true)
     public List<ThanhVienHoiDongHienThi> layDanhSach(String maHoiDong) {
         if (!hoiDongRepository.existsById(maHoiDong)) {

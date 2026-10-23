@@ -71,19 +71,26 @@ public class SecurityConfig {
                     .hasRole("TRUONG_KHOA")
 
                 // TV4: assignment/ownership checks still run inside the real services.
-                .requestMatchers(HttpMethod.GET, "/hoi-dong", "/hoi-dong/tao", "/hoi-dong/{id}")
+                .requestMatchers(HttpMethod.GET, "/hoi-dong")
+                    .hasAnyRole("TRUONG_KHOA", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/hoi-dong/tao")
                     .hasRole("TRUONG_KHOA")
+                .requestMatchers(HttpMethod.GET, "/hoi-dong/{id}")
+                    .hasAnyRole("TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/hoi-dong/tao", "/hoi-dong/{id}/thanh-vien",
                         "/hoi-dong/{id}/thanh-vien/{lecturer}/xoa",
                         "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong")
                     .hasRole("TRUONG_KHOA")
-                .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}", "/ket-qua/tong-hop")
-                    .hasRole("GIANG_VIEN")
+                .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}")
+                    .hasAnyRole("GIANG_VIEN", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/ket-qua/tong-hop")
+                    .hasAnyRole("GIANG_VIEN", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem/{id}/luu-nhap",
                         "/cham-diem/{id}/nop", "/ket-qua/{id}/tong-hop").hasRole("GIANG_VIEN")
-                .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly").hasRole("TRUONG_KHOA")
+                .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly").hasAnyRole("TRUONG_KHOA","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
-                .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi").hasRole("SINH_VIEN")
+                .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi")
+                    .hasAnyRole("SINH_VIEN", "ADMIN")
 
                 // TV3: nhóm sinh viên, đăng ký đề tài và nộp báo cáo.
                 // Kiểm tra quyền nhóm trưởng, thành viên và giảng viên tiếp tục ở tầng Service.
