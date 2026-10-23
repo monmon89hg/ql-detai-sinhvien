@@ -355,6 +355,39 @@ class OfficialSecurityTests {
     }
 
     @Test
+    void lecturerCanLookUpPublishedResultsButCannotUseAnUnknownRoundOrManageResults() throws Exception {
+        DotDangKyLuaChon dot = mock(DotDangKyLuaChon.class);
+        when(dot.getMaDot()).thenReturn("DOT01");
+        when(dot.getTenDot()).thenReturn("Đợt kiểm thử");
+        KetQuaTraCuuHienThi ketQua = mock(KetQuaTraCuuHienThi.class);
+        when(ketQua.getMaNhom()).thenReturn("N01");
+        when(ketQua.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(ketQua.getMaDeTai()).thenReturn("DT01");
+        when(ketQua.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(ketQua.getDiemCuoi()).thenReturn(new BigDecimal("8.25"));
+
+        when(adminTraCuuKetQuaService.layDotCoKetQuaCongBo()).thenReturn(List.of(dot));
+        when(adminTraCuuKetQuaService.traCuuTheoDot("DOT01")).thenReturn(List.of(ketQua));
+
+        mvc.perform(get("/ket-qua/cua-toi").param("maDot", "DOT01")
+                .with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("N01")))
+            .andExpect(content().string(containsString("8.25")))
+            .andExpect(content().string(containsString("của tất cả nhóm")));
+        mvc.perform(get("/ket-qua/cua-toi").param("maDot", "DOT_KHAC")
+                .with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))
+            .andExpect(status().isForbidden());
+        mvc.perform(get("/ket-qua/quan-ly")
+                .with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))
+            .andExpect(status().isForbidden());
+
+        verify(adminTraCuuKetQuaService).traCuuTheoDot("DOT01");
+        verify(adminTraCuuKetQuaService, never()).traCuuTheoDot("DOT_KHAC");
+        verifyNoInteractions(traCuuKetQuaService);
+    }
+
+    @Test
     void lockedAccountIsRejectedEvenWithTheCorrectPassword() throws Exception {
         String password = account("KHOA", "ADMIN");
         mvc.perform(post("/login").with(csrf()).param("email", "admin@example.test").param("matKhau", password))

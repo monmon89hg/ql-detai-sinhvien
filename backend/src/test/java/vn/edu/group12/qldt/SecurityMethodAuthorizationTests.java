@@ -37,7 +37,8 @@ import static org.mockito.Mockito.*;
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class, PasswordConfig.class, CustomUserDetailsService.class,
         DeTaiService.class, DeTaiGiangVienService.class, DotDangKyService.class, BoMonService.class,
-        HoiDongService.class, ChamDiemHoiDongService.class, TraCuuKetQuaService.class, TongHopKetQuaService.class})
+        HoiDongService.class, ChamDiemHoiDongService.class, TraCuuKetQuaService.class,
+        AdminTraCuuKetQuaService.class, TongHopKetQuaService.class})
 class SecurityMethodAuthorizationTests {
     @Autowired DeTaiService topics;
     @Autowired DeTaiGiangVienService assignments;
@@ -46,6 +47,7 @@ class SecurityMethodAuthorizationTests {
     @Autowired HoiDongService councils;
     @Autowired ChamDiemHoiDongService marking;
     @Autowired TraCuuKetQuaService studentResults;
+    @Autowired AdminTraCuuKetQuaService publishedResults;
     @Autowired TongHopKetQuaService results;
     @MockitoBean NguoiDungRepository users;
     @MockitoBean NguoiDungVaiTroRepository roles;
@@ -99,6 +101,20 @@ class SecurityMethodAuthorizationTests {
         studentResults.traCuuTheoDot("DOT01");
         verify(resultRepo).layDotCoKetQuaCuaSinhVien("DB_SV");
         verify(resultRepo).traCuuKetQuaCuaSinhVien("DB_SV", "DOT01");
+    }
+
+    @Test
+    void lecturerCanReadPublishedResultsButStudentCannotUseTheAllGroupsService() {
+        signIn("DB_GV", "GIANG_VIEN");
+        publishedResults.layDotCoKetQuaCongBo();
+        publishedResults.traCuuTheoDot("DOT01");
+        verify(resultRepo).layDotCoKetQuaCongBo();
+        verify(resultRepo).traCuuKetQuaCongBoTheoDot("DOT01");
+
+        signIn("DB_SV", "SINH_VIEN");
+        assertThatThrownBy(() -> publishedResults.traCuuTheoDot("DOT01"))
+            .isInstanceOf(AccessDeniedException.class);
+        verifyNoMoreInteractions(resultRepo);
     }
 
     @Test
