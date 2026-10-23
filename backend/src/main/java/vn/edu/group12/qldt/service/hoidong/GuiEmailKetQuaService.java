@@ -46,8 +46,12 @@ public class GuiEmailKetQuaService {
     // Khóa một bản ghi trong lúc gửi để các lượt xử lý không chọn trùng.
     @Transactional
     public void guiMotEmail() {
+        LocalDateTime nguongThuLai =
+                LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
+                        .minusMinutes(5);
+
         Optional<EmailThongBaoKetQua> emailCanGui =
-                emailRepository.khoaEmailCanGui();
+                emailRepository.khoaEmailCanGui(nguongThuLai);
 
         if (emailCanGui.isEmpty()) {
             return;

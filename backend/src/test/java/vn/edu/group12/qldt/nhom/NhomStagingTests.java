@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+@org.junit.jupiter.api.Tag("mysql")
 @SpringBootTest(
         properties = {
             "spring.flyway.enabled=true",

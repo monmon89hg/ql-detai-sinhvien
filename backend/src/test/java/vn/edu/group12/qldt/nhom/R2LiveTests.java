@@ -13,6 +13,7 @@ import vn.edu.group12.qldt.storage.nhom.R2ReportStorage;
 import java.net.URI;
 import java.util.UUID;
 
+@org.junit.jupiter.api.Tag("external")
 @EnabledIfEnvironmentVariable(named = "R2_ENDPOINT", matches = "https://.+")
 class R2LiveTests {
     @Test

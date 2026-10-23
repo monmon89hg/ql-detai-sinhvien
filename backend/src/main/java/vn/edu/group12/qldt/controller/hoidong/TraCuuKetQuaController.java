@@ -15,6 +15,7 @@ import vn.edu.group12.qldt.dto.hoidong.DotDangKyLuaChon;
 import vn.edu.group12.qldt.service.hoidong.TraCuuKetQuaService;
 import vn.edu.group12.qldt.service.hoidong.AdminTraCuuKetQuaService;
 import jakarta.servlet.http.HttpServletRequest;
+import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 
 @Controller
 @RequestMapping("/ket-qua")
@@ -22,12 +23,15 @@ public class TraCuuKetQuaController {
 
     private final TraCuuKetQuaService traCuuKetQuaService;
     private final AdminTraCuuKetQuaService adminTraCuuKetQuaService;
+    private final NguoiDungHienThiService nguoiDungHienThiService;
 
     public TraCuuKetQuaController(
             TraCuuKetQuaService traCuuKetQuaService,
-            AdminTraCuuKetQuaService adminTraCuuKetQuaService) {
+            AdminTraCuuKetQuaService adminTraCuuKetQuaService,
+            NguoiDungHienThiService nguoiDungHienThiService) {
         this.traCuuKetQuaService = traCuuKetQuaService;
         this.adminTraCuuKetQuaService = adminTraCuuKetQuaService;
+        this.nguoiDungHienThiService = nguoiDungHienThiService;
     }
 
     // Sinh viên xem kết quả nhóm mình; ADMIN xem mọi kết quả đã công bố.
@@ -74,7 +78,7 @@ public class TraCuuKetQuaController {
                 : traCuuKetQuaService.traCuuTheoDot(maDotDuocChon)
         );
 
-        model.addAttribute("currentUserName", principal.getName());
+        model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
 
         return "assessment/ket-qua/cua-toi";
     }

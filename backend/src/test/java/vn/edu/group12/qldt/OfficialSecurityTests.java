@@ -88,6 +88,7 @@ class OfficialSecurityTests {
     @MockitoBean TongHopKetQuaService tongHopKetQuaService;
     @MockitoBean TraCuuKetQuaService traCuuKetQuaService;
     @MockitoBean AdminTraCuuKetQuaService adminTraCuuKetQuaService;
+    @MockitoBean NguoiDungHienThiService nguoiDungHienThiService;
 
     @Test
     void loginUsesTv1TemplateAndCsrf() throws Exception {

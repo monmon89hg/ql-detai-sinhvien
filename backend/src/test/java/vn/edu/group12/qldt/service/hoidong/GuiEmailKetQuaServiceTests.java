@@ -26,6 +26,7 @@ import vn.edu.group12.qldt.enums.hoidong.TrangThaiEmailKetQua;
 import vn.edu.group12.qldt.enums.hoidong.TrangThaiKetQua;
 import vn.edu.group12.qldt.repository.hoidong.EmailThongBaoKetQuaRepository;
 import vn.edu.group12.qldt.repository.hoidong.KetQuaRepository;
+import java.time.LocalDateTime;
 
 class GuiEmailKetQuaServiceTests {
 
@@ -52,7 +53,7 @@ class GuiEmailKetQuaServiceTests {
         EmailThongBaoKetQua email = taoEmailCho();
         KetQua ketQua = taoKetQuaDaCongBo();
 
-        when(emailRepository.khoaEmailCanGui())
+        when(emailRepository.khoaEmailCanGui(any(LocalDateTime.class)))
                 .thenReturn(Optional.of(email));
         when(ketQuaRepository.findById("N01"))
                 .thenReturn(Optional.of(ketQua));
@@ -76,7 +77,7 @@ class GuiEmailKetQuaServiceTests {
         EmailThongBaoKetQua email = taoEmailCho();
         KetQua ketQua = taoKetQuaDaCongBo();
 
-        when(emailRepository.khoaEmailCanGui())
+        when(emailRepository.khoaEmailCanGui(any(LocalDateTime.class)))
                 .thenReturn(Optional.of(email));
         when(ketQuaRepository.findById("N01"))
                 .thenReturn(Optional.of(ketQua));
@@ -93,7 +94,7 @@ class GuiEmailKetQuaServiceTests {
 
     @Test
     void khongCoEmailChoThiKhongGui() {
-        when(emailRepository.khoaEmailCanGui())
+        when(emailRepository.khoaEmailCanGui(any(LocalDateTime.class)))
                 .thenReturn(Optional.empty());
 
         service.guiMotEmail();
