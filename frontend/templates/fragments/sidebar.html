@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <body>
         <aside th:fragment="sidebar(activeMenu)" class="sidebar" id="main-navigation" aria-label="Điều hướng chính">
-            <div class="side-group">
+            <div class="side-group" sec:authorize="isAuthenticated()">
                 <div class="side-heading">Tổng quan</div>
                 <a
                     class="side-link"
@@ -28,13 +28,14 @@
                     <span>Tổng quan</span>
                 </a>
             </div>
-            <div class="side-group">
+            <div class="side-group" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                 <div class="side-heading">Quản trị &amp; danh mục</div>
                 <a
                     class="side-link"
                     href="/admin/users"
                     th:href="@{/admin/users}"
                     th:classappend="${activeMenu == 'users'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN')"
                 >
                     <svg
                         class="icon"
@@ -57,6 +58,7 @@
                     href="/admin/bo-mon"
                     th:href="@{/admin/bo-mon}"
                     th:classappend="${activeMenu == 'departments'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN')"
                 >
                     <svg
                         class="icon"
@@ -78,6 +80,7 @@
                     href="/thong-bao"
                     th:href="@{/thong-bao}"
                     th:classappend="${activeMenu == 'announcements'} ? ' is-active' : ''"
+                    sec:authorize="isAuthenticated()"
                 >
                     <svg
                         class="icon"
@@ -94,13 +97,14 @@
                     <span>Thông báo</span>
                 </a>
             </div>
-            <div class="side-group">
+            <div class="side-group" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                 <div class="side-heading">Đợt đăng ký &amp; đề tài</div>
                 <a
                     class="side-link"
                     href="/dot-dang-ky"
                     th:href="@{/dot-dang-ky}"
                     th:classappend="${activeMenu == 'rounds'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
                 >
                     <svg
                         class="icon"
@@ -122,6 +126,7 @@
                     href="/de-tai"
                     th:href="@{/de-tai}"
                     th:classappend="${activeMenu == 'topics'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -144,6 +149,7 @@
                     href="/de-tai/de-xuat"
                     th:href="@{/de-tai/de-xuat}"
                     th:classappend="${activeMenu == 'propose'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -164,6 +170,7 @@
                     href="/de-tai/duyet"
                     th:href="@{/de-tai/duyet}"
                     th:classappend="${activeMenu == 'approve-topic'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
                 >
                     <svg
                         class="icon"
@@ -181,13 +188,14 @@
                     <span>Duyệt / công bố đề tài</span>
                 </a>
             </div>
-            <div class="side-group">
+            <div class="side-group" sec:authorize="hasRole('TRUONG_KHOA') or hasRole('SINH_VIEN')">
                 <div class="side-heading">Nhóm sinh viên &amp; báo cáo</div>
                 <a
                     class="side-link"
                     href="/nhom"
                     th:href="@{/nhom}"
                     th:classappend="${activeMenu == 'find-group'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('SINH_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -207,7 +215,8 @@
                 <a
                     class="side-link"
                     href="/nhom/tao"
-                    th:href="@{/nhom/tao}" sec:authorize="hasRole('SINH_VIEN')"
+                    th:href="@{/nhom/tao}"
+                    sec:authorize="hasRole('SINH_VIEN')"
                     th:classappend="${activeMenu == 'create-group'} ? ' is-active' : ''"
                 >
                     <svg
@@ -229,7 +238,8 @@
                 <a
                     class="side-link"
                     href="/nhom/cua-toi"
-                    th:href="@{/nhom/cua-toi}" sec:authorize="hasRole('SINH_VIEN')"
+                    th:href="@{/nhom/cua-toi}"
+                    sec:authorize="hasRole('SINH_VIEN')"
                     th:classappend="${activeMenu == 'my-group'} ? ' is-active' : ''"
                 >
                     <svg
@@ -253,6 +263,7 @@
                     href="/dang-ky-de-tai"
                     th:href="@{/dang-ky-de-tai}"
                     th:classappend="${activeMenu == 'register'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('SINH_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -273,7 +284,8 @@
                 <a
                     class="side-link"
                     href="/dang-ky-de-tai/duyet"
-                    th:href="@{/dang-ky-de-tai/duyet}" sec:authorize="hasRole('TRUONG_KHOA')"
+                    th:href="@{/dang-ky-de-tai/duyet}"
+                    sec:authorize="hasRole('TRUONG_KHOA')"
                     th:classappend="${activeMenu == 'approve-registration'} ? ' is-active' : ''"
                 >
                     <svg
@@ -296,6 +308,7 @@
                     href="/bao-cao"
                     th:href="@{/bao-cao}"
                     th:classappend="${activeMenu == 'report'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -312,13 +325,14 @@
                     <span>Nộp báo cáo</span>
                 </a>
             </div>
-            <div class="side-group">
+            <div class="side-group" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                 <div class="side-heading">Hội đồng &amp; kết quả</div>
                 <a
                     class="side-link"
                     href="/hoi-dong"
                     th:href="@{/hoi-dong}"
                     th:classappend="${activeMenu == 'council'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
                 >
                     <svg
                         class="icon"
@@ -341,6 +355,7 @@
                     href="/cham-diem"
                     th:href="@{/cham-diem}"
                     th:classappend="${activeMenu == 'grading'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -363,6 +378,7 @@
                     href="/ket-qua/tong-hop"
                     th:href="@{/ket-qua/tong-hop}"
                     th:classappend="${activeMenu == 'aggregate-result'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -385,6 +401,7 @@
                     href="/ket-qua/quan-ly"
                     th:href="@{/ket-qua/quan-ly}"
                     th:classappend="${activeMenu == 'publish-result'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
                 >
                     <svg
                         class="icon"
@@ -406,6 +423,7 @@
                     href="/ket-qua/cua-toi"
                     th:href="@{/ket-qua/cua-toi}"
                     th:classappend="${activeMenu == 'my-result'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')"
                 >
                     <svg
                         class="icon"
@@ -420,7 +438,7 @@
                         <circle cx="12" cy="8" r="5"/>
                         <path d="m8 12-2 9 6-3 6 3-2-9"/>
                     </svg>
-                    <span>Tra cứu kết quả</span>
+                    <span>Tra cứu điểm</span>
                 </a>
             </div>
         </aside>
