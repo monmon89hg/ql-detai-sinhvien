@@ -20,7 +20,10 @@
 
                     <div class="page-heading">
                         <h1>Tổng hợp kết quả</h1>
-                        <p>
+                        <p th:if="${laAdmin}">
+                            Xem trạng thái tổng hợp và điểm cuối của các nhóm.
+                        </p>
+                        <p th:unless="${laAdmin}">
                             Chủ tịch hội đồng tổng hợp sau khi tất cả
                             giảng viên đã nộp phiếu chấm.
                         </p>
@@ -28,11 +31,16 @@
 
                     <section class="section">
                         <div class="section-top">
-                            <h2 class="section-title">Nhóm thuộc hội đồng của bạn</h2>
+                            <h2 class="section-title" th:if="${laAdmin}">
+                                Danh sách nhóm đã phân công hội đồng
+                            </h2>
+                            <h2 class="section-title" th:unless="${laAdmin}">
+                                Nhóm thuộc hội đồng của bạn
+                            </h2>
                         </div>
 
                         <p th:if="${#lists.isEmpty(danhSachNhom)}">
-                            Hiện không có nhóm nào cần tổng hợp.
+                            Hiện chưa có nhóm nào để hiển thị.
                         </p>
 
                         <table
@@ -46,7 +54,8 @@
                                     <th scope="col">Hội đồng</th>
                                     <th scope="col">Trạng thái</th>
                                     <th scope="col">Điểm cuối</th>
-                                    <th scope="col">Thao tác</th>
+                                    <th scope="col" th:if="${laAdmin}">Quyền</th>
+                                    <th scope="col" th:unless="${laAdmin}">Thao tác</th>
                                 </tr>
                             </thead>
 
@@ -80,9 +89,8 @@
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
                                     <td>
-                                        <!-- Chỉ nhóm chưa có kết quả mới hiện nút tổng hợp. -->
                                         <form
-                                            th:if="${nhom.trangThaiKetQua == null}"
+                                            th:if="${!laAdmin and nhom.trangThaiKetQua == null}"
                                             th:action="@{/ket-qua/{maNhom}/tong-hop(
                                                 maNhom=${nhom.maNhom})}"
                                             method="post"
@@ -108,8 +116,10 @@
                                                 Tổng hợp
                                             </button>
                                         </form>
+
+                                        <span th:if="${laAdmin}">Chỉ xem</span>
                                         <span
-                                            th:unless="${nhom.trangThaiKetQua == null}"
+                                            th:if="${!laAdmin and nhom.trangThaiKetQua != null}"
                                         >
                                             Đã xử lý
                                         </span>

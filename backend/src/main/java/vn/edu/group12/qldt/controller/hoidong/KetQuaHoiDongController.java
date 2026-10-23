@@ -15,6 +15,7 @@ import java.security.Principal;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/ket-qua")
@@ -27,29 +28,57 @@ public class KetQuaHoiDongController {
         this.tongHopKetQuaService = tongHopKetQuaService;
     }
 
-    // Trang tổng hợp dành cho chủ tịch hội đồng.
+    // Chủ tịch tổng hợp; ADMIN chỉ xem danh sách và trạng thái.
     @GetMapping("/tong-hop")
-    @PreAuthorize("hasRole('GIANG_VIEN')")
-    public String danhSachTongHop(Model model, Principal principal) {
-        model.addAttribute(
-            "danhSachNhom",
-            tongHopKetQuaService.layDanhSachNhomChoChuTich()
-        );
-        model.addAttribute("currentUserName", principal.getName());
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'ADMIN')")
+    public String danhSachTongHop(
+            Model model,
+            Principal principal,
+            HttpServletRequest request) {
 
+        boolean laAdmin = request.isUserInRole("ADMIN");
+        model.addAttribute("laAdmin", laAdmin);
+
+        if (laAdmin) {
+            model.addAttribute(
+                "danhSachNhom",
+                tongHopKetQuaService.layDanhSachNhomChoAdmin()
+            );
+        } else {
+            model.addAttribute(
+                "danhSachNhom",
+                tongHopKetQuaService.layDanhSachNhomChoChuTich()
+            );
+        }
+
+        model.addAttribute("currentUserName", principal.getName());
         return "assessment/ket-qua/tong-hop-list";
     }
 
-    // Trang quản lý, công bố kết quả dành cho trưởng khoa.
+    // Trưởng khoa quản lý và công bố; ADMIN chỉ xem kết quả.
     @GetMapping("/quan-ly")
-    @PreAuthorize("hasRole('TRUONG_KHOA')")
-    public String danhSachQuanLy(Model model, Principal principal) {
-        model.addAttribute(
-            "danhSachNhom",
-            tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()
-        );
-        model.addAttribute("currentUserName", principal.getName());
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
+    public String danhSachQuanLy(
+            Model model,
+            Principal principal,
+            HttpServletRequest request) {
 
+        boolean laAdmin = request.isUserInRole("ADMIN");
+        model.addAttribute("laAdmin", laAdmin);
+
+        if (laAdmin) {
+            model.addAttribute(
+                "danhSachNhom",
+                tongHopKetQuaService.layDanhSachNhomChoAdmin()
+            );
+        } else {
+            model.addAttribute(
+                "danhSachNhom",
+                tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()
+            );
+        }
+
+        model.addAttribute("currentUserName", principal.getName());
         return "assessment/ket-qua/quan-ly-list";
     }
 

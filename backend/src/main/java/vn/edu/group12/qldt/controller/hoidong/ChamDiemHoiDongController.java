@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import vn.edu.group12.qldt.service.hoidong.ChamDiemHoiDongService;
+import vn.edu.group12.qldt.service.hoidong.AdminXemChamDiemService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -22,30 +23,50 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import vn.edu.group12.qldt.dto.hoidong.PhieuChamDiemForm;
 import vn.edu.group12.qldt.enums.hoidong.TrangThaiPhieuCham;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/cham-diem")
-@PreAuthorize("hasRole('GIANG_VIEN')")
 public class ChamDiemHoiDongController {
 
     private final ChamDiemHoiDongService chamDiemHoiDongService;
+    private final AdminXemChamDiemService adminXemChamDiemService;
 
     public ChamDiemHoiDongController(
-            ChamDiemHoiDongService chamDiemHoiDongService) {
-
+            ChamDiemHoiDongService chamDiemHoiDongService,
+            AdminXemChamDiemService adminXemChamDiemService) {
         this.chamDiemHoiDongService = chamDiemHoiDongService;
+        this.adminXemChamDiemService = adminXemChamDiemService;
     }
 
-    // Mở danh sách nhóm mà giảng viên đang đăng nhập được phép chấm.
+    // Mở danh sách nhóm phù hợp với vai trò đang đăng nhập.
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'ADMIN')")
     @GetMapping
-    public String danhSach(Model model, Principal principal) {
+    public String danhSach(
+            Model model,
+            Principal principal,
+            HttpServletRequest request) {
 
-        model.addAttribute(
-            "danhSachNhom",
-            chamDiemHoiDongService.layDanhSachNhomDuocCham()
-        );
+        boolean laAdmin = request.isUserInRole("ADMIN");
+        model.addAttribute("laAdmin", laAdmin);
 
-        // Header chung dùng thuộc tính này để hiển thị tài khoản.
+        if (laAdmin) {
+            // ADMIN xem các nhóm đã được phân công hội đồng.
+            model.addAttribute(
+                "danhSachNhom",
+                adminXemChamDiemService.layDanhSachNhom()
+            );
+        } else {
+            // Giảng viên chỉ thấy nhóm mình được phép chấm.
+            model.addAttribute(
+                "danhSachNhom",
+                chamDiemHoiDongService.layDanhSachNhomDuocCham()
+            );
+        }
+
         model.addAttribute(
             "currentUserName",
             principal != null ? principal.getName() : "Người dùng"
@@ -54,33 +75,57 @@ public class ChamDiemHoiDongController {
         return "assessment/cham-diem/list";
     }
 
-    // Mở phiếu của giảng viên đang đăng nhập cho nhóm được chọn.
+    // ADMIN xem mọi phiếu đã lưu; giảng viên mở phiếu của mình.
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'ADMIN')")
     @GetMapping("/{maNhom}")
     public String moPhieu(
             @PathVariable("maNhom") String maNhom,
             Model model,
             Principal principal,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
+
+        if (request.isUserInRole("ADMIN")) {
+            try {
+                model.addAttribute(
+                    "nhom",
+                    adminXemChamDiemService.layThongTinNhom(maNhom)
+                );
+                model.addAttribute(
+                    "danhSachPhieu",
+                    adminXemChamDiemService.layPhieuChamTheoNhom(maNhom)
+                );
+                model.addAttribute(
+                    "currentUserName",
+                    principal != null ? principal.getName() : "Người dùng"
+                );
+
+                return "assessment/cham-diem/admin-detail";
+            } catch (EntityNotFoundException ex) {
+                throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    ex.getMessage(),
+                    ex
+                );
+            }
+        }
 
         try {
-            // Service kiểm tra quyền trước khi trả thông tin nhóm.
+            // Luồng cũ của giảng viên: kiểm tra nhóm được phép chấm.
             model.addAttribute(
                 "nhom",
                 chamDiemHoiDongService.layThongTinNhom(maNhom)
             );
 
-            // Lấy trạng thái phiếu để hiển thị và quyết định quyền sửa.
             TrangThaiPhieuCham trangThaiPhieu =
                 chamDiemHoiDongService.layTrangThaiPhieu(maNhom);
 
             model.addAttribute("trangThaiPhieu", trangThaiPhieu);
-
             model.addAttribute(
                 "coTheChinhSua",
                 trangThaiPhieu == TrangThaiPhieuCham.NHAP
             );
 
-            // Giữ dữ liệu người dùng đã nhập nếu vừa quay lại sau lỗi.
             if (!model.containsAttribute("phieuChamDiemForm")) {
                 model.addAttribute(
                     "phieuChamDiemForm",
@@ -96,16 +141,15 @@ public class ChamDiemHoiDongController {
             return "assessment/cham-diem/form";
 
         } catch (IllegalArgumentException ex) {
-            // Ví dụ: giảng viên đã có phiếu loại khác cho nhóm này.
             redirectAttributes.addFlashAttribute(
                 "errorMessage",
                 ex.getMessage()
             );
-
             return "redirect:/cham-diem";
         }
     }
 
+    @PreAuthorize("hasRole('GIANG_VIEN')")
     @PostMapping("/{maNhom}/luu-nhap")
     public String luuNhap(
             @PathVariable("maNhom") String maNhom,
@@ -155,6 +199,7 @@ public class ChamDiemHoiDongController {
         return "redirect:/cham-diem/{maNhom}";
     }
 
+    @PreAuthorize("hasRole('GIANG_VIEN')")
     @PostMapping("/{maNhom}/nop")
     public String nopPhieu(
             @PathVariable("maNhom") String maNhom,

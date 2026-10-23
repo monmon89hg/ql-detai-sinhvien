@@ -13,50 +13,67 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import vn.edu.group12.qldt.dto.hoidong.DotDangKyLuaChon;
 import vn.edu.group12.qldt.service.hoidong.TraCuuKetQuaService;
+import vn.edu.group12.qldt.service.hoidong.AdminTraCuuKetQuaService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/ket-qua")
 public class TraCuuKetQuaController {
 
     private final TraCuuKetQuaService traCuuKetQuaService;
+    private final AdminTraCuuKetQuaService adminTraCuuKetQuaService;
 
     public TraCuuKetQuaController(
-            TraCuuKetQuaService traCuuKetQuaService) {
+            TraCuuKetQuaService traCuuKetQuaService,
+            AdminTraCuuKetQuaService adminTraCuuKetQuaService) {
         this.traCuuKetQuaService = traCuuKetQuaService;
+        this.adminTraCuuKetQuaService = adminTraCuuKetQuaService;
     }
 
-    // Sinh viên chỉ tra cứu các đợt có kết quả đã công bố của chính mình.
+    // Sinh viên xem kết quả nhóm mình; ADMIN xem mọi kết quả đã công bố.
     @GetMapping("/cua-toi")
-    @PreAuthorize("hasRole('SINH_VIEN')")
+    @PreAuthorize("hasAnyRole('SINH_VIEN', 'ADMIN')")
     public String cuaToi(
             @RequestParam(required = false) String maDot,
             Model model,
-            Principal principal) {
+            Principal principal,
+            HttpServletRequest request) {
 
-        List<DotDangKyLuaChon> danhSachDot =
-                traCuuKetQuaService.layDotCuaToi();
+        boolean laAdmin = request.isUserInRole("ADMIN");
+
+        List<DotDangKyLuaChon> danhSachDot = laAdmin
+            ? adminTraCuuKetQuaService.layDotCoKetQuaCongBo()
+            : traCuuKetQuaService.layDotCuaToi();
 
         String maDotDuocChon;
         if (maDot == null || maDot.isBlank()) {
             maDotDuocChon = danhSachDot.isEmpty()
-                    ? null
-                    : danhSachDot.get(0).getMaDot();
+                ? null
+                : danhSachDot.get(0).getMaDot();
         } else {
             maDotDuocChon = maDot.strip();
+
             boolean coQuyenXemDot = danhSachDot.stream()
-                    .anyMatch(dot -> dot.getMaDot().equals(maDotDuocChon));
+                .anyMatch(dot -> dot.getMaDot().equals(maDotDuocChon));
 
             if (!coQuyenXemDot) {
                 throw new AccessDeniedException(
-                        "Bạn không có quyền xem kết quả của đợt này.");
+                    "Bạn không có quyền xem kết quả của đợt này."
+                );
             }
         }
 
+        model.addAttribute("laAdmin", laAdmin);
         model.addAttribute("danhSachDot", danhSachDot);
         model.addAttribute("maDotDuocChon", maDotDuocChon);
+
         model.addAttribute(
-                "danhSachKetQua",
-                traCuuKetQuaService.traCuuTheoDot(maDotDuocChon));
+            "danhSachKetQua",
+            laAdmin
+                ? adminTraCuuKetQuaService.traCuuTheoDot(maDotDuocChon)
+                : traCuuKetQuaService.traCuuTheoDot(maDotDuocChon)
+        );
+
         model.addAttribute("currentUserName", principal.getName());
 
         return "assessment/ket-qua/cua-toi";

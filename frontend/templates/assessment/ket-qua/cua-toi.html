@@ -15,7 +15,12 @@
         <div class="container">
             <div class="page-heading">
                 <h1>Tra cứu kết quả</h1>
-                <p>Xem kết quả đã công bố của nhóm bạn theo đợt đăng ký.</p>
+                <p th:if="${laAdmin}">
+                    Xem kết quả đã công bố của tất cả nhóm theo đợt đăng ký.
+                </p>
+                <p th:unless="${laAdmin}">
+                    Xem kết quả đã công bố của nhóm bạn theo đợt đăng ký.
+                </p>
             </div>
 
             <section class="section">
@@ -23,7 +28,10 @@
                     <h2 class="section-title">Chọn đợt đăng ký</h2>
                 </div>
 
-                <p th:if="${#lists.isEmpty(danhSachDot)}">
+                <p th:if="${laAdmin and #lists.isEmpty(danhSachDot)}">
+                    Chưa có kết quả nào được công bố.
+                </p>
+                <p th:if="${!laAdmin and #lists.isEmpty(danhSachDot)}">
                     Bạn chưa có kết quả nào được công bố.
                 </p>
 

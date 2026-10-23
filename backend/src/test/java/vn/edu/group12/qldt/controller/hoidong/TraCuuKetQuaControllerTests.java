@@ -18,12 +18,17 @@ import org.springframework.ui.ExtendedModelMap;
 
 import vn.edu.group12.qldt.dto.hoidong.DotDangKyLuaChon;
 import vn.edu.group12.qldt.service.hoidong.TraCuuKetQuaService;
+import org.springframework.mock.web.MockHttpServletRequest;
+import vn.edu.group12.qldt.service.hoidong.AdminTraCuuKetQuaService;
 
 @ExtendWith(MockitoExtension.class)
 class TraCuuKetQuaControllerTests {
 
     @Mock
     private TraCuuKetQuaService traCuuKetQuaService;
+
+    @Mock
+    private AdminTraCuuKetQuaService adminTraCuuKetQuaService;
 
     @InjectMocks
     private TraCuuKetQuaController controller;
@@ -50,7 +55,8 @@ class TraCuuKetQuaControllerTests {
             () -> controller.cuaToi(
                 "DEMO_DOT_MH26",
                 new ExtendedModelMap(),
-                () -> "DEMO_SV26"
+                () -> "DEMO_SV26",
+                new MockHttpServletRequest()
             )
         );
 

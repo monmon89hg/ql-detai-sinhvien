@@ -86,6 +86,13 @@ public class TongHopKetQuaService {
             .layDanhSachNhomChoTruongKhoa();
     }
 
+    // ADMIN xem danh sách nhóm và trạng thái kết quả, không thay đổi dữ liệu.
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
+    public List<NhomKetQuaHienThi> layDanhSachNhomChoAdmin() {
+        return hoiDongDeTaiRepository.layDanhSachNhomChoTruongKhoa();
+    }
+
     // Chỉ chủ tịch hội đồng được tổng hợp; toàn bộ kiểm tra và lưu cùng transaction.
     @PreAuthorize("hasRole('GIANG_VIEN')")
     @Transactional(isolation = Isolation.READ_COMMITTED)

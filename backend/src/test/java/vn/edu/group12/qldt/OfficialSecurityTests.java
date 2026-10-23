@@ -49,6 +49,17 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.math.BigDecimal;
+
+import vn.edu.group12.qldt.dto.hoidong.NhomKetQuaHienThi;
+import vn.edu.group12.qldt.entity.hoidong.PhieuChamDiem;
+import vn.edu.group12.qldt.entity.hoidong.PhieuChamDiemId;
+import vn.edu.group12.qldt.enums.hoidong.LoaiPhieuCham;
+import vn.edu.group12.qldt.enums.hoidong.TrangThaiPhieuCham;
+import vn.edu.group12.qldt.dto.hoidong.DotDangKyLuaChon;
+import vn.edu.group12.qldt.dto.hoidong.KetQuaTraCuuHienThi;
+
+import static org.hamcrest.Matchers.not;
 
 /** Real filter chain, login provider, BCrypt, UserDetailsService, controllers and templates; mock persistence/services. */
 @WebMvcTest({AuthController.class, DashboardController.class, NguoiDungController.class,
@@ -73,8 +84,10 @@ class OfficialSecurityTests {
     @MockitoBean ThanhVienHoiDongService thanhVienHoiDongService;
     @MockitoBean PhanCongHoiDongService phanCongHoiDongService;
     @MockitoBean ChamDiemHoiDongService chamDiemHoiDongService;
+    @MockitoBean AdminXemChamDiemService adminXemChamDiemService;
     @MockitoBean TongHopKetQuaService tongHopKetQuaService;
     @MockitoBean TraCuuKetQuaService traCuuKetQuaService;
+    @MockitoBean AdminTraCuuKetQuaService adminTraCuuKetQuaService;
 
     @Test
     void loginUsesTv1TemplateAndCsrf() throws Exception {
@@ -111,6 +124,160 @@ class OfficialSecurityTests {
         mvc.perform(post("/login").with(csrf()).param("email", "admin@example.test")
                 .param("matKhau", UUID.randomUUID().toString()))
             .andExpect(redirectedUrl("/login?error")).andExpect(unauthenticated());
+    }
+
+    @Test
+    void adminCanViewDraftGradingSheetButCannotSaveOrSubmit() throws Exception {
+        NhomKetQuaHienThi nhom = mock(NhomKetQuaHienThi.class);
+        when(nhom.getMaNhom()).thenReturn("N01");
+        when(nhom.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(nhom.getMaDeTai()).thenReturn("DT01");
+        when(nhom.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(nhom.getMaHoiDong()).thenReturn("HD01");
+        when(nhom.getTenHoiDong()).thenReturn("Hội đồng kiểm thử");
+
+        PhieuChamDiem phieu = new PhieuChamDiem();
+        phieu.setId(new PhieuChamDiemId("N01", "GV01"));
+        phieu.setLoaiPhieu(LoaiPhieuCham.HOI_DONG);
+        phieu.setTrangThai(TrangThaiPhieuCham.NHAP);
+        phieu.setDiem(new BigDecimal("8.25"));
+        phieu.setNhanXet("Nhận xét bản nháp");
+
+        when(adminXemChamDiemService.layDanhSachNhom())
+            .thenReturn(List.of(nhom));
+        when(adminXemChamDiemService.layThongTinNhom("N01"))
+            .thenReturn(nhom);
+        when(adminXemChamDiemService.layPhieuChamTheoNhom("N01"))
+            .thenReturn(List.of(phieu));
+
+        var admin = user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"));
+
+        mvc.perform(get("/cham-diem").with(admin))
+            .andExpect(status().isOk())
+            .andExpect(view().name("assessment/cham-diem/list"))
+            .andExpect(content().string(containsString("Xem phiếu")));
+
+        mvc.perform(get("/cham-diem/N01")
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("assessment/cham-diem/admin-detail"))
+            .andExpect(content().string(containsString("Nhận xét bản nháp")))
+            .andExpect(content().string(containsString("8.25")))
+            .andExpect(content().string(
+                not(containsString("/cham-diem/N01/luu-nhap"))));
+
+        mvc.perform(post("/cham-diem/N01/luu-nhap").with(csrf())
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isForbidden());
+
+        mvc.perform(post("/cham-diem/N01/nop").with(csrf())
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isForbidden());
+
+        verifyNoInteractions(chamDiemHoiDongService);
+    }
+
+    @Test
+    void adminCanViewAggregationStatusButCannotAggregate() throws Exception {
+        NhomKetQuaHienThi nhom = mock(NhomKetQuaHienThi.class);
+        when(nhom.getMaNhom()).thenReturn("N01");
+        when(nhom.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(nhom.getMaDeTai()).thenReturn("DT01");
+        when(nhom.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(nhom.getMaHoiDong()).thenReturn("HD01");
+        when(nhom.getTenHoiDong()).thenReturn("Hội đồng kiểm thử");
+
+        when(tongHopKetQuaService.layDanhSachNhomChoAdmin())
+            .thenReturn(List.of(nhom));
+
+        mvc.perform(get("/ket-qua/tong-hop")
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("assessment/ket-qua/tong-hop-list"))
+            .andExpect(content().string(containsString("Chưa tổng hợp")))
+            .andExpect(content().string(containsString("Chỉ xem")))
+            .andExpect(content().string(
+                not(containsString("/ket-qua/N01/tong-hop"))));
+
+        mvc.perform(post("/ket-qua/N01/tong-hop").with(csrf())
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isForbidden());
+
+        verify(tongHopKetQuaService).layDanhSachNhomChoAdmin();
+        verifyNoMoreInteractions(tongHopKetQuaService);
+    }
+
+    @Test
+    void adminCanViewPendingPublicationButCannotPublish() throws Exception {
+        NhomKetQuaHienThi nhom = mock(NhomKetQuaHienThi.class);
+        when(nhom.getMaNhom()).thenReturn("N01");
+        when(nhom.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(nhom.getMaDeTai()).thenReturn("DT01");
+        when(nhom.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(nhom.getMaHoiDong()).thenReturn("HD01");
+        when(nhom.getTenHoiDong()).thenReturn("Hội đồng kiểm thử");
+        when(nhom.getTrangThaiKetQua()).thenReturn("DA_TONG_HOP");
+        when(nhom.getDiemCuoi()).thenReturn(new BigDecimal("8.25"));
+
+        when(tongHopKetQuaService.layDanhSachNhomChoAdmin())
+            .thenReturn(List.of(nhom));
+
+        mvc.perform(get("/ket-qua/quan-ly")
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("assessment/ket-qua/quan-ly-list"))
+            .andExpect(content().string(containsString("Chờ công bố")))
+            .andExpect(content().string(containsString("8.25")))
+            .andExpect(content().string(containsString("Chỉ xem")))
+            .andExpect(content().string(
+                not(containsString("/ket-qua/N01/cong-bo"))));
+
+        mvc.perform(post("/ket-qua/N01/cong-bo").with(csrf())
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isForbidden());
+
+        verify(tongHopKetQuaService).layDanhSachNhomChoAdmin();
+        verifyNoMoreInteractions(tongHopKetQuaService);
+    }
+
+    @Test
+    void adminCanLookUpPublishedResultsByRoundOnly() throws Exception {
+        DotDangKyLuaChon dot = mock(DotDangKyLuaChon.class);
+        when(dot.getMaDot()).thenReturn("DOT01");
+        when(dot.getTenDot()).thenReturn("Đợt kiểm thử");
+
+        KetQuaTraCuuHienThi ketQua = mock(KetQuaTraCuuHienThi.class);
+        when(ketQua.getMaNhom()).thenReturn("N01");
+        when(ketQua.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(ketQua.getMaDeTai()).thenReturn("DT01");
+        when(ketQua.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(ketQua.getDiemCuoi()).thenReturn(new BigDecimal("8.25"));
+        when(ketQua.getNhanXetTongHop()).thenReturn("Đạt yêu cầu");
+
+        when(adminTraCuuKetQuaService.layDotCoKetQuaCongBo())
+            .thenReturn(List.of(dot));
+        when(adminTraCuuKetQuaService.traCuuTheoDot("DOT01"))
+            .thenReturn(List.of(ketQua));
+
+        mvc.perform(get("/ket-qua/cua-toi")
+                .param("maDot", "DOT01")
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("assessment/ket-qua/cua-toi"))
+            .andExpect(content().string(containsString("N01")))
+            .andExpect(content().string(containsString("8.25")))
+            .andExpect(content().string(containsString("Đạt yêu cầu")))
+            .andExpect(content().string(
+                containsString("của tất cả nhóm")));
+
+        mvc.perform(get("/ket-qua/cua-toi")
+                .param("maDot", "DOT_KHAC")
+                .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
+            .andExpect(status().isForbidden());
+
+        verify(adminTraCuuKetQuaService).traCuuTheoDot("DOT01");
+        verify(adminTraCuuKetQuaService, never()).traCuuTheoDot("DOT_KHAC");
+        verifyNoInteractions(traCuuKetQuaService);
     }
 
     @Test
@@ -168,7 +335,6 @@ class OfficialSecurityTests {
             Arguments.of("TRUONG_KHOA", "GET", "/admin/users"),
             Arguments.of("TRUONG_KHOA", "POST", "/cham-diem/N01/nop"),
             Arguments.of("ADMIN", "POST", "/hoi-dong/tao"),
-            Arguments.of("ADMIN", "GET", "/ket-qua/cua-toi"),
             Arguments.of("UNKNOWN", "GET", "/dashboard")
         );
     }

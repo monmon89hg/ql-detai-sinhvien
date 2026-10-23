@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.not;
 
 // Render the real templates and serve the real assets without accessing MySQL.
 @WebMvcTest(HoiDongController.class)
@@ -80,6 +81,24 @@ class FrontendIntegrationTests {
             .andExpect(content().string(containsString("HD_TEST")))
             .andExpect(content().string(containsString("/css/components.css")))
             .andExpect(content().string(containsString("/images/ute_logo.png")));
+    }
+
+    @Test
+    void adminCanViewCouncilDetailWithoutActionForms() throws Exception {
+        when(hoiDongService.layChiTiet("HD_TEST")).thenReturn(council());
+        when(phanCongHoiDongService.layDanhSachDaPhanCong("HD_TEST"))
+            .thenReturn(List.of());
+        when(thanhVienHoiDongService.layDanhSach("HD_TEST"))
+            .thenReturn(List.of());
+
+        mvc.perform(get("/hoi-dong/HD_TEST")
+                .with(user("TEST_ADMIN").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("HD_TEST")))
+            .andExpect(content().string(
+                not(containsString("/hoi-dong/HD_TEST/phan-cong"))))
+            .andExpect(content().string(
+                not(containsString("/hoi-dong/HD_TEST/thanh-vien"))));
     }
 
     @Test

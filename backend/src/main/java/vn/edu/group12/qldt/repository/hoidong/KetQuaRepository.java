@@ -56,6 +56,19 @@ public interface KetQuaRepository extends JpaRepository<KetQua, String> {
         @Param("maSinhVien") String maSinhVien
     );
 
+    // ADMIN chọn trong các đợt có ít nhất một kết quả đã công bố.
+    @Query(value = """
+        SELECT DISTINCT
+            d.ma_dot AS maDot,
+            d.ten_dot AS tenDot
+        FROM nhom_sinh_vien n
+        JOIN dot_dang_ky d ON d.ma_dot = n.ma_dot
+        JOIN ket_qua k ON k.ma_nhom = n.ma_nhom
+        WHERE k.trang_thai = 'CONG_BO'
+        ORDER BY d.ten_dot, d.ma_dot
+        """, nativeQuery = true)
+    List<DotDangKyLuaChon> layDotCoKetQuaCongBo();
+
     // Lọc theo đợt, đồng thời giới hạn kết quả vào nhóm của sinh viên đó.
     @Query(value = """
         SELECT
@@ -83,6 +96,32 @@ public interface KetQuaRepository extends JpaRepository<KetQua, String> {
         """, nativeQuery = true)
     List<KetQuaTraCuuHienThi> traCuuKetQuaCuaSinhVien(
         @Param("maSinhVien") String maSinhVien,
+        @Param("maDot") String maDot
+    );
+
+    // ADMIN xem kết quả đã công bố của mọi nhóm trong đợt được chọn.
+    @Query(value = """
+        SELECT
+            d.ma_dot AS maDot,
+            d.ten_dot AS tenDot,
+            n.ma_nhom AS maNhom,
+            n.ten_nhom AS tenNhom,
+            dt.ma_de_tai AS maDeTai,
+            dt.ten_de_tai AS tenDeTai,
+            k.diem_cuoi AS diemCuoi,
+            k.nhan_xet_tong_hop AS nhanXetTongHop,
+            k.cong_bo_luc AS congBoLuc
+        FROM nhom_sinh_vien n
+        JOIN dot_dang_ky d ON d.ma_dot = n.ma_dot
+        JOIN dang_ky_de_tai dk ON dk.ma_nhom = n.ma_nhom
+        JOIN de_tai dt ON dt.ma_de_tai = dk.ma_de_tai
+        JOIN ket_qua k ON k.ma_nhom = n.ma_nhom
+        WHERE n.ma_dot = :maDot
+            AND dt.ma_dot = d.ma_dot
+            AND k.trang_thai = 'CONG_BO'
+        ORDER BY k.cong_bo_luc DESC, n.ma_nhom
+        """, nativeQuery = true)
+    List<KetQuaTraCuuHienThi> traCuuKetQuaCongBoTheoDot(
         @Param("maDot") String maDot
     );
 

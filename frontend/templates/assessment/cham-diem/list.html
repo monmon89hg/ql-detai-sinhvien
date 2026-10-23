@@ -5,7 +5,6 @@
     <body>
         <a class="skip" href="#content">Bỏ qua điều hướng</a>
 
-        <!-- Dùng lại header và sidebar của giao diện chung. -->
         <div th:replace="~{fragments/header :: header}"></div>
         <div class="backdrop"></div>
 
@@ -24,7 +23,11 @@
 
                     <div class="page-heading">
                         <h1>Chấm điểm hội đồng</h1>
-                        <p>
+
+                        <p th:if="${laAdmin}">
+                            Xem các nhóm đã phân công hội đồng và phiếu chấm đã lưu.
+                        </p>
+                        <p th:unless="${laAdmin}">
                             Xem các nhóm được phân công và mở phiếu để
                             nhập điểm, nhận xét.
                         </p>
@@ -32,13 +35,18 @@
 
                     <section class="section">
                         <div class="section-top">
-                            <h2 class="section-title">
+                            <h2 class="section-title" th:if="${laAdmin}">
+                                Danh sách nhóm đã phân công hội đồng
+                            </h2>
+                            <h2 class="section-title" th:unless="${laAdmin}">
                                 Danh sách nhóm được chấm
                             </h2>
                         </div>
 
-                        <!-- Danh sách chỉ bao gồm các nhóm đang được phép chấm. -->
-                        <p th:if="${#lists.isEmpty(danhSachNhom)}">
+                        <p th:if="${laAdmin and #lists.isEmpty(danhSachNhom)}">
+                            Hiện chưa có nhóm nào đã được phân công hội đồng.
+                        </p>
+                        <p th:if="${!laAdmin and #lists.isEmpty(danhSachNhom)}">
                             Hiện chưa có nhóm nào đang ở giai đoạn chấm
                             thuộc phạm vi chấm của bạn.
                         </p>
@@ -81,7 +89,8 @@
                                             class="btn btn-primary"
                                             th:href="@{/cham-diem/{maNhom}(maNhom=${nhom.maNhom})}"
                                         >
-                                            Mở phiếu
+                                            <span th:if="${laAdmin}">Xem phiếu</span>
+                                            <span th:unless="${laAdmin}">Mở phiếu</span>
                                         </a>
                                     </td>
                                 </tr>
