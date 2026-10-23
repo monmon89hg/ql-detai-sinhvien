@@ -18,14 +18,22 @@
                 <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
-                    <div class="page-heading">
-                        <h1>Quản lý kết quả</h1>
-                        <p th:if="${laAdmin}">
-                            Xem trạng thái công bố và điểm cuối của các nhóm.
-                        </p>
-                        <p th:unless="${laAdmin}">
-                            Xem kết quả tổng hợp và công bố cho nhóm sinh viên.
-                        </p>
+                    <div class="page-heading result-export-heading">
+                        <div>
+                            <h1>Quản lý kết quả</h1>
+                            <p th:if="${laAdmin}">
+                                Xem trạng thái công bố và điểm cuối của các nhóm.
+                            </p>
+                            <p th:unless="${laAdmin}">
+                                Xem kết quả tổng hợp và công bố cho nhóm sinh viên.
+                            </p>
+                        </div>
+                        <a class="btn btn-excel"
+                           th:href="@{/ket-qua/quan-ly/xuat-excel}">
+                            <img class="excel-logo" th:src="@{/images/excel-logo.png}"
+                                 alt="" aria-hidden="true">
+                            Xuất kết quả
+                        </a>
                     </div>
 
                     <section class="section sv-panel">

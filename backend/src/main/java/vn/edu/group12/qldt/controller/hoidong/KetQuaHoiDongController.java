@@ -15,8 +15,16 @@ import java.security.Principal;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
+import vn.edu.group12.qldt.service.hoidong.XuatExcelKetQuaService;
+import vn.edu.group12.qldt.dto.hoidong.NhomKetQuaHienThi;
+import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/ket-qua")
@@ -24,12 +32,15 @@ public class KetQuaHoiDongController {
 
     private final TongHopKetQuaService tongHopKetQuaService;
     private final NguoiDungHienThiService nguoiDungHienThiService;
+    private final XuatExcelKetQuaService xuatExcelKetQuaService;
 
     public KetQuaHoiDongController(
             TongHopKetQuaService tongHopKetQuaService,
-            NguoiDungHienThiService nguoiDungHienThiService) {
+            NguoiDungHienThiService nguoiDungHienThiService,
+            XuatExcelKetQuaService xuatExcelKetQuaService) {
         this.tongHopKetQuaService = tongHopKetQuaService;
         this.nguoiDungHienThiService = nguoiDungHienThiService;
+        this.xuatExcelKetQuaService = xuatExcelKetQuaService;
     }
 
     // Chủ tịch tổng hợp; Trưởng khoa và ADMIN chỉ xem danh sách, trạng thái.
@@ -45,25 +56,20 @@ public class KetQuaHoiDongController {
         boolean chiXem = laAdmin || laTruongKhoa;
         model.addAttribute("chiXem", chiXem);
 
-        if (laAdmin) {
-            model.addAttribute(
-                "danhSachNhom",
-                tongHopKetQuaService.layDanhSachNhomChoAdmin()
-            );
-        } else if (laTruongKhoa) {
-            model.addAttribute(
-                "danhSachNhom",
-                tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()
-            );
-        } else {
-            model.addAttribute(
-                "danhSachNhom",
-                tongHopKetQuaService.layDanhSachNhomChoChuTich()
-            );
-        }
+        model.addAttribute("danhSachNhom", layDanhSachTongHop(request));
 
         model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
         return "assessment/ket-qua/tong-hop-list";
+    }
+
+    @GetMapping("/tong-hop/xuat-excel")
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_KHOA', 'ADMIN')")
+    public ResponseEntity<byte[]> xuatDanhSachTongHop(HttpServletRequest request)
+            throws IOException {
+        return taiExcel(
+            xuatExcelKetQuaService.xuat(layDanhSachTongHop(request), false),
+            "tong-hop-ket-qua.xlsx"
+        );
     }
 
     // Trưởng khoa quản lý và công bố; ADMIN chỉ xem kết quả.
@@ -77,20 +83,46 @@ public class KetQuaHoiDongController {
         boolean laAdmin = request.isUserInRole("ADMIN");
         model.addAttribute("laAdmin", laAdmin);
 
-        if (laAdmin) {
-            model.addAttribute(
-                "danhSachNhom",
-                tongHopKetQuaService.layDanhSachNhomChoAdmin()
-            );
-        } else {
-            model.addAttribute(
-                "danhSachNhom",
-                tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()
-            );
-        }
+        model.addAttribute("danhSachNhom", layDanhSachQuanLy(request));
 
         model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
         return "assessment/ket-qua/quan-ly-list";
+    }
+
+    @GetMapping("/quan-ly/xuat-excel")
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
+    public ResponseEntity<byte[]> xuatDanhSachQuanLy(HttpServletRequest request)
+            throws IOException {
+        return taiExcel(
+            xuatExcelKetQuaService.xuat(layDanhSachQuanLy(request), true),
+            "quan-ly-ket-qua.xlsx"
+        );
+    }
+
+    private List<NhomKetQuaHienThi> layDanhSachTongHop(HttpServletRequest request) {
+        if (request.isUserInRole("ADMIN")) {
+            return tongHopKetQuaService.layDanhSachNhomChoAdmin();
+        }
+        if (request.isUserInRole("TRUONG_KHOA")) {
+            return tongHopKetQuaService.layDanhSachNhomChoTruongKhoa();
+        }
+        return tongHopKetQuaService.layDanhSachNhomChoChuTich();
+    }
+
+    private List<NhomKetQuaHienThi> layDanhSachQuanLy(HttpServletRequest request) {
+        return request.isUserInRole("ADMIN")
+            ? tongHopKetQuaService.layDanhSachNhomChoAdmin()
+            : tongHopKetQuaService.layDanhSachNhomChoTruongKhoa();
+    }
+
+    private ResponseEntity<byte[]> taiExcel(byte[] noiDung, String tenFile) {
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + tenFile + "\"")
+            .contentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .cacheControl(CacheControl.noStore())
+            .body(noiDung);
     }
 
     // Chủ tịch hội đồng gửi yêu cầu tổng hợp kết quả của một nhóm.
