@@ -61,6 +61,10 @@ public class SecurityConfig {
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
                 .requestMatchers(HttpMethod.POST, "/de-tai/de-xuat")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
+                .requestMatchers(HttpMethod.GET, "/de-tai/sua/{id}")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/de-tai/sua/{id}", "/de-tai/{id}/ngung-nhan", "/de-tai/{id}/xoa")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/de-tai/duyet", "/dot-dang-ky/tao",
                         "/dot-dang-ky/sua/{id}").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.POST, "/de-tai/{id}/duyet",
