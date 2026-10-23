@@ -12,7 +12,7 @@
     <main class="page" id="content">
         <div th:replace="~{fragments/breadcrumb :: breadcrumb('Tra cứu kết quả')}"></div>
 
-        <div class="container">
+        <div class="container sv-module">
             <div class="page-heading">
                 <h1>Tra cứu kết quả</h1>
                 <p th:if="${laAdmin}">
@@ -23,8 +23,8 @@
                 </p>
             </div>
 
-            <section class="section">
-                <div class="section-top">
+            <section class="section sv-panel">
+                <div class="section-top sv-panel-heading">
                     <h2 class="section-title">Chọn đợt đăng ký</h2>
                 </div>
 
@@ -55,8 +55,8 @@
                 </form>
             </section>
 
-            <section class="section" th:if="${maDotDuocChon != null}">
-                <div class="section-top">
+            <section class="section sv-panel" th:if="${maDotDuocChon != null}">
+                <div class="section-top sv-panel-heading">
                     <h2 class="section-title">Kết quả đã công bố</h2>
                 </div>
 

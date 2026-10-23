@@ -16,7 +16,7 @@
                     th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý hội đồng')}"
                 ></div>
 
-                <div class="container">
+                <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
                     <div class="page-heading">
@@ -24,9 +24,9 @@
                         <p>Quản lý thông tin, thành viên và phân công hội đồng chấm đề tài.</p>
                     </div>
 
-                    <section class="section">
+                    <section class="section sv-panel">
 
-                        <div class="section-top">
+                        <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Danh sách hội đồng</h2>
 
                             <a
@@ -42,40 +42,42 @@
                             Chưa có hội đồng nào trong hệ thống.
                         </p>
 
-                        <table
-                            class="data-table"
+
+                        <div class="sv-table-wrap"
                             th:unless="${#lists.isEmpty(danhSachHoiDong)}"
                         >
-                            <thead>
-                                <tr>
-                                    <th scope="col">STT</th>
-                                    <th scope="col">Mã hội đồng</th>
-                                    <th scope="col">Tên hội đồng</th>
-                                    <th scope="col">Mã đợt</th>
-                                    <th scope="col">Địa điểm</th>
-                                    <th scope="col">Trạng thái</th>
-                                </tr>
-                            </thead>
+                            <table class="data-table sv-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">STT</th>
+                                        <th scope="col">Mã hội đồng</th>
+                                        <th scope="col">Tên hội đồng</th>
+                                        <th scope="col">Mã đợt</th>
+                                        <th scope="col">Địa điểm</th>
+                                        <th scope="col">Trạng thái</th>
+                                    </tr>
+                                </thead>
 
-                            <tbody>
-                                <tr th:each="hoiDong, viTri : ${danhSachHoiDong}">
-                                    <td th:text="${viTri.count}"></td>
-                                    <td>
-                                        <a
-                                            th:href="@{/hoi-dong/{maHoiDong}(maHoiDong=${hoiDong.maHoiDong})}"
-                                            th:text="${hoiDong.maHoiDong}"
-                                        ></a>
-                                    </td>
-                                    <td th:text="${hoiDong.tenHoiDong}"></td>
-                                    <td th:text="${hoiDong.maDot}"></td>
-                                    <td
-                                        th:text="${#strings.isEmpty(hoiDong.diaDiem)
-                                            ? 'Chưa cập nhật' : hoiDong.diaDiem}"
-                                    ></td>
-                                    <td th:text="${hoiDong.trangThai}"></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                <tbody>
+                                    <tr th:each="hoiDong, viTri : ${danhSachHoiDong}">
+                                        <td th:text="${viTri.count}"></td>
+                                        <td>
+                                            <a
+                                                th:href="@{/hoi-dong/{maHoiDong}(maHoiDong=${hoiDong.maHoiDong})}"
+                                                th:text="${hoiDong.maHoiDong}"
+                                            ></a>
+                                        </td>
+                                        <td th:text="${hoiDong.tenHoiDong}"></td>
+                                        <td th:text="${hoiDong.maDot}"></td>
+                                        <td
+                                            th:text="${#strings.isEmpty(hoiDong.diaDiem)
+                                                ? 'Chưa cập nhật' : hoiDong.diaDiem}"
+                                        ></td>
+                                        <td th:text="${hoiDong.trangThai}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
 
                     <div th:replace="~{fragments/footer :: footer}"></div>

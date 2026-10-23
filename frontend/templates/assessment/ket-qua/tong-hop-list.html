@@ -15,7 +15,7 @@
                     th:replace="~{fragments/breadcrumb :: breadcrumb('Tổng hợp kết quả')}"
                 ></div>
 
-                <div class="container">
+                <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
                     <div class="page-heading">
@@ -29,8 +29,8 @@
                         </p>
                     </div>
 
-                    <section class="section">
-                        <div class="section-top">
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
                             <h2 class="section-title" th:if="${laAdmin}">
                                 Danh sách nhóm đã phân công hội đồng
                             </h2>

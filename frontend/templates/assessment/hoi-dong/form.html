@@ -16,7 +16,7 @@
                     th:replace="~{fragments/breadcrumb :: breadcrumb('Tạo hội đồng')}"
                 ></div>
 
-                <div class="container">
+                <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
                     <div class="page-heading">
@@ -24,7 +24,7 @@
                         <p>Nhập thông tin để lập hội đồng ở trạng thái nháp.</p>
                     </div>
 
-                    <section class="section">
+                    <section class="section sv-panel">
                         <form
                             th:action="@{/hoi-dong/tao}"
                             th:object="${hoiDongForm}"
