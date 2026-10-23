@@ -18,15 +18,23 @@
                 <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
-                    <div class="page-heading">
-                        <h1>Tổng hợp kết quả</h1>
-                        <p th:if="${chiXem}">
-                            Xem trạng thái tổng hợp và điểm cuối của các nhóm.
-                        </p>
-                        <p th:unless="${chiXem}">
-                            Chủ tịch hội đồng tổng hợp sau khi tất cả
-                            giảng viên đã nộp phiếu chấm.
-                        </p>
+                    <div class="page-heading result-export-heading">
+                        <div>
+                            <h1>Tổng hợp kết quả</h1>
+                            <p th:if="${chiXem}">
+                                Xem trạng thái tổng hợp và điểm cuối của các nhóm.
+                            </p>
+                            <p th:unless="${chiXem}">
+                                Chủ tịch hội đồng tổng hợp sau khi tất cả
+                                giảng viên đã nộp phiếu chấm.
+                            </p>
+                        </div>
+                        <a class="btn btn-excel"
+                           th:href="@{/ket-qua/tong-hop/xuat-excel}">
+                            <img class="excel-logo" th:src="@{/images/excel-logo.png}"
+                                 alt="" aria-hidden="true">
+                            Xuất kết quả
+                        </a>
                     </div>
 
                     <section class="section sv-panel">
