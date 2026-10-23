@@ -61,6 +61,10 @@ public class SecurityConfig {
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
                 .requestMatchers(HttpMethod.POST, "/de-tai/de-xuat")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
+                .requestMatchers(HttpMethod.GET, "/de-tai/sua/{id}")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/de-tai/sua/{id}", "/de-tai/{id}/ngung-nhan", "/de-tai/{id}/xoa")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/de-tai/duyet", "/dot-dang-ky/tao",
                         "/dot-dang-ky/sua/{id}").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.POST, "/de-tai/{id}/duyet",
@@ -83,11 +87,13 @@ public class SecurityConfig {
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/ket-qua/tong-hop")
+                .requestMatchers(HttpMethod.GET, "/ket-qua/tong-hop",
+                        "/ket-qua/tong-hop/xuat-excel")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem/{id}/luu-nhap",
                         "/cham-diem/{id}/nop", "/ket-qua/{id}/tong-hop").hasRole("GIANG_VIEN")
-                .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly").hasAnyRole("TRUONG_KHOA","ADMIN")
+                .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly",
+                        "/ket-qua/quan-ly/xuat-excel").hasAnyRole("TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi")
                     .hasAnyRole("SINH_VIEN", "GIANG_VIEN", "TRUONG_KHOA", "ADMIN")

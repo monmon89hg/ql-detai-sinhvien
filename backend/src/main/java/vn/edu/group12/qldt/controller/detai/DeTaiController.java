@@ -107,6 +107,83 @@ public class DeTaiController {
         }
     }
 
+    // 4.1 Form chỉnh sửa đề tài
+    @GetMapping("/sua/{maDeTai}")
+    public String showEditForm(@PathVariable("maDeTai") String maDeTai,
+                               Principal principal,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            DeTai deTai = deTaiService.getDeTaiByMa(maDeTai);
+            List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
+
+            DeTaiDto dto = new DeTaiDto();
+            dto.setMaDeTai(deTai.getMaDeTai());
+            dto.setMaDot(deTai.getMaDot());
+            dto.setMaBoMon(deTai.getMaBoMon());
+            dto.setTenDeTai(deTai.getTenDeTai());
+            dto.setNoiDung(deTai.getNoiDung());
+            dto.setYeuCau(deTai.getYeuCau());
+
+            model.addAttribute("deTaiDto", dto);
+            model.addAttribute("deTai", deTai);
+            model.addAttribute("dots", dots);
+            model.addAttribute("activeMenu", "topics");
+            model.addAttribute("currentUserName", principal != null ? principal.getName() : "Người dùng");
+            return "topics/form";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/de-tai";
+        }
+    }
+
+    // 4.2 Xử lý cập nhật đề tài
+    @PostMapping("/sua/{maDeTai}")
+    public String updateTopic(@PathVariable("maDeTai") String maDeTai,
+                              @ModelAttribute("deTaiDto") DeTaiDto dto,
+                              Principal principal,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            String maNguoiCapNhat = CurrentUser.maNguoiDung();
+            deTaiService.capNhatDeTai(maDeTai, dto, maNguoiCapNhat);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật đề tài thành công!");
+            return "redirect:/de-tai/chi-tiet/" + maDeTai;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/de-tai/sua/" + maDeTai;
+        }
+    }
+
+    // 4.3 Cơ chế ngừng nhận đăng ký đề tài (thay vì xóa vật lý)
+    @PostMapping("/{maDeTai}/ngung-nhan")
+    public String stopAcceptingTopic(@PathVariable("maDeTai") String maDeTai,
+                                     Principal principal,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            String maNguoiThucHien = CurrentUser.maNguoiDung();
+            deTaiService.ngungNhanDeTai(maDeTai, maNguoiThucHien);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã chuyển đề tài sang trạng thái NGỪNG NHẬN đăng ký!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/de-tai/chi-tiet/" + maDeTai;
+    }
+
+    // 4.4 Cơ chế xóa hoặc hủy đề tài (chống xóa vật lý khi có dữ liệu liên quan)
+    @PostMapping("/{maDeTai}/xoa")
+    public String deleteOrCancelTopic(@PathVariable("maDeTai") String maDeTai,
+                                      Principal principal,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            String maNguoiThucHien = CurrentUser.maNguoiDung();
+            String msg = deTaiService.xoaHoacHuyDeTai(maDeTai, maNguoiThucHien);
+            redirectAttributes.addFlashAttribute("successMessage", msg);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/de-tai";
+    }
+
     // 5. Giao diện Trưởng khoa xét duyệt, phân công & công bố đề tài
     @GetMapping("/duyet")
     public String showApprovalList(Principal principal, Model model) {

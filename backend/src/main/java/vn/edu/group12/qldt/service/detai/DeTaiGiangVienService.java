@@ -86,4 +86,13 @@ public class DeTaiGiangVienService {
     public void xoaPhanCong(String maDeTai, String maGiangVien) {
         deTaiGiangVienRepository.deleteById_MaDeTaiAndId_MaGiangVien(maDeTai, maGiangVien);
     }
+
+    @Transactional
+    public void xoaTatCaPhanCongCuaDeTai(String maDeTai) {
+        deTaiGiangVienRepository.deleteById_MaDeTai(maDeTai);
+    }
+
+    public long countPhanCongByDeTai(String maDeTai) {
+        return deTaiGiangVienRepository.countById_MaDeTai(maDeTai);
+    }
 }

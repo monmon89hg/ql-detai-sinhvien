@@ -43,6 +43,7 @@
                             <option value="CHO_DUYET" th:selected="${selectedTrangThai == 'CHO_DUYET'}">Chờ duyệt</option>
                             <option value="DA_DUYET" th:selected="${selectedTrangThai == 'DA_DUYET'}">Đã duyệt</option>
                             <option value="CONG_BO" th:selected="${selectedTrangThai == 'CONG_BO'}">Đã công bố (SV xem)</option>
+                            <option value="NGUNG_NHAN" th:selected="${selectedTrangThai == 'NGUNG_NHAN'}">Ngừng nhận đăng ký</option>
                             <option value="TU_CHOI" th:selected="${selectedTrangThai == 'TU_CHOI'}">Bị từ chối</option>
                         </select>
                     </div>
@@ -82,11 +83,14 @@
                             <td><span class="status-pill" th:text="${dt.maDot}">DOT-01</span></td>
                             <td>
                                 <span class="status-pill"
-                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : 'background:#eaf2fa; color:#214967;')}"
+                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#eaf2fa; color:#214967;'))}"
                                       th:text="${dt.trangThai}">CONG_BO</span>
                             </td>
                             <td>
-                                <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Xem chi tiết &amp; Phân công</a>
+                                <div class="btn-row" style="gap: 6px;">
+                                    <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:28px; padding:3px 8px; font-size:12px;">Chi tiết</a>
+                                    <a th:if="${dt.trangThai != 'NGUNG_NHAN'}" th:href="@{/de-tai/sua/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:28px; padding:3px 8px; font-size:12px;">Sửa</a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

@@ -17,7 +17,11 @@
 
             <div class="page-heading">
                 <h1 th:text="${deTai.tenDeTai}">Tên đề tài</h1>
-                <p>Mã: <strong th:text="${deTai.maDeTai}">DT001</strong> | Đợt: <strong th:text="${dot.tenDot}">Đợt 1</strong> | Trạng thái: <span class="status-pill" th:text="${deTai.trangThai}">CONG_BO</span></p>
+                <p>Mã: <strong th:text="${deTai.maDeTai}">DT001</strong> | Đợt: <strong th:text="${dot.tenDot}">Đợt 1</strong> | Trạng thái: 
+                    <span class="status-pill"
+                          th:style="${deTai.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#eaf2fa; color:#214967;'))}"
+                          th:text="${deTai.trangThai}">CONG_BO</span>
+                </p>
             </div>
 
             <!-- THÔNG TIN NỘI DUNG VÀ YÊU CẦU -->
@@ -95,7 +99,17 @@
                 </form>
             </div>
 
-            <div class="btn-row">
+            <div class="btn-row" style="margin-top: 20px; gap: 10px; flex-wrap: wrap;">
+                <a th:if="${deTai.trangThai != 'NGUNG_NHAN'}" th:href="@{/de-tai/sua/{maDeTai}(maDeTai=${deTai.maDeTai})}" class="btn btn-primary">Chỉnh sửa đề tài</a>
+
+                <form th:if="${deTai.trangThai == 'CONG_BO' || deTai.trangThai == 'DA_DUYET'}" th:action="@{/de-tai/{maDeTai}/ngung-nhan(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline" style="color:#d97706; border-color:#d97706;" onclick="return confirm('Bạn có chắc muốn chuyển đề tài sang trạng thái NGỪNG NHẬN đăng ký?');">Ngừng nhận đăng ký</button>
+                </form>
+
+                <form th:action="@{/de-tai/{maDeTai}/xoa(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Bạn có chắc chắn muốn xóa/hủy đề tài này? Nếu đề tài đã có dữ liệu liên quan, hệ thống sẽ tự động chuyển sang NGỪNG NHẬN để bảo toàn lịch sử.');">Xóa / Hủy đề tài</button>
+                </form>
+
                 <a th:href="@{/de-tai}" class="btn btn-outline">Quay lại danh sách đề tài</a>
                 <a th:href="@{/de-tai/duyet}" class="btn btn-outline">Sang trang duyệt đề tài</a>
             </div>
