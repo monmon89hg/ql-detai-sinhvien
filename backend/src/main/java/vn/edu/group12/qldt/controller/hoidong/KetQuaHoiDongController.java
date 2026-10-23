@@ -32,21 +32,28 @@ public class KetQuaHoiDongController {
         this.nguoiDungHienThiService = nguoiDungHienThiService;
     }
 
-    // Chủ tịch tổng hợp; ADMIN chỉ xem danh sách và trạng thái.
+    // Chủ tịch tổng hợp; Trưởng khoa và ADMIN chỉ xem danh sách, trạng thái.
     @GetMapping("/tong-hop")
-    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_KHOA', 'ADMIN')")
     public String danhSachTongHop(
             Model model,
             Principal principal,
             HttpServletRequest request) {
 
         boolean laAdmin = request.isUserInRole("ADMIN");
-        model.addAttribute("laAdmin", laAdmin);
+        boolean laTruongKhoa = request.isUserInRole("TRUONG_KHOA");
+        boolean chiXem = laAdmin || laTruongKhoa;
+        model.addAttribute("chiXem", chiXem);
 
         if (laAdmin) {
             model.addAttribute(
                 "danhSachNhom",
                 tongHopKetQuaService.layDanhSachNhomChoAdmin()
+            );
+        } else if (laTruongKhoa) {
+            model.addAttribute(
+                "danhSachNhom",
+                tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()
             );
         } else {
             model.addAttribute(
@@ -88,7 +95,7 @@ public class KetQuaHoiDongController {
 
     // Chủ tịch hội đồng gửi yêu cầu tổng hợp kết quả của một nhóm.
     @PostMapping("/{maNhom}/tong-hop")
-    @PreAuthorize("hasRole('GIANG_VIEN')")
+    @PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
     public String tongHop(
             @PathVariable String maNhom,
             @RequestParam(required = false) String nhanXetTongHop,

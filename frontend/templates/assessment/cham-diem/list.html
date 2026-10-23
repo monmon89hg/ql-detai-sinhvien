@@ -24,10 +24,10 @@
                     <div class="page-heading">
                         <h1>Chấm điểm hội đồng</h1>
 
-                        <p th:if="${laAdmin}">
+                        <p th:if="${chiXem}">
                             Xem các nhóm đã phân công hội đồng và phiếu chấm đã lưu.
                         </p>
-                        <p th:unless="${laAdmin}">
+                        <p th:unless="${chiXem}">
                             Xem các nhóm được phân công và mở phiếu để
                             nhập điểm, nhận xét.
                         </p>
@@ -35,18 +35,18 @@
 
                     <section class="section sv-panel">
                         <div class="section-top sv-panel-heading">
-                            <h2 class="section-title" th:if="${laAdmin}">
+                            <h2 class="section-title" th:if="${chiXem}">
                                 Danh sách nhóm đã phân công hội đồng
                             </h2>
-                            <h2 class="section-title" th:unless="${laAdmin}">
+                            <h2 class="section-title" th:unless="${chiXem}">
                                 Danh sách nhóm được chấm
                             </h2>
                         </div>
 
-                        <p th:if="${laAdmin and #lists.isEmpty(danhSachNhom)}">
+                        <p th:if="${chiXem and #lists.isEmpty(danhSachNhom)}">
                             Hiện chưa có nhóm nào đã được phân công hội đồng.
                         </p>
-                        <p th:if="${!laAdmin and #lists.isEmpty(danhSachNhom)}">
+                        <p th:if="${!chiXem and #lists.isEmpty(danhSachNhom)}">
                             Hiện chưa có nhóm nào đang ở giai đoạn chấm
                             thuộc phạm vi chấm của bạn.
                         </p>
@@ -89,8 +89,8 @@
                                             class="btn btn-primary"
                                             th:href="@{/cham-diem/{maNhom}(maNhom=${nhom.maNhom})}"
                                         >
-                                            <span th:if="${laAdmin}">Xem phiếu</span>
-                                            <span th:unless="${laAdmin}">Mở phiếu</span>
+                                            <span th:if="${chiXem}">Xem phiếu</span>
+                                            <span th:unless="${chiXem}">Mở phiếu</span>
                                         </a>
                                     </td>
                                 </tr>

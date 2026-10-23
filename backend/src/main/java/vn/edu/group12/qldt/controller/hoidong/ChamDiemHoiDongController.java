@@ -48,18 +48,19 @@ public class ChamDiemHoiDongController {
     }
 
     // Mở danh sách nhóm phù hợp với vai trò đang đăng nhập.
-    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_KHOA', 'ADMIN')")
     @GetMapping
     public String danhSach(
             Model model,
             Principal principal,
             HttpServletRequest request) {
 
-        boolean laAdmin = request.isUserInRole("ADMIN");
-        model.addAttribute("laAdmin", laAdmin);
+        boolean chiXem = request.isUserInRole("ADMIN")
+            || request.isUserInRole("TRUONG_KHOA");
+        model.addAttribute("chiXem", chiXem);
 
-        if (laAdmin) {
-            // ADMIN xem các nhóm đã được phân công hội đồng.
+        if (chiXem) {
+            // Trưởng khoa và ADMIN xem các nhóm đã được phân công hội đồng.
             model.addAttribute(
                 "danhSachNhom",
                 adminXemChamDiemService.layDanhSachNhom()
@@ -80,8 +81,8 @@ public class ChamDiemHoiDongController {
         return "assessment/cham-diem/list";
     }
 
-    // ADMIN xem mọi phiếu đã lưu; giảng viên mở phiếu của mình.
-    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'ADMIN')")
+    // Trưởng khoa và ADMIN xem phiếu; giảng viên mở phiếu của mình.
+    @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_KHOA', 'ADMIN')")
     @GetMapping("/{maNhom}")
     public String moPhieu(
             @PathVariable("maNhom") String maNhom,
@@ -90,7 +91,8 @@ public class ChamDiemHoiDongController {
             RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
 
-        if (request.isUserInRole("ADMIN")) {
+        if (request.isUserInRole("ADMIN")
+                || request.isUserInRole("TRUONG_KHOA")) {
             try {
                 model.addAttribute(
                     "nhom",
@@ -154,7 +156,7 @@ public class ChamDiemHoiDongController {
         }
     }
 
-    @PreAuthorize("hasRole('GIANG_VIEN')")
+    @PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
     @PostMapping("/{maNhom}/luu-nhap")
     public String luuNhap(
             @PathVariable("maNhom") String maNhom,
@@ -204,7 +206,7 @@ public class ChamDiemHoiDongController {
         return "redirect:/cham-diem/{maNhom}";
     }
 
-    @PreAuthorize("hasRole('GIANG_VIEN')")
+    @PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
     @PostMapping("/{maNhom}/nop")
     public String nopPhieu(
             @PathVariable("maNhom") String maNhom,

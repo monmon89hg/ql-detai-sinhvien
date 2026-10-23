@@ -34,18 +34,19 @@ public class TraCuuKetQuaController {
         this.nguoiDungHienThiService = nguoiDungHienThiService;
     }
 
-    // Sinh viên xem kết quả nhóm mình; ADMIN xem mọi kết quả đã công bố.
+    // Sinh viên xem nhóm mình; Trưởng khoa và ADMIN xem kết quả đã công bố.
     @GetMapping("/cua-toi")
-    @PreAuthorize("hasAnyRole('SINH_VIEN', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SINH_VIEN', 'TRUONG_KHOA', 'ADMIN')")
     public String cuaToi(
             @RequestParam(required = false) String maDot,
             Model model,
             Principal principal,
             HttpServletRequest request) {
 
-        boolean laAdmin = request.isUserInRole("ADMIN");
+        boolean xemTatCa = request.isUserInRole("ADMIN")
+            || request.isUserInRole("TRUONG_KHOA");
 
-        List<DotDangKyLuaChon> danhSachDot = laAdmin
+        List<DotDangKyLuaChon> danhSachDot = xemTatCa
             ? adminTraCuuKetQuaService.layDotCoKetQuaCongBo()
             : traCuuKetQuaService.layDotCuaToi();
 
@@ -67,13 +68,13 @@ public class TraCuuKetQuaController {
             }
         }
 
-        model.addAttribute("laAdmin", laAdmin);
+        model.addAttribute("xemTatCa", xemTatCa);
         model.addAttribute("danhSachDot", danhSachDot);
         model.addAttribute("maDotDuocChon", maDotDuocChon);
 
         model.addAttribute(
             "danhSachKetQua",
-            laAdmin
+            xemTatCa
                 ? adminTraCuuKetQuaService.traCuuTheoDot(maDotDuocChon)
                 : traCuuKetQuaService.traCuuTheoDot(maDotDuocChon)
         );

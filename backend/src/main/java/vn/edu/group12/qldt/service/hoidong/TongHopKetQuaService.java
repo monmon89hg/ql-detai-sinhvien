@@ -94,7 +94,7 @@ public class TongHopKetQuaService {
     }
 
     // Chỉ chủ tịch hội đồng được tổng hợp; toàn bộ kiểm tra và lưu cùng transaction.
-    @PreAuthorize("hasRole('GIANG_VIEN')")
+    @PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public KetQua tongHop(String maNhom, String nhanXetTongHop) {
         if (maNhom == null || maNhom.isBlank()) {

@@ -20,10 +20,10 @@
 
                     <div class="page-heading">
                         <h1>Tổng hợp kết quả</h1>
-                        <p th:if="${laAdmin}">
+                        <p th:if="${chiXem}">
                             Xem trạng thái tổng hợp và điểm cuối của các nhóm.
                         </p>
-                        <p th:unless="${laAdmin}">
+                        <p th:unless="${chiXem}">
                             Chủ tịch hội đồng tổng hợp sau khi tất cả
                             giảng viên đã nộp phiếu chấm.
                         </p>
@@ -31,10 +31,10 @@
 
                     <section class="section sv-panel">
                         <div class="section-top sv-panel-heading">
-                            <h2 class="section-title" th:if="${laAdmin}">
+                            <h2 class="section-title" th:if="${chiXem}">
                                 Danh sách nhóm đã phân công hội đồng
                             </h2>
-                            <h2 class="section-title" th:unless="${laAdmin}">
+                            <h2 class="section-title" th:unless="${chiXem}">
                                 Nhóm thuộc hội đồng của bạn
                             </h2>
                         </div>
@@ -54,8 +54,8 @@
                                     <th scope="col">Hội đồng</th>
                                     <th scope="col">Trạng thái</th>
                                     <th scope="col">Điểm cuối</th>
-                                    <th scope="col" th:if="${laAdmin}">Quyền</th>
-                                    <th scope="col" th:unless="${laAdmin}">Thao tác</th>
+                                    <th scope="col" th:if="${chiXem}">Quyền</th>
+                                    <th scope="col" th:unless="${chiXem}">Thao tác</th>
                                 </tr>
                             </thead>
 
@@ -90,7 +90,7 @@
                                     ></td>
                                     <td>
                                         <form
-                                            th:if="${!laAdmin and nhom.trangThaiKetQua == null}"
+                                            th:if="${!chiXem and nhom.trangThaiKetQua == null}"
                                             th:action="@{/ket-qua/{maNhom}/tong-hop(
                                                 maNhom=${nhom.maNhom})}"
                                             method="post"
@@ -117,9 +117,9 @@
                                             </button>
                                         </form>
 
-                                        <span th:if="${laAdmin}">Chỉ xem</span>
+                                        <span th:if="${chiXem}">Chỉ xem</span>
                                         <span
-                                            th:if="${!laAdmin and nhom.trangThaiKetQua != null}"
+                                            th:if="${!chiXem and nhom.trangThaiKetQua != null}"
                                         >
                                             Đã xử lý
                                         </span>

@@ -36,7 +36,7 @@ import java.time.ZoneId;
 
 @Service
 @Validated
-@PreAuthorize("hasRole('GIANG_VIEN')")
+@PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
 public class ChamDiemHoiDongService {
 
     private final PhieuChamDiemRepository phieuChamDiemRepository;
