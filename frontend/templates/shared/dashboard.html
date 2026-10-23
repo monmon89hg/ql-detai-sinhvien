@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head th:replace="~{fragments/head :: head('Tổng quan')}"></head>
     <body>
         <a class="skip" href="#content">Bỏ qua điều hướng</a>
@@ -33,7 +33,7 @@
                             </svg>
                         </div>
                     </div>
-                    <section class="section">
+                    <section class="section" sec:authorize="isAuthenticated()">
                         <div class="section-top">
                             <div>
                                 <h2 class="section-title">
@@ -57,7 +57,7 @@
                             </div>
                         </div>
                         <div class="action-grid">
-                            <a href="/admin/users" th:href="@{/admin/users}" class="action-card">
+                            <a href="/admin/users" th:href="@{/admin/users}" class="action-card" sec:authorize="hasRole('ADMIN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -91,7 +91,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/admin/bo-mon" th:href="@{/admin/bo-mon}" class="action-card">
+                            <a href="/admin/bo-mon" th:href="@{/admin/bo-mon}" class="action-card" sec:authorize="hasRole('ADMIN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -124,7 +124,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/thong-bao" th:href="@{/thong-bao}" class="action-card">
+                            <a href="/thong-bao" th:href="@{/thong-bao}" class="action-card" sec:authorize="isAuthenticated()">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -158,7 +158,7 @@
                             </a>
                         </div>
                     </section>
-                    <section class="section">
+                    <section class="section" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                         <div class="section-top">
                             <div>
                                 <h2 class="section-title">
@@ -181,7 +181,7 @@
                             </div>
                         </div>
                         <div class="action-grid">
-                            <a href="/dot-dang-ky" th:href="@{/dot-dang-ky}" class="action-card">
+                            <a href="/dot-dang-ky" th:href="@{/dot-dang-ky}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -214,7 +214,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/de-tai" th:href="@{/de-tai}" class="action-card">
+                            <a href="/de-tai" th:href="@{/de-tai}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -248,7 +248,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/de-tai/de-xuat" th:href="@{/de-tai/de-xuat}" class="action-card">
+                            <a href="/de-tai/de-xuat" th:href="@{/de-tai/de-xuat}" class="action-card" sec:authorize="hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -280,7 +280,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/de-tai/duyet" th:href="@{/de-tai/duyet}" class="action-card">
+                            <a href="/de-tai/duyet" th:href="@{/de-tai/duyet}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -315,7 +315,7 @@
                             </a>
                         </div>
                     </section>
-                    <section class="section">
+                    <section class="section" sec:authorize="hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                         <div class="section-top">
                             <div>
                                 <h2 class="section-title">
@@ -338,7 +338,7 @@
                             </div>
                         </div>
                         <div class="action-grid">
-                            <a href="/nhom" th:href="@{/nhom}" class="action-card">
+                            <a href="/nhom" th:href="@{/nhom}" class="action-card" sec:authorize="hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -371,7 +371,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/nhom/tao" th:href="@{/nhom/tao}" class="action-card">
+                            <a href="/nhom/tao" th:href="@{/nhom/tao}" class="action-card" sec:authorize="hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -405,7 +405,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/nhom/cua-toi" th:href="@{/nhom/cua-toi}" class="action-card">
+                            <a href="/nhom/cua-toi" th:href="@{/nhom/cua-toi}" class="action-card" sec:authorize="hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -439,7 +439,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/dang-ky-de-tai" th:href="@{/dang-ky-de-tai}" class="action-card">
+                            <a href="/dang-ky-de-tai" th:href="@{/dang-ky-de-tai}" class="action-card" sec:authorize="hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -473,7 +473,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/dang-ky-de-tai/duyet" th:href="@{/dang-ky-de-tai/duyet}" class="action-card">
+                            <a href="/dang-ky-de-tai/duyet" th:href="@{/dang-ky-de-tai/duyet}" class="action-card" sec:authorize="hasRole('TRUONG_KHOA')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -506,7 +506,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/bao-cao" th:href="@{/bao-cao}" class="action-card">
+                            <a href="/bao-cao" th:href="@{/bao-cao}" class="action-card" sec:authorize="hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -540,7 +540,7 @@
                             </a>
                         </div>
                     </section>
-                    <section class="section">
+                    <section class="section" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                         <div class="section-top">
                             <div>
                                 <h2 class="section-title">
@@ -564,7 +564,7 @@
                             </div>
                         </div>
                         <div class="action-grid">
-                            <a href="/hoi-dong" th:href="@{/hoi-dong}" class="action-card">
+                            <a href="/hoi-dong" th:href="@{/hoi-dong}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -598,7 +598,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/cham-diem" th:href="@{/cham-diem}" class="action-card">
+                            <a href="/cham-diem" th:href="@{/cham-diem}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -630,7 +630,40 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/ket-qua/quan-ly" th:href="@{/ket-qua/quan-ly}" class="action-card">
+                            <a href="/ket-qua/tong-hop" th:href="@{/ket-qua/tong-hop}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN')">
+                                <span class="action-ico">
+                                    <svg
+                                        class="icon"
+                                        aria-hidden="true"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d="M4 5h16M4 12h16M4 19h16"/>
+                                        <path d="M8 3v4M12 10v4M16 17v4"/>
+                                    </svg>
+                                </span>
+                                <span class="action-body">
+                                    <span class="action-title">Tổng hợp kết quả</span>
+                                    <span class="action-caption">Xem và tổng hợp kết quả chấm điểm</span>
+                                </span>
+                                <svg
+                                    class="icon action-chevron"
+                                    aria-hidden="true"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="m9 18 6-6-6-6"/>
+                                </svg>
+                            </a>
+                            <a href="/ket-qua/quan-ly" th:href="@{/ket-qua/quan-ly}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -663,7 +696,7 @@
                                     <path d="m9 18 6-6-6-6"/>
                                 </svg>
                             </a>
-                            <a href="/ket-qua/cua-toi" th:href="@{/ket-qua/cua-toi}" class="action-card">
+                            <a href="/ket-qua/cua-toi" th:href="@{/ket-qua/cua-toi}" class="action-card" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                                 <span class="action-ico">
                                     <svg
                                         class="icon"
@@ -680,7 +713,7 @@
                                     </svg>
                                 </span>
                                 <span class="action-body">
-                                    <span class="action-title">Tra cứu kết quả</span>
+                                    <span class="action-title">Tra cứu điểm</span>
                                     <span class="action-caption">Xem kết quả theo quyền và đợt</span>
                                 </span>
                                 <svg
