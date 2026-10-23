@@ -16,7 +16,7 @@
                     th:replace="~{fragments/breadcrumb :: breadcrumb('Chi tiết hội đồng')}"
                 ></div>
 
-                <div class="container">
+                <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
                     <div class="page-heading">
@@ -24,8 +24,8 @@
                         <p th:text="${hoiDong.tenHoiDong}"></p>
                     </div>
 
-                    <section class="section">
-                        <div class="section-top">
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Thông tin hội đồng</h2>
 
                             <a
@@ -74,8 +74,8 @@
                         </table>
                     </section>
 
-                    <section class="section">
-                        <div class="section-top">
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Thành viên hội đồng</h2>
                         </div>
 
@@ -129,8 +129,8 @@
                         </table>
                     </section>
 
-                    <section class="section" th:if="${coQuyenThemThanhVien}">
-                        <div class="section-top">
+                    <section class="section sv-panel" th:if="${coQuyenThemThanhVien}">
+                        <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Thêm thành viên</h2>
                         </div>
 
@@ -203,8 +203,8 @@
                         </form>
                     </section>
 
-                    <section class="section" th:if="${coQuyenXacNhanSanSang}">
-                        <div class="section-top">
+                    <section class="section sv-panel" th:if="${coQuyenXacNhanSanSang}">
+                        <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Xác nhận hội đồng</h2>
                         </div>
 
@@ -229,8 +229,10 @@
                     </section>
 
                     <!-- Danh sách nhóm đã được phân công cho hội đồng đang xem. -->
-                    <section class="section">
-                        <h2 class="section-title">Nhóm đã được phân công</h2>
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Nhóm đã được phân công</h2>
+                        </div>
 
                         <p th:if="${#lists.isEmpty(danhSachNhomDaPhanCong)}">
                             Hội đồng chưa được phân công nhóm nào.
@@ -263,8 +265,10 @@
                     </section>
 
                     <!-- Chỉ hiện form khi trưởng khoa được phép phân công. -->
-                    <section class="section" th:if="${coQuyenPhanCong}">
-                        <h2 class="section-title">Phân công nhóm cho hội đồng</h2>
+                    <section class="section sv-panel" th:if="${coQuyenPhanCong}">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Phân công nhóm cho hội đồng</h2>
+                        </div>
 
                         <p th:if="${#lists.isEmpty(danhSachNhomCoThePhanCong)}">
                             Không có nhóm đủ điều kiện để phân công cho hội đồng này.

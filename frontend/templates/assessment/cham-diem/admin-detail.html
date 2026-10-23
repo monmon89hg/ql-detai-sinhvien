@@ -16,14 +16,16 @@
                     th:replace="~{fragments/breadcrumb :: breadcrumb('Xem phiếu chấm')}"
                 ></div>
 
-                <div class="container">
+                <div class="container sv-module">
                     <div class="page-heading">
                         <h1>Phiếu chấm của nhóm</h1>
                         <p>ADMIN chỉ xem các phiếu đã lưu, gồm cả phiếu nháp.</p>
                     </div>
 
-                    <section class="section">
-                        <h2 class="section-title">Thông tin nhóm</h2>
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Thông tin nhóm</h2>
+                        </div>
 
                         <table class="data-table">
                             <tbody>
@@ -43,8 +45,10 @@
                         </table>
                     </section>
 
-                    <section class="section">
-                        <h2 class="section-title">Các phiếu chấm đã lưu</h2>
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Các phiếu chấm đã lưu</h2>
+                        </div>
 
                         <p th:if="${#lists.isEmpty(danhSachPhieu)}">
                             Nhóm này chưa có phiếu chấm nào được lưu.
