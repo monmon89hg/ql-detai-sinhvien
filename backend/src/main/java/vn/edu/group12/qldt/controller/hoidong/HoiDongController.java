@@ -32,6 +32,7 @@ import vn.edu.group12.qldt.enums.hoidong.ChucDanhHoiDong;
 import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
 import vn.edu.group12.qldt.service.hoidong.PhanCongHoiDongService;
 import vn.edu.group12.qldt.dto.hoidong.PhanCongHoiDongForm;
+import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 
 
 @Controller
@@ -41,15 +42,18 @@ public class HoiDongController {
     private final ThanhVienHoiDongService thanhVienHoiDongService;
     // Xử lý danh sách và nghiệp vụ phân công nhóm cho hội đồng.
     private final PhanCongHoiDongService phanCongHoiDongService;
+    private final NguoiDungHienThiService nguoiDungHienThiService;
 
     public HoiDongController(
             HoiDongService hoiDongService,
             ThanhVienHoiDongService thanhVienHoiDongService,
-            PhanCongHoiDongService phanCongHoiDongService) {
+            PhanCongHoiDongService phanCongHoiDongService,
+            NguoiDungHienThiService nguoiDungHienThiService) {
 
         this.hoiDongService = hoiDongService;
         this.thanhVienHoiDongService = thanhVienHoiDongService;
         this.phanCongHoiDongService = phanCongHoiDongService;
+        this.nguoiDungHienThiService = nguoiDungHienThiService;
     }
 
     @GetMapping("/hoi-dong")
@@ -60,7 +64,7 @@ public class HoiDongController {
 
         model.addAttribute(
             "currentUserName",
-            principal != null ? principal.getName() : "Người dùng"
+            nguoiDungHienThiService.layHoTenHienTai()
         );
 
         model.addAttribute(
@@ -170,7 +174,7 @@ public class HoiDongController {
 
         model.addAttribute(
             "currentUserName",
-            principal != null ? principal.getName() : "Người dùng"
+            nguoiDungHienThiService.layHoTenHienTai()
         );
 
         return "assessment/hoi-dong/detail";
@@ -180,7 +184,7 @@ public class HoiDongController {
     public String hienThiFormTao(Model model, Principal principal) {
         model.addAttribute(
             "currentUserName",
-            principal != null ? principal.getName() : "Người dùng"
+            nguoiDungHienThiService.layHoTenHienTai()
         );
 
         model.addAttribute("hoiDongForm", new HoiDongForm());
@@ -203,7 +207,7 @@ public class HoiDongController {
 
         model.addAttribute(
             "currentUserName",
-            principal != null ? principal.getName() : "Người dùng"
+            nguoiDungHienThiService.layHoTenHienTai()
         );
 
         model.addAttribute(
