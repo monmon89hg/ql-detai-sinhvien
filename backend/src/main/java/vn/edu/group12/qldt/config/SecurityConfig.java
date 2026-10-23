@@ -82,15 +82,15 @@ public class SecurityConfig {
                         "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong")
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}")
-                    .hasAnyRole("GIANG_VIEN", "ADMIN")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/tong-hop")
-                    .hasAnyRole("GIANG_VIEN", "ADMIN")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem/{id}/luu-nhap",
                         "/cham-diem/{id}/nop", "/ket-qua/{id}/tong-hop").hasRole("GIANG_VIEN")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly").hasAnyRole("TRUONG_KHOA","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi")
-                    .hasAnyRole("SINH_VIEN", "ADMIN")
+                    .hasAnyRole("SINH_VIEN", "TRUONG_KHOA", "ADMIN")
 
                 // TV3: nhóm sinh viên, đăng ký đề tài và nộp báo cáo.
                 // Kiểm tra quyền nhóm trưởng, thành viên và giảng viên tiếp tục ở tầng Service.

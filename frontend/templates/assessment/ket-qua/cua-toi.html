@@ -15,10 +15,10 @@
         <div class="container sv-module">
             <div class="page-heading">
                 <h1>Tra cứu kết quả</h1>
-                <p th:if="${laAdmin}">
+                <p th:if="${xemTatCa}">
                     Xem kết quả đã công bố của tất cả nhóm theo đợt đăng ký.
                 </p>
-                <p th:unless="${laAdmin}">
+                <p th:unless="${xemTatCa}">
                     Xem kết quả đã công bố của nhóm bạn theo đợt đăng ký.
                 </p>
             </div>
@@ -28,10 +28,10 @@
                     <h2 class="section-title">Chọn đợt đăng ký</h2>
                 </div>
 
-                <p th:if="${laAdmin and #lists.isEmpty(danhSachDot)}">
+                <p th:if="${xemTatCa and #lists.isEmpty(danhSachDot)}">
                     Chưa có kết quả nào được công bố.
                 </p>
-                <p th:if="${!laAdmin and #lists.isEmpty(danhSachDot)}">
+                <p th:if="${!xemTatCa and #lists.isEmpty(danhSachDot)}">
                     Bạn chưa có kết quả nào được công bố.
                 </p>
 

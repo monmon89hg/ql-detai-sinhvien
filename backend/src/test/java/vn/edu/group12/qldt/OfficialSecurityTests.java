@@ -282,6 +282,79 @@ class OfficialSecurityTests {
     }
 
     @Test
+    void deanCanInspectGradingAndAggregationButCannotSubmitEither() throws Exception {
+        NhomKetQuaHienThi nhom = mock(NhomKetQuaHienThi.class);
+        when(nhom.getMaNhom()).thenReturn("N01");
+        when(nhom.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(nhom.getMaDeTai()).thenReturn("DT01");
+        when(nhom.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(nhom.getMaHoiDong()).thenReturn("HD01");
+        when(nhom.getTenHoiDong()).thenReturn("Hội đồng kiểm thử");
+        when(nhom.getTrangThaiKetQua()).thenReturn("DA_TONG_HOP");
+        when(nhom.getDiemCuoi()).thenReturn(new BigDecimal("8.25"));
+
+        when(adminXemChamDiemService.layDanhSachNhom()).thenReturn(List.of(nhom));
+        when(adminXemChamDiemService.layThongTinNhom("N01")).thenReturn(nhom);
+        when(adminXemChamDiemService.layPhieuChamTheoNhom("N01")).thenReturn(List.of());
+        when(tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()).thenReturn(List.of(nhom));
+
+        mvc.perform(get("/cham-diem")
+                .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Xem phiếu")));
+        mvc.perform(get("/cham-diem/N01")
+                .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("assessment/cham-diem/admin-detail"))
+            .andExpect(content().string(not(containsString("/cham-diem/N01/nop"))));
+        mvc.perform(get("/ket-qua/tong-hop")
+                .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("8.25")))
+            .andExpect(content().string(containsString("Chỉ xem")))
+            .andExpect(content().string(not(containsString("/ket-qua/N01/tong-hop"))));
+
+        for (String path : List.of("/cham-diem/N01/luu-nhap", "/cham-diem/N01/nop",
+                "/ket-qua/N01/tong-hop")) {
+            mvc.perform(post(path).with(csrf())
+                    .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA", "GIANG_VIEN"))))
+                .andExpect(status().isForbidden());
+        }
+        verifyNoInteractions(chamDiemHoiDongService);
+        verify(tongHopKetQuaService).layDanhSachNhomChoTruongKhoa();
+        verifyNoMoreInteractions(tongHopKetQuaService);
+    }
+
+    @Test
+    void deanCanLookUpPublishedResultsButNotAnUnknownRound() throws Exception {
+        DotDangKyLuaChon dot = mock(DotDangKyLuaChon.class);
+        when(dot.getMaDot()).thenReturn("DOT01");
+        when(dot.getTenDot()).thenReturn("Đợt kiểm thử");
+        KetQuaTraCuuHienThi ketQua = mock(KetQuaTraCuuHienThi.class);
+        when(ketQua.getMaNhom()).thenReturn("N01");
+        when(ketQua.getTenNhom()).thenReturn("Nhóm kiểm thử");
+        when(ketQua.getMaDeTai()).thenReturn("DT01");
+        when(ketQua.getTenDeTai()).thenReturn("Đề tài kiểm thử");
+        when(ketQua.getDiemCuoi()).thenReturn(new BigDecimal("8.25"));
+
+        when(adminTraCuuKetQuaService.layDotCoKetQuaCongBo()).thenReturn(List.of(dot));
+        when(adminTraCuuKetQuaService.traCuuTheoDot("DOT01")).thenReturn(List.of(ketQua));
+
+        mvc.perform(get("/ket-qua/cua-toi").param("maDot", "DOT01")
+                .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("N01")))
+            .andExpect(content().string(containsString("8.25")));
+        mvc.perform(get("/ket-qua/cua-toi").param("maDot", "DOT_KHAC")
+                .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
+            .andExpect(status().isForbidden());
+
+        verify(adminTraCuuKetQuaService).traCuuTheoDot("DOT01");
+        verify(adminTraCuuKetQuaService, never()).traCuuTheoDot("DOT_KHAC");
+        verifyNoInteractions(traCuuKetQuaService);
+    }
+
+    @Test
     void lockedAccountIsRejectedEvenWithTheCorrectPassword() throws Exception {
         String password = account("KHOA", "ADMIN");
         mvc.perform(post("/login").with(csrf()).param("email", "admin@example.test").param("matKhau", password))

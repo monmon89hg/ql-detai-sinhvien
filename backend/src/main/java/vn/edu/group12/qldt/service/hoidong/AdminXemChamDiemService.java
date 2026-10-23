@@ -25,13 +25,13 @@ public class AdminXemChamDiemService {
         this.phieuChamDiemRepository = phieuChamDiemRepository;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<NhomKetQuaHienThi> layDanhSachNhom() {
         return hoiDongDeTaiRepository.layDanhSachNhomChoTruongKhoa();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public NhomKetQuaHienThi layThongTinNhom(String maNhom) {
         return hoiDongDeTaiRepository.layDanhSachNhomChoTruongKhoa()
@@ -43,7 +43,7 @@ public class AdminXemChamDiemService {
             ));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<PhieuChamDiem> layPhieuChamTheoNhom(String maNhom) {
         if (!hoiDongDeTaiRepository.existsById(maNhom)) {
