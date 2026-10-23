@@ -11,7 +11,7 @@ import vn.edu.group12.qldt.dto.hoidong.KetQuaTraCuuHienThi;
 import vn.edu.group12.qldt.repository.hoidong.KetQuaRepository;
 
 @Service
-@PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA')")
+@PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA', 'GIANG_VIEN')")
 @Transactional(readOnly = true)
 public class AdminTraCuuKetQuaService {
 

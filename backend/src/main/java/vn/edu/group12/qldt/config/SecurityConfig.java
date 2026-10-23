@@ -90,7 +90,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly").hasAnyRole("TRUONG_KHOA","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi")
-                    .hasAnyRole("SINH_VIEN", "TRUONG_KHOA", "ADMIN")
+                    .hasAnyRole("SINH_VIEN", "GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
 
                 // TV3: nhóm sinh viên, đăng ký đề tài và nộp báo cáo.
                 // Kiểm tra quyền nhóm trưởng, thành viên và giảng viên tiếp tục ở tầng Service.
