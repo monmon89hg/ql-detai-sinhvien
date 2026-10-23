@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 import static org.hamcrest.Matchers.not;
 
 // Render the real templates and serve the real assets without accessing MySQL.
@@ -64,6 +65,9 @@ class FrontendIntegrationTests {
     @MockitoBean
     private NguoiDungVaiTroRepository nguoiDungVaiTroRepository;
 
+    @MockitoBean
+    private NguoiDungHienThiService nguoiDungHienThiService;
+
     @Test
     void staticAssetsKeepTheirPublicUrls() throws Exception {
         for (String url : List.of("/css/base.css", "/css/layout.css",
@@ -76,11 +80,15 @@ class FrontendIntegrationTests {
     void councilListRendersSharedFragments() throws Exception {
         when(hoiDongService.layDanhSach()).thenReturn(List.of(council()));
 
+        when(nguoiDungHienThiService.layHoTenHienTai())
+            .thenReturn("Đặng Minh Phú");
+
         mvc.perform(get("/hoi-dong").with(user("TEST_TK").roles("TRUONG_KHOA")))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("HD_TEST")))
             .andExpect(content().string(containsString("/css/components.css")))
-            .andExpect(content().string(containsString("/images/ute_logo.png")));
+            .andExpect(content().string(containsString("/images/ute_logo.png")))
+            .andExpect(content().string(containsString("Đặng Minh Phú")));
     }
 
     @Test

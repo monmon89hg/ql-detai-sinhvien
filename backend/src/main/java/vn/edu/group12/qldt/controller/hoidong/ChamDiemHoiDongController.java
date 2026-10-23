@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 
 @Controller
 @RequestMapping("/cham-diem")
@@ -34,12 +35,16 @@ public class ChamDiemHoiDongController {
 
     private final ChamDiemHoiDongService chamDiemHoiDongService;
     private final AdminXemChamDiemService adminXemChamDiemService;
+    private final NguoiDungHienThiService nguoiDungHienThiService;
 
     public ChamDiemHoiDongController(
             ChamDiemHoiDongService chamDiemHoiDongService,
-            AdminXemChamDiemService adminXemChamDiemService) {
+            AdminXemChamDiemService adminXemChamDiemService,
+            NguoiDungHienThiService nguoiDungHienThiService) {
+
         this.chamDiemHoiDongService = chamDiemHoiDongService;
         this.adminXemChamDiemService = adminXemChamDiemService;
+        this.nguoiDungHienThiService = nguoiDungHienThiService;
     }
 
     // Mở danh sách nhóm phù hợp với vai trò đang đăng nhập.
@@ -69,7 +74,7 @@ public class ChamDiemHoiDongController {
 
         model.addAttribute(
             "currentUserName",
-            principal != null ? principal.getName() : "Người dùng"
+            nguoiDungHienThiService.layHoTenHienTai()
         );
 
         return "assessment/cham-diem/list";
@@ -97,7 +102,7 @@ public class ChamDiemHoiDongController {
                 );
                 model.addAttribute(
                     "currentUserName",
-                    principal != null ? principal.getName() : "Người dùng"
+                    nguoiDungHienThiService.layHoTenHienTai()
                 );
 
                 return "assessment/cham-diem/admin-detail";
@@ -135,7 +140,7 @@ public class ChamDiemHoiDongController {
 
             model.addAttribute(
                 "currentUserName",
-                principal != null ? principal.getName() : "Người dùng"
+                nguoiDungHienThiService.layHoTenHienTai()
             );
 
             return "assessment/cham-diem/form";

@@ -16,16 +16,20 @@ import java.security.Principal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpServletRequest;
+import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 
 @Controller
 @RequestMapping("/ket-qua")
 public class KetQuaHoiDongController {
 
     private final TongHopKetQuaService tongHopKetQuaService;
+    private final NguoiDungHienThiService nguoiDungHienThiService;
 
     public KetQuaHoiDongController(
-            TongHopKetQuaService tongHopKetQuaService) {
+            TongHopKetQuaService tongHopKetQuaService,
+            NguoiDungHienThiService nguoiDungHienThiService) {
         this.tongHopKetQuaService = tongHopKetQuaService;
+        this.nguoiDungHienThiService = nguoiDungHienThiService;
     }
 
     // Chủ tịch tổng hợp; ADMIN chỉ xem danh sách và trạng thái.
@@ -51,7 +55,7 @@ public class KetQuaHoiDongController {
             );
         }
 
-        model.addAttribute("currentUserName", principal.getName());
+        model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
         return "assessment/ket-qua/tong-hop-list";
     }
 
@@ -78,7 +82,7 @@ public class KetQuaHoiDongController {
             );
         }
 
-        model.addAttribute("currentUserName", principal.getName());
+        model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
         return "assessment/ket-qua/quan-ly-list";
     }
 
