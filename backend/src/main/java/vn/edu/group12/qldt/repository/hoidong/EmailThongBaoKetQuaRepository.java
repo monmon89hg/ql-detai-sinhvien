@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import vn.edu.group12.qldt.entity.hoidong.EmailThongBaoKetQua;
 import vn.edu.group12.qldt.entity.hoidong.EmailThongBaoKetQuaId;
+import java.time.LocalDateTime;
+import org.springframework.data.repository.query.Param;
 
 public interface EmailThongBaoKetQuaRepository
         extends JpaRepository<EmailThongBaoKetQua, EmailThongBaoKetQuaId> {
@@ -21,7 +23,7 @@ public interface EmailThongBaoKetQuaRepository
                 AND (
                     lan_thu_cuoi_luc IS NULL
                     OR lan_thu_cuoi_luc <
-                        DATE_SUB(CURRENT_TIMESTAMP(6), INTERVAL 5 MINUTE)
+                        :nguongThuLai
                 )
             ORDER BY created_at, ma_nhom, ma_sinh_vien
             LIMIT 1
@@ -29,5 +31,7 @@ public interface EmailThongBaoKetQuaRepository
             """,
         nativeQuery = true
     )
-    Optional<EmailThongBaoKetQua> khoaEmailCanGui();
+    Optional<EmailThongBaoKetQua> khoaEmailCanGui(
+        @Param("nguongThuLai") LocalDateTime nguongThuLai
+    );
 }
