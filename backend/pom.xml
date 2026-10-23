@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Kiểm thử CI mặc định không gọi MySQL hay dịch vụ R2 thật. -->
+		<test.groups>!mysql &amp; !external</test.groups>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -159,8 +161,21 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<!-- Nạp agent trước khi chạy test để không cần tự attach trên Java 21. -->
+					<groups>${test.groups}</groups>
+					<failIfNoTests>true</failIfNoTests>
+					<!-- Giữ Mockito javaagent đã tích hợp ở PR #38. -->
 					<argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+					<systemPropertyVariables>
+						<app.ket-qua.email.enabled>false</app.ket-qua.email.enabled>
+						<spring.test.mockmvc.print>NONE</spring.test.mockmvc.print>
+					</systemPropertyVariables>
+					<includes>
+						<include>**/Test*.java</include>
+						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
+						<include>**/*TestCase.java</include>
+						<include>**/*IT.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -169,5 +184,13 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>ci-mysql</id>
+			<properties>
+				<test.groups>mysql</test.groups>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
