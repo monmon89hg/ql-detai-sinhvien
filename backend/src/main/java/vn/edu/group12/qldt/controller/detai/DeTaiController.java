@@ -130,6 +130,7 @@ public class DeTaiController {
             dto.setTenDeTai(deTai.getTenDeTai());
             dto.setNoiDung(deTai.getNoiDung());
             dto.setYeuCau(deTai.getYeuCau());
+            dto.setTrangThai(deTai.getTrangThai());
 
             model.addAttribute("deTaiDto", dto);
             model.addAttribute("deTai", deTai);
