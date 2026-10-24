@@ -24,12 +24,12 @@ JOIN nguoi_dung_vai_tro ndvt
   OR (tb.pham_vi = 'GIANG_VIEN' AND ndvt.ma_vai_tro = 'GIANG_VIEN')
 WHERE tb.pham_vi IN ('SINH_VIEN', 'GIANG_VIEN');
 
+ALTER TABLE thong_bao
+    DROP CHECK ck_thong_bao_pham_vi;
+
 UPDATE thong_bao
 SET pham_vi = 'CA_NHAN'
 WHERE pham_vi IN ('SINH_VIEN', 'GIANG_VIEN');
-
-ALTER TABLE thong_bao
-    DROP CHECK ck_thong_bao_pham_vi;
 
 ALTER TABLE thong_bao
     ADD CONSTRAINT ck_thong_bao_pham_vi
