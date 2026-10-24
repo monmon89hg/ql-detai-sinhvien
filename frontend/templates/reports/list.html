@@ -36,7 +36,8 @@
             <td><a class="btn btn-outline sv-btn-small" th:href="@{/bao-cao/{maNhom}/{phienBan}/tai(maNhom=${bc.maNhom},phienBan=${bc.phienBan})}">Tải PDF</a></td>
         </tr></tbody></table></div>
 </section>
-<div class="sv-info sv-info-soft">Chỉ nhóm trưởng được gửi báo cáo. Tối đa 20 MiB, định dạng PDF. Các phiên bản cũ được giữ để theo dõi lịch sử; tệp được tải qua hệ thống có kiểm tra quyền truy cập.</div>
+<div class="sv-info sv-alert-warning" role="note"><strong>Quy định nộp báo cáo:</strong> Chỉ nhóm trưởng được nộp khi nhóm và đề tài đủ điều kiện, đồng thời chưa quá hạn. Tệp tải lên phải là PDF hợp lệ, dung lượng không vượt quá 20 MiB.</div>
+<div class="sv-info sv-info-soft"><strong>Lịch sử phiên bản:</strong> Mỗi lần nộp hợp lệ tạo một phiên bản mới; những phiên bản trước vẫn được giữ lại. Chỉ người có quyền mới có thể tải tệp qua hệ thống.</div>
 
 <nav class="sv-actions" aria-label="Phân trang">
     <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/bao-cao(trang=${trang - 1},maNhom=${nhomCuaToi != null ? nhomCuaToi.maNhom : null})}">Trang trước</a>
