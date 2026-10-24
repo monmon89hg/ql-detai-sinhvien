@@ -76,13 +76,16 @@
                                         <div th:text="${nhom.tenHoiDong}"></div>
                                     </td>
                                     <td>
-                                        <span th:if="${nhom.trangThaiKetQua == null}">
+                                        <span class="workflow-status workflow-status--neutral"
+                                              th:if="${nhom.trangThaiKetQua == null}">
                                             Chưa tổng hợp
                                         </span>
-                                        <span th:if="${nhom.trangThaiKetQua == 'DA_TONG_HOP'}">
+                                        <span class="workflow-status workflow-status--waiting"
+                                              th:if="${nhom.trangThaiKetQua == 'DA_TONG_HOP'}">
                                             Chờ công bố
                                         </span>
-                                        <span th:if="${nhom.trangThaiKetQua == 'CONG_BO'}">
+                                        <span class="workflow-status workflow-status--completed"
+                                              th:if="${nhom.trangThaiKetQua == 'CONG_BO'}">
                                             Đã công bố
                                         </span>
                                     </td>

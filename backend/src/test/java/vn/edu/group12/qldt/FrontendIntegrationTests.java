@@ -158,7 +158,8 @@ class FrontendIntegrationTests {
         mvc.perform(get("/hoi-dong").with(user("TEST_TK").roles("TRUONG_KHOA")))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("HD_TEST")))
-            .andExpect(content().string(containsString(">Sẵn sàng</td>")))
+            .andExpect(content().string(containsString("workflow-status--waiting")))
+            .andExpect(content().string(containsString(">Sẵn sàng</span>")))
             .andExpect(content().string(not(containsString(">SAN_SANG</td>"))))
             .andExpect(content().string(containsString("/css/components.css")))
             .andExpect(content().string(containsString("/images/ute_logo.png")))
@@ -177,7 +178,8 @@ class FrontendIntegrationTests {
                 .with(user("TEST_ADMIN").roles("ADMIN")))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("HD_TEST")))
-            .andExpect(content().string(containsString(">Sẵn sàng</td>")))
+            .andExpect(content().string(containsString("workflow-status--waiting")))
+            .andExpect(content().string(containsString(">Sẵn sàng</span>")))
             .andExpect(content().string(
                 not(containsString("/hoi-dong/HD_TEST/phan-cong"))))
             .andExpect(content().string(

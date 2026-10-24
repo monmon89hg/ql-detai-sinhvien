@@ -306,6 +306,38 @@
     font-weight: 600
 }
 
+.workflow-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.workflow-status--neutral {
+    background: #edf2f6;
+    color: #43586d;
+}
+
+.workflow-status--waiting {
+    background: #fff3d6;
+    color: #875400;
+}
+
+.workflow-status--active {
+    background: #e7f2fb;
+    color: #155c85;
+}
+
+.workflow-status--completed {
+    background: #e5f5ec;
+    color: #17643d;
+}
+
 @media (max-width: 1180px) {
     .action-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr))
