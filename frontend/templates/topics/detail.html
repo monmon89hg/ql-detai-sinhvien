@@ -60,7 +60,7 @@
                             </td>
                         </tr>
                         <tr th:each="pc : ${phanCongs}">
-                            <td><strong class="route-line" th:text="${pc.maGiangVien}">DEMO_GV01</strong></td>
+                            <td><strong class="route-line" th:text="${pc.maGiangVien}">Mã giảng viên</strong></td>
                             <td>
                                 <span class="status-pill"
                                       th:style="${pc.loaiPhanCong == 'HUONG_DAN' ? 'background:#eaf2fa; color:#214967;' : 'background:#fef7e7; color:#815915;'}"
@@ -83,7 +83,7 @@
                 <form th:action="@{/de-tai/{maDeTai}/phan-cong(maDeTai=${deTai.maDeTai})}" method="post" style="margin-top:20px; padding-top:15px; border-top:1px dashed var(--border); display:grid; grid-template-columns: 1fr 1fr 150px; gap:12px; align-items:end;">
                     <div class="form-field" style="margin:0;">
                         <label>Mã Giảng viên *</label>
-                        <input type="text" name="maGiangVien" class="form-control" placeholder="Nhập mã GV (VD: DEMO_GV01)..." required>
+                        <input type="text" name="maGiangVien" class="form-control" placeholder="Nhập mã giảng viên cần phân công" required>
                     </div>
 
                     <div class="form-field" style="margin:0;">

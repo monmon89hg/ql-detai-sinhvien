@@ -17,6 +17,7 @@ import vn.edu.group12.qldt.service.detai.DeTaiGiangVienService;
 import vn.edu.group12.qldt.service.detai.DeTaiService;
 import vn.edu.group12.qldt.service.detai.DotDangKyService;
 import vn.edu.group12.qldt.service.detai.LichIcsService;
+import vn.edu.group12.qldt.repository.admin.BoMonRepository;
 
 import java.security.Principal;
 import java.util.List;
@@ -36,6 +37,9 @@ public class DeTaiController {
 
     @Autowired
     private LichIcsService lichIcsService;
+
+    @Autowired
+    private BoMonRepository boMonRepository;
 
     // 1. Danh sách đề tài (Tìm kiếm & Lọc theo đợt, bộ môn, trạng thái, từ khóa)
     @GetMapping
@@ -88,6 +92,7 @@ public class DeTaiController {
     public String showProposeForm(Principal principal, Model model) {
         List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
         model.addAttribute("deTaiDto", new DeTaiDto());
+        model.addAttribute("boMons", boMonRepository.findAllByHoatDongTrueOrderByTenBoMonAsc());
         model.addAttribute("dots", dots);
         model.addAttribute("activeMenu", "propose");
         model.addAttribute("currentUserName", principal != null ? principal.getName() : "TS. Trần Văn B (Giảng viên)");
@@ -133,6 +138,7 @@ public class DeTaiController {
             dto.setTrangThai(deTai.getTrangThai());
 
             model.addAttribute("deTaiDto", dto);
+            model.addAttribute("boMons", boMonRepository.findAllByHoatDongTrueOrderByTenBoMonAsc());
             model.addAttribute("deTai", deTai);
             model.addAttribute("dots", dots);
             model.addAttribute("activeMenu", "topics");
