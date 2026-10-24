@@ -478,6 +478,8 @@ class OfficialSecurityTests {
             Arguments.of("SINH_VIEN", "GET", "/de-tai/duyet"),
             Arguments.of("SINH_VIEN", "POST", "/de-tai/de-xuat"),
             Arguments.of("SINH_VIEN", "GET", "/dot-dang-ky/tao"),
+            Arguments.of("SINH_VIEN", "GET", "/dot-dang-ky"),
+            Arguments.of("GIANG_VIEN", "GET", "/dot-dang-ky"),
             Arguments.of("SINH_VIEN", "POST", "/thong-bao/quan-ly"),
             Arguments.of("GIANG_VIEN", "POST", "/de-tai/DT01/duyet"),
             Arguments.of("GIANG_VIEN", "POST", "/de-tai/DT01/phan-cong"),

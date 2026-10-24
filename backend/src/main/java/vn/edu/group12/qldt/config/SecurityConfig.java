@@ -57,6 +57,10 @@ public class SecurityConfig {
                         "/thong-bao/quan-ly/{id}/an").hasAnyRole("ADMIN", "TRUONG_KHOA")
 
                 // TV2: preserve the existing staging policy; no implicit ADMIN inheritance.
+                .requestMatchers(HttpMethod.GET, "/dot-dang-ky/{maDot}/lich.ics", "/de-tai/lich/{maDot}.ics")
+                    .hasAnyRole("ADMIN", "TRUONG_KHOA", "TRUONG_BO_MON", "GIANG_VIEN", "SINH_VIEN")
+                .requestMatchers(HttpMethod.GET, "/dot-dang-ky")
+                    .hasAnyRole("TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/de-tai/de-xuat")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
                 .requestMatchers(HttpMethod.POST, "/de-tai/de-xuat")
@@ -119,7 +123,7 @@ public class SecurityConfig {
                     .hasRole("SINH_VIEN")
 
                 .requestMatchers(HttpMethod.GET, "/", "/dashboard", "/thong-bao",
-                        "/de-tai", "/de-tai/chi-tiet/{id}", "/dot-dang-ky")
+                        "/de-tai", "/de-tai/chi-tiet/{id}")
                     .hasAnyRole("ADMIN", "TRUONG_KHOA", "TRUONG_BO_MON", "GIANG_VIEN", "SINH_VIEN")
                 // Mọi tuyến đường chưa được xét duyệt đều bị từ chối.
                 .anyRequest().denyAll()
