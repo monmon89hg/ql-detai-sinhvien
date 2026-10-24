@@ -80,12 +80,14 @@ class OfficialSecurityTests {
     @MockitoBean DeTaiService deTaiService;
     @MockitoBean DeTaiGiangVienService deTaiGiangVienService;
     @MockitoBean DotDangKyService dotDangKyService;
+    @MockitoBean LichIcsService lichIcsService;
     @MockitoBean HoiDongService hoiDongService;
     @MockitoBean ThanhVienHoiDongService thanhVienHoiDongService;
     @MockitoBean PhanCongHoiDongService phanCongHoiDongService;
     @MockitoBean ChamDiemHoiDongService chamDiemHoiDongService;
     @MockitoBean AdminXemChamDiemService adminXemChamDiemService;
     @MockitoBean TongHopKetQuaService tongHopKetQuaService;
+    @MockitoBean XuatExcelKetQuaService xuatExcelKetQuaService;
     @MockitoBean TraCuuKetQuaService traCuuKetQuaService;
     @MockitoBean AdminTraCuuKetQuaService adminTraCuuKetQuaService;
     @MockitoBean NguoiDungHienThiService nguoiDungHienThiService;
@@ -179,6 +181,47 @@ class OfficialSecurityTests {
     }
 
     @Test
+    void excelDownloadsUseTheSameListsAndRolesAsTheirPages() throws Exception {
+        mvc.perform(get("/images/excel-logo.png"))
+            .andExpect(status().isOk());
+
+        NhomKetQuaHienThi nhom = mock(NhomKetQuaHienThi.class);
+        List<NhomKetQuaHienThi> danhSach = List.of(nhom);
+        byte[] file = {1, 2, 3};
+
+        when(tongHopKetQuaService.layDanhSachNhomChoChuTich()).thenReturn(danhSach);
+        when(tongHopKetQuaService.layDanhSachNhomChoTruongKhoa()).thenReturn(danhSach);
+        when(xuatExcelKetQuaService.xuat(danhSach, false)).thenReturn(file);
+        when(xuatExcelKetQuaService.xuat(danhSach, true)).thenReturn(file);
+
+        mvc.perform(get("/ket-qua/tong-hop/xuat-excel")
+                .with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition",
+                "attachment; filename=\"tong-hop-ket-qua.xlsx\""))
+            .andExpect(content().bytes(file));
+
+        mvc.perform(get("/ket-qua/quan-ly/xuat-excel")
+                .with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition",
+                "attachment; filename=\"quan-ly-ket-qua.xlsx\""))
+            .andExpect(content().bytes(file));
+
+        mvc.perform(get("/ket-qua/quan-ly/xuat-excel")
+                .with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))
+            .andExpect(status().isForbidden());
+        mvc.perform(get("/ket-qua/tong-hop/xuat-excel")
+                .with(user(SecurityTestUsers.user("SV", "SINH_VIEN"))))
+            .andExpect(status().isForbidden());
+
+        verify(tongHopKetQuaService).layDanhSachNhomChoChuTich();
+        verify(tongHopKetQuaService).layDanhSachNhomChoTruongKhoa();
+        verify(xuatExcelKetQuaService).xuat(danhSach, false);
+        verify(xuatExcelKetQuaService).xuat(danhSach, true);
+    }
+
+    @Test
     void adminCanViewAggregationStatusButCannotAggregate() throws Exception {
         NhomKetQuaHienThi nhom = mock(NhomKetQuaHienThi.class);
         when(nhom.getMaNhom()).thenReturn("N01");
@@ -195,6 +238,8 @@ class OfficialSecurityTests {
                 .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
             .andExpect(status().isOk())
             .andExpect(view().name("assessment/ket-qua/tong-hop-list"))
+            .andExpect(content().string(containsString("/ket-qua/tong-hop/xuat-excel")))
+            .andExpect(content().string(containsString("/images/excel-logo.png")))
             .andExpect(content().string(containsString("Chưa tổng hợp")))
             .andExpect(content().string(containsString("Chỉ xem")))
             .andExpect(content().string(
@@ -227,6 +272,8 @@ class OfficialSecurityTests {
                 .with(user(SecurityTestUsers.user("DB_ADMIN", "ADMIN"))))
             .andExpect(status().isOk())
             .andExpect(view().name("assessment/ket-qua/quan-ly-list"))
+            .andExpect(content().string(containsString("/ket-qua/quan-ly/xuat-excel")))
+            .andExpect(content().string(containsString("/images/excel-logo.png")))
             .andExpect(content().string(containsString("Chờ công bố")))
             .andExpect(content().string(containsString("8.25")))
             .andExpect(content().string(containsString("Chỉ xem")))
@@ -466,6 +513,8 @@ class OfficialSecurityTests {
 
     @Test
     void allowedRolesReachTheirActualControllers() throws Exception {
+        when(hoiDongService.traCuuDanhSach(null)).thenReturn(
+            new vn.edu.group12.qldt.dto.hoidong.DanhSachHoiDong(List.of(), "", List.of(), java.util.Set.of()));
         mvc.perform(get("/hoi-dong").with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
             .andExpect(status().isOk()).andExpect(view().name("assessment/hoi-dong/list"));
         mvc.perform(get("/cham-diem").with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))

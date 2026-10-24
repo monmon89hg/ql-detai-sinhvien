@@ -25,6 +25,10 @@ public interface DeTaiRepository extends JpaRepository<DeTai, String> {
     // Lấy danh sách đề tài do chính 1 Giảng viên đề xuất
     List<DeTai> findByMaNguoiDeXuat(String maNguoiDeXuat);
 
+    // Đếm số lượng đăng ký của sinh viên đối với đề tài này
+    @Query(value = "SELECT COUNT(*) FROM dang_ky_de_tai WHERE ma_de_tai = :maDeTai", nativeQuery = true)
+    long countDangKyByMaDeTai(@Param("maDeTai") String maDeTai);
+
     // Tìm kiếm và lọc linh hoạt: theo đợt, bộ môn, trạng thái và từ khóa tìm kiếm
     @Query("SELECT d FROM DeTai d WHERE " +
            "(:maDot IS NULL OR :maDot = '' OR d.maDot = :maDot) AND " +

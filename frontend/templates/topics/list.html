@@ -20,7 +20,8 @@
                     <h1>Danh sách đề tài nghiên cứu</h1>
                     <p>Tra cứu và tìm kiếm đề tài theo đợt đăng ký, bộ môn và trạng thái.</p>
                 </div>
-                <div>
+                <div style="display:flex; gap:10px;">
+                    <a th:if="${selectedMaDot != null and !selectedMaDot.isEmpty()}" th:href="@{/dot-dang-ky/{maDot}/lich.ics(maDot=${selectedMaDot})}" class="btn btn-outline" style="color:#1a73e8; border-color:#1a73e8;">📅 Lịch đợt này (.ics)</a>
                     <a th:href="@{/de-tai/de-xuat}" class="btn btn-primary">+ Đề xuất đề tài mới</a>
                 </div>
             </div>
@@ -43,6 +44,7 @@
                             <option value="CHO_DUYET" th:selected="${selectedTrangThai == 'CHO_DUYET'}">Chờ duyệt</option>
                             <option value="DA_DUYET" th:selected="${selectedTrangThai == 'DA_DUYET'}">Đã duyệt</option>
                             <option value="CONG_BO" th:selected="${selectedTrangThai == 'CONG_BO'}">Đã công bố (SV xem)</option>
+                            <option value="NGUNG_NHAN" th:selected="${selectedTrangThai == 'NGUNG_NHAN'}">Ngừng nhận đăng ký</option>
                             <option value="TU_CHOI" th:selected="${selectedTrangThai == 'TU_CHOI'}">Bị từ chối</option>
                         </select>
                     </div>
@@ -82,11 +84,14 @@
                             <td><span class="status-pill" th:text="${dt.maDot}">DOT-01</span></td>
                             <td>
                                 <span class="status-pill"
-                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : 'background:#eaf2fa; color:#214967;')}"
-                                      th:text="${dt.trangThai}">CONG_BO</span>
+                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (dt.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1;' : (dt.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#f1f5f9; color:#475569;'))))}"
+                                      th:text="${dt.tenTrangThaiHienThi}">Đã công bố</span>
                             </td>
                             <td>
-                                <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Xem chi tiết &amp; Phân công</a>
+                                <div class="btn-row" style="gap: 6px;">
+                                    <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:28px; padding:3px 8px; font-size:12px;">Chi tiết</a>
+                                    <a th:if="${dt.trangThai != 'NGUNG_NHAN'}" th:href="@{/de-tai/sua/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:28px; padding:3px 8px; font-size:12px;">Sửa</a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

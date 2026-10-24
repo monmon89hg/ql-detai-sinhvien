@@ -3,6 +3,8 @@ package vn.edu.group12.qldt.controller.detai;
 import vn.edu.group12.qldt.service.auth.CurrentUser;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import vn.edu.group12.qldt.entity.detai.DotDangKy;
 import vn.edu.group12.qldt.service.detai.DeTaiGiangVienService;
 import vn.edu.group12.qldt.service.detai.DeTaiService;
 import vn.edu.group12.qldt.service.detai.DotDangKyService;
+import vn.edu.group12.qldt.service.detai.LichIcsService;
 
 import java.security.Principal;
 import java.util.List;
@@ -30,6 +33,9 @@ public class DeTaiController {
 
     @Autowired
     private DeTaiGiangVienService deTaiGiangVienService;
+
+    @Autowired
+    private LichIcsService lichIcsService;
 
     // 1. Danh sách đề tài (Tìm kiếm & Lọc theo đợt, bộ môn, trạng thái, từ khóa)
     @GetMapping
@@ -105,6 +111,84 @@ public class DeTaiController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
             return "redirect:/de-tai/de-xuat";
         }
+    }
+
+    // 4.1 Form chỉnh sửa đề tài
+    @GetMapping("/sua/{maDeTai}")
+    public String showEditForm(@PathVariable("maDeTai") String maDeTai,
+                               Principal principal,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            DeTai deTai = deTaiService.getDeTaiByMa(maDeTai);
+            List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
+
+            DeTaiDto dto = new DeTaiDto();
+            dto.setMaDeTai(deTai.getMaDeTai());
+            dto.setMaDot(deTai.getMaDot());
+            dto.setMaBoMon(deTai.getMaBoMon());
+            dto.setTenDeTai(deTai.getTenDeTai());
+            dto.setNoiDung(deTai.getNoiDung());
+            dto.setYeuCau(deTai.getYeuCau());
+            dto.setTrangThai(deTai.getTrangThai());
+
+            model.addAttribute("deTaiDto", dto);
+            model.addAttribute("deTai", deTai);
+            model.addAttribute("dots", dots);
+            model.addAttribute("activeMenu", "topics");
+            model.addAttribute("currentUserName", principal != null ? principal.getName() : "Người dùng");
+            return "topics/form";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/de-tai";
+        }
+    }
+
+    // 4.2 Xử lý cập nhật đề tài
+    @PostMapping("/sua/{maDeTai}")
+    public String updateTopic(@PathVariable("maDeTai") String maDeTai,
+                              @ModelAttribute("deTaiDto") DeTaiDto dto,
+                              Principal principal,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            String maNguoiCapNhat = CurrentUser.maNguoiDung();
+            deTaiService.capNhatDeTai(maDeTai, dto, maNguoiCapNhat);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật đề tài thành công!");
+            return "redirect:/de-tai/chi-tiet/" + maDeTai;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/de-tai/sua/" + maDeTai;
+        }
+    }
+
+    // 4.3 Cơ chế ngừng nhận đăng ký đề tài (thay vì xóa vật lý)
+    @PostMapping("/{maDeTai}/ngung-nhan")
+    public String stopAcceptingTopic(@PathVariable("maDeTai") String maDeTai,
+                                     Principal principal,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            String maNguoiThucHien = CurrentUser.maNguoiDung();
+            deTaiService.ngungNhanDeTai(maDeTai, maNguoiThucHien);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã chuyển đề tài sang trạng thái NGỪNG NHẬN đăng ký!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/de-tai/chi-tiet/" + maDeTai;
+    }
+
+    // 4.4 Cơ chế xóa hoặc hủy đề tài (chống xóa vật lý khi có dữ liệu liên quan)
+    @PostMapping("/{maDeTai}/xoa")
+    public String deleteOrCancelTopic(@PathVariable("maDeTai") String maDeTai,
+                                      Principal principal,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            String maNguoiThucHien = CurrentUser.maNguoiDung();
+            String msg = deTaiService.xoaHoacHuyDeTai(maDeTai, maNguoiThucHien);
+            redirectAttributes.addFlashAttribute("successMessage", msg);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/de-tai";
     }
 
     // 5. Giao diện Trưởng khoa xét duyệt, phân công & công bố đề tài
@@ -194,5 +278,18 @@ public class DeTaiController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/de-tai/chi-tiet/" + maDeTai;
+    }
+
+    // 11. Xuất lịch hạn nộp và các mốc thời gian vào Google Calendar (.ics)
+    @GetMapping(value = "/lich/{maDot}.ics", produces = "text/calendar;charset=UTF-8")
+    @ResponseBody
+    public ResponseEntity<byte[]> exportCalendarTopic(@PathVariable("maDot") String maDot) {
+        String icsContent = lichIcsService.taoLichIcsChoDot(maDot);
+        byte[] bytes = icsContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"lich-dot-" + maDot + ".ics\"")
+                .header(HttpHeaders.CONTENT_TYPE, "text/calendar; charset=UTF-8")
+                .body(bytes);
     }
 }

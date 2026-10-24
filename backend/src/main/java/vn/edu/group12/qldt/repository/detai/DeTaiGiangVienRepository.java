@@ -27,4 +27,10 @@ public interface DeTaiGiangVienRepository extends JpaRepository<DeTaiGiangVien, 
 
     // Xóa phân công của một giảng viên trong một đề tài
     void deleteById_MaDeTaiAndId_MaGiangVien(String maDeTai, String maGiangVien);
+
+    // Đếm tổng số phân công của một đề tài
+    long countById_MaDeTai(String maDeTai);
+
+    // Xóa tất cả phân công của một đề tài
+    void deleteById_MaDeTai(String maDeTai);
 }

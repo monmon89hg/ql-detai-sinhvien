@@ -3,6 +3,8 @@ package vn.edu.group12.qldt.controller.detai;
 import vn.edu.group12.qldt.service.auth.CurrentUser;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.group12.qldt.dto.detai.DotDangKyDto;
 import vn.edu.group12.qldt.entity.detai.DotDangKy;
 import vn.edu.group12.qldt.service.detai.DotDangKyService;
+import vn.edu.group12.qldt.service.detai.LichIcsService;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -22,6 +25,9 @@ public class DotDangKyController {
 
     @Autowired
     private DotDangKyService dotDangKyService;
+
+    @Autowired
+    private LichIcsService lichIcsService;
 
     // 1. Danh sách đợt đăng ký
     @GetMapping
@@ -139,5 +145,18 @@ public class DotDangKyController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/dot-dang-ky";
+    }
+
+    // 8. Xuất lịch hạn nộp và các mốc thời gian vào Google Calendar / Apple Calendar (.ics)
+    @GetMapping(value = "/{maDot}/lich.ics", produces = "text/calendar;charset=UTF-8")
+    @ResponseBody
+    public ResponseEntity<byte[]> exportCalendar(@PathVariable("maDot") String maDot) {
+        String icsContent = lichIcsService.taoLichIcsChoDot(maDot);
+        byte[] bytes = icsContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"lich-dot-" + maDot + ".ics\"")
+                .header(HttpHeaders.CONTENT_TYPE, "text/calendar; charset=UTF-8")
+                .body(bytes);
     }
 }

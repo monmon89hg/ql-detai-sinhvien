@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.flywaydb.core.Flyway;
 
 import vn.edu.group12.qldt.domain.nhom.*;
 import vn.edu.group12.qldt.domain.nhom.NhomBaoCaoModels.*;
@@ -48,6 +49,7 @@ import java.util.concurrent.*;
         matches = "jdbc:mysql://(127\\.0\\.0\\.1|localhost):[0-9]+/nhom_test_.*")
 class NhomMySqlTests extends NhomMySqlTestBase {
     @Autowired JdbcTemplate jdbc;
+    @Autowired Flyway flyway;
     @Autowired NhomService nhom;
     @Autowired QuyenNhomService quyen;
     @Autowired DangKyDeTaiService dangKy;
@@ -60,11 +62,10 @@ class NhomMySqlTests extends NhomMySqlTestBase {
     @BeforeEach
     void setup() {
         assertThat(jdbc.queryForObject("SELECT VERSION()", String.class)).startsWith("8.4.");
-        assertThat(
-                        jdbc.queryForObject(
-                                "SELECT COUNT(*) FROM flyway_schema_history WHERE success=1",
-                                Integer.class))
-                .isEqualTo(6);
+        // Schema phải khớp các migration hiện có, kể cả khi phân hệ khác thêm phiên bản mới.
+        flyway.validate();
+        assertThat(flyway.info().applied()).isNotEmpty();
+        assertThat(flyway.info().pending()).isEmpty();
         f = new Fixture(jdbc);
         storage.reset();
     }

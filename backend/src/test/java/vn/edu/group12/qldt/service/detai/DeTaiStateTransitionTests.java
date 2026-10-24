@@ -151,4 +151,136 @@ class DeTaiStateTransitionTests {
         assertTrue(ex.getMessage().contains("Chỉ được công bố đề tài đã ở trạng thái 'DA_DUYET'"));
         verify(deTaiRepository, never()).save(any());
     }
+
+    @Test
+    void capNhatDeTai_ThanhCong_BoiNguoiDeXuat() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CHO_DUYET");
+        deTai.setTenDeTai("Tên cũ");
+
+        vn.edu.group12.qldt.dto.detai.DeTaiDto dto = new vn.edu.group12.qldt.dto.detai.DeTaiDto();
+        dto.setTenDeTai("Tên mới");
+        dto.setNoiDung("Nội dung mới");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.countDangKyByMaDeTai("DT01")).thenReturn(0L);
+        when(deTaiRepository.save(any(DeTai.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeTai ketQua = deTaiService.capNhatDeTai("DT01", dto, "GV01");
+
+        assertEquals("Tên mới", ketQua.getTenDeTai());
+        assertEquals("Nội dung mới", ketQua.getNoiDung());
+        verify(deTaiRepository).save(deTai);
+    }
+
+    @Test
+    void capNhatDeTai_ChuyenVeChoDuyet_KhiDeTaiDangBiTuChoi() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("TU_CHOI");
+        deTai.setLyDoTuChoi("Lý do từ chối cũ");
+
+        vn.edu.group12.qldt.dto.detai.DeTaiDto dto = new vn.edu.group12.qldt.dto.detai.DeTaiDto();
+        dto.setTenDeTai("Tên chỉnh sửa sau từ chối");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.countDangKyByMaDeTai("DT01")).thenReturn(0L);
+        when(deTaiRepository.save(any(DeTai.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeTai ketQua = deTaiService.capNhatDeTai("DT01", dto, "GV01");
+
+        assertEquals("CHO_DUYET", ketQua.getTrangThai());
+        assertNull(ketQua.getLyDoTuChoi());
+    }
+
+    @Test
+    void capNhatDeTai_CapNhatTrangThaiThanhCong_KhiChonTrangThaiMoi() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CHO_DUYET");
+
+        vn.edu.group12.qldt.dto.detai.DeTaiDto dto = new vn.edu.group12.qldt.dto.detai.DeTaiDto();
+        dto.setTrangThai("NGUNG_NHAN");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.countDangKyByMaDeTai("DT01")).thenReturn(0L);
+        when(deTaiRepository.save(any(DeTai.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeTai ketQua = deTaiService.capNhatDeTai("DT01", dto, "GV01");
+
+        assertEquals("NGUNG_NHAN", ketQua.getTrangThai());
+        verify(deTaiRepository).save(deTai);
+    }
+
+    @Test
+    void capNhatDeTai_NemLoi_KhiKhongPhaiNguoiDeXuat() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CHO_DUYET");
+
+        vn.edu.group12.qldt.dto.detai.DeTaiDto dto = new vn.edu.group12.qldt.dto.detai.DeTaiDto();
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+
+        assertThrows(org.springframework.security.access.AccessDeniedException.class,
+                () -> deTaiService.capNhatDeTai("DT01", dto, "GV_KHAC"));
+        verify(deTaiRepository, never()).save(any());
+    }
+
+    @Test
+    void ngungNhanDeTai_ThanhCong() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CONG_BO");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.save(any(DeTai.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeTai ketQua = deTaiService.ngungNhanDeTai("DT01", "GV01");
+
+        assertEquals("NGUNG_NHAN", ketQua.getTrangThai());
+        verify(deTaiRepository).save(deTai);
+    }
+
+    @Test
+    void xoaHoacHuyDeTai_ChuyenNgungNhanThayViXoaVatLy_KhiDaCoDangKy() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CONG_BO");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.countDangKyByMaDeTai("DT01")).thenReturn(2L);
+        when(deTaiRepository.save(any(DeTai.class))).thenAnswer(i -> i.getArgument(0));
+
+        String thongBao = deTaiService.xoaHoacHuyDeTai("DT01", "GV01");
+
+        assertEquals("NGUNG_NHAN", deTai.getTrangThai());
+        assertTrue(thongBao.contains("NGỪNG NHẬN thay vì xóa vật lý"));
+        verify(deTaiRepository).save(deTai);
+        verify(deTaiRepository, never()).delete(any());
+    }
+
+    @Test
+    void xoaHoacHuyDeTai_XoaVatLyAnToan_KhiChuaCoDangKy() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CHO_DUYET");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.countDangKyByMaDeTai("DT01")).thenReturn(0L);
+
+        String thongBao = deTaiService.xoaHoacHuyDeTai("DT01", "GV01");
+
+        assertEquals("Đã xóa đề tài thành công!", thongBao);
+        verify(deTaiGiangVienService).xoaTatCaPhanCongCuaDeTai("DT01");
+        verify(deTaiRepository).delete(deTai);
+    }
 }
