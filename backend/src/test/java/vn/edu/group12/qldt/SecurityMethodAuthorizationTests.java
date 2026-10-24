@@ -81,6 +81,7 @@ class SecurityMethodAuthorizationTests {
         assertThatThrownBy(() -> assignments.xoaPhanCong("DT01", "OTHER")).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> rounds.congBoDot("DOT01")).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> councils.layDanhSach()).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> councils.traCuuDanhSach(null)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> results.congBo("N01")).isInstanceOf(AccessDeniedException.class);
         verifyNoInteractions(topicRepo, assignmentRepo, roundRepo, councilRepo, resultRepo);
     }
@@ -145,6 +146,8 @@ class SecurityMethodAuthorizationTests {
             assertThatThrownBy(() -> councils.layDeSua("HD01"))
                 .isInstanceOf(AccessDeniedException.class);
             assertThatThrownBy(() -> councils.suaThongTin("HD01", form))
+                .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> councils.xoaHoiDong("HD01", 0L))
                 .isInstanceOf(AccessDeniedException.class);
         }
         verifyNoInteractions(councilRepo);
