@@ -30,16 +30,16 @@
 
             <!-- Bảng danh sách đợt -->
             <div class="placeholder" style="max-width: 100%;">
-                <table class="data-table">
+                <table class="data-table" style="vertical-align: middle;">
                     <thead>
                         <tr>
-                            <th>Mã đợt</th>
-                            <th>Tên đợt</th>
-                            <th>Loại</th>
-                            <th>Hạn GV đề xuất</th>
-                            <th>Hạn SV đăng ký</th>
-                            <th>Tiến độ</th>
-                            <th>Thao tác</th>
+                            <th style="text-align: center; width: 110px;">Mã đợt</th>
+                            <th style="text-align: center; min-width: 220px;">Tên đợt</th>
+                            <th style="text-align: center; width: 90px;">Loại</th>
+                            <th style="text-align: center; width: 160px;">Hạn GV đề xuất</th>
+                            <th style="text-align: center; width: 160px;">Hạn SV đăng ký</th>
+                            <th style="text-align: center; width: 140px;">Tiến độ</th>
+                            <th style="text-align: center; width: 170px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,32 +48,45 @@
                                 Chưa có đợt đăng ký nào. Hãy tạo đợt đăng ký mới!
                             </td>
                         </tr>
-                        <tr th:each="dot : ${dots}">
-                            <td><strong class="route-line" th:text="${dot.maDot}">DOT-01</strong></td>
-                            <td th:text="${dot.tenDot}">Khóa luận HK1 2026</td>
-                            <td><span class="status-pill" th:text="${dot.loaiDeTai}">KLTN</span></td>
-                            <td>
-                                <span style="font-size:12px;" th:text="${#temporals.format(dot.batDauGv, 'dd/MM/yyyy HH:mm')} + ' - ' + ${#temporals.format(dot.ketThucGv, 'dd/MM/yyyy HH:mm')}"></span>
+                        <tr th:each="dot : ${dots}" style="vertical-align: middle;">
+                            <td style="text-align: center;">
+                                <strong class="route-line" style="white-space: nowrap; display: inline-block;" th:text="${dot.maDot}">DOT-01</strong>
                             </td>
                             <td>
-                                <span style="font-size:12px;" th:text="${#temporals.format(dot.batDauSv, 'dd/MM/yyyy HH:mm')} + ' - ' + ${#temporals.format(dot.ketThucSv, 'dd/MM/yyyy HH:mm')}"></span>
+                                <strong th:text="${dot.tenDot}">Khóa luận HK1 2026</strong>
                             </td>
-                            <td>
+                            <td style="text-align: center;">
+                                <span class="status-pill" style="white-space: nowrap; display: inline-block;" th:text="${dot.loaiDeTai}">KLTN</span>
+                            </td>
+                            <td style="text-align: center; font-size: 12px; line-height: 1.5; white-space: nowrap;">
+                                <span th:text="${#temporals.format(dot.batDauGv, 'dd/MM/yyyy HH:mm')}"></span>
+                                <br>
+                                <span style="color: #888; font-size: 11px;">đến</span>
+                                <span th:text="${#temporals.format(dot.ketThucGv, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td style="text-align: center; font-size: 12px; line-height: 1.5; white-space: nowrap;">
+                                <span th:text="${#temporals.format(dot.batDauSv, 'dd/MM/yyyy HH:mm')}"></span>
+                                <br>
+                                <span style="color: #888; font-size: 11px;">đến</span>
+                                <span th:text="${#temporals.format(dot.ketThucSv, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td style="text-align: center; white-space: nowrap;">
                                 <span class="status-pill"
-                                      th:style="${giaiDoanMap[dot.maDot] == 'Đang mở đăng ký' || giaiDoanMap[dot.maDot] == 'GV đề xuất' ? 'background:#e6f9f0; color:#18794e;' : ((giaiDoanMap[dot.maDot] == 'Sắp diễn ra' || giaiDoanMap[dot.maDot] == 'Chờ duyệt đề tài') ? 'background:#fef3c7; color:#92400e;' : 'background:#fdeeee; color:#b3261e;')}"
+                                      style="white-space: nowrap; display: inline-block; padding: 4px 10px;"
+                                      th:style="${giaiDoanMap[dot.maDot] == 'Đang mở đăng ký' || giaiDoanMap[dot.maDot] == 'GV đề xuất' ? 'background:#e6f9f0; color:#18794e; white-space:nowrap; display:inline-block; padding:4px 10px;' : ((giaiDoanMap[dot.maDot] == 'Sắp diễn ra' || giaiDoanMap[dot.maDot] == 'Chờ duyệt đề tài') ? 'background:#fef3c7; color:#92400e; white-space:nowrap; display:inline-block; padding:4px 10px;' : 'background:#fdeeee; color:#b3261e; white-space:nowrap; display:inline-block; padding:4px 10px;')}"
                                       th:text="${giaiDoanMap[dot.maDot]}">Đang mở đăng ký</span>
                             </td>
-                            <td>
-                                <div class="btn-row">
-                                    <a th:href="@{/dot-dang-ky/{maDot}/lich.ics(maDot=${dot.maDot})}" class="btn btn-outline" style="min-height:30px; padding:4px 8px; font-size:12px; color:#1a73e8; border-color:#1a73e8;" title="Tải file .ics để thêm lịch vào Google Calendar">📅 Lịch .ics</a>
-                                    <a th:href="@{/dot-dang-ky/sua/{maDot}(maDot=${dot.maDot})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px;">Sửa</a>
+                            <td style="text-align: center;">
+                                <div class="btn-row" style="justify-content: center; gap: 6px; flex-wrap: nowrap;">
+                                    <a th:href="@{/dot-dang-ky/{maDot}/lich.ics(maDot=${dot.maDot})}" class="btn btn-outline" style="min-height:30px; padding:4px 8px; font-size:12px; color:#1a73e8; border-color:#1a73e8; white-space: nowrap;" title="Tải file .ics để thêm lịch vào Google Calendar">📅 Lịch .ics</a>
+                                    <a th:href="@{/dot-dang-ky/sua/{maDot}(maDot=${dot.maDot})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;">Sửa</a>
                                     
                                     <form th:if="${dot.trangThai == 'NHAP'}" th:action="@{/dot-dang-ky/{maDot}/cong-bo(maDot=${dot.maDot})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-primary" style="min-height:30px; padding:4px 10px; font-size:12px;" onclick="return confirm('Bạn có chắc muốn công bố đợt này?');">Công bố</button>
+                                        <button type="submit" class="btn btn-primary" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;" onclick="return confirm('Bạn có chắc muốn công bố đợt này?');">Công bố</button>
                                     </form>
 
                                     <form th:if="${dot.trangThai == 'CONG_BO'}" th:action="@{/dot-dang-ky/{maDot}/dong(maDot=${dot.maDot})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Bạn có chắc muốn đóng đợt này?');">Đóng đợt</button>
+                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; color:#c0392b; border-color:#e74c3c; white-space: nowrap;" onclick="return confirm('Bạn có chắc muốn đóng đợt này?');">Đóng đợt</button>
                                     </form>
                                 </div>
                             </td>
