@@ -13,6 +13,7 @@ import vn.edu.group12.qldt.dto.detai.DotDangKyDto;
 import vn.edu.group12.qldt.entity.detai.DotDangKy;
 import vn.edu.group12.qldt.service.detai.DotDangKyService;
 import vn.edu.group12.qldt.service.detai.LichIcsService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class DotDangKyController {
 
     // 1. Danh sách đợt đăng ký
     @GetMapping
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
     public String listDotDangKy(Model model, Principal principal) {
         List<DotDangKy> list = dotDangKyService.getAllDotDangKy();
         

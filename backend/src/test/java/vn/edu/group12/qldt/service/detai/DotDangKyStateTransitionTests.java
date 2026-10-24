@@ -109,4 +109,34 @@ class DotDangKyStateTransitionTests {
         assertTrue(ex.getMessage().contains("Không thể chỉnh sửa đợt đăng ký đã đóng"));
         verify(dotDangKyRepository, never()).save(any());
     }
+
+    @Test
+    void getGiaiDoanHienTai_TraVeCacTrangThaiChuan() {
+        DotDangKy dot = new DotDangKy();
+        dot.setTrangThai("DONG");
+        assertEquals("Đã đóng đợt", dotDangKyService.getGiaiDoanHienTai(dot));
+
+        dot.setTrangThai("CONG_BO");
+        dot.setBatDauGv(LocalDateTime.now().plusDays(2));
+        dot.setKetThucGv(LocalDateTime.now().plusDays(5));
+        dot.setBatDauSv(LocalDateTime.now().plusDays(6));
+        dot.setKetThucSv(LocalDateTime.now().plusDays(10));
+        assertEquals("Sắp diễn ra", dotDangKyService.getGiaiDoanHienTai(dot));
+
+        dot.setBatDauGv(LocalDateTime.now().minusDays(1));
+        dot.setKetThucGv(LocalDateTime.now().plusDays(2));
+        assertEquals("GV đề xuất", dotDangKyService.getGiaiDoanHienTai(dot));
+
+        dot.setBatDauGv(LocalDateTime.now().minusDays(5));
+        dot.setKetThucGv(LocalDateTime.now().minusDays(1));
+        dot.setBatDauSv(LocalDateTime.now().plusDays(1));
+        assertEquals("Chờ duyệt đề tài", dotDangKyService.getGiaiDoanHienTai(dot));
+
+        dot.setBatDauSv(LocalDateTime.now().minusDays(1));
+        dot.setKetThucSv(LocalDateTime.now().plusDays(2));
+        assertEquals("Đang mở đăng ký", dotDangKyService.getGiaiDoanHienTai(dot));
+
+        dot.setKetThucSv(LocalDateTime.now().minusDays(1));
+        assertEquals("Hết hạn đăng ký", dotDangKyService.getGiaiDoanHienTai(dot));
+    }
 }
