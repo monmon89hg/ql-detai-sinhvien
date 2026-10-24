@@ -10,9 +10,12 @@ import vn.edu.group12.qldt.dto.detai.DeTaiDto;
 import vn.edu.group12.qldt.entity.detai.DeTai;
 import vn.edu.group12.qldt.entity.detai.DotDangKy;
 import vn.edu.group12.qldt.repository.detai.DeTaiRepository;
+import vn.edu.group12.qldt.repository.admin.BoMonRepository;
+import vn.edu.group12.qldt.repository.admin.NguoiDungRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA', 'TRUONG_BO_MON', 'GIANG_VIEN', 'SINH_VIEN')")
@@ -26,6 +29,12 @@ public class DeTaiService {
 
     @Autowired
     private DeTaiGiangVienService deTaiGiangVienService;
+
+    @Autowired
+    private BoMonRepository boMonRepository;
+
+    @Autowired
+    private NguoiDungRepository nguoiDungRepository;
 
     public List<DeTai> getAllDeTai() {
         return deTaiRepository.findAll();
@@ -64,7 +73,7 @@ public class DeTaiService {
         DeTai deTai = new DeTai();
         deTai.setMaDeTai(maDeTai);
         deTai.setMaDot(dto.getMaDot());
-        deTai.setMaBoMon(dto.getMaBoMon() != null && !dto.getMaBoMon().isBlank() ? dto.getMaBoMon() : "DEMO_CNPM");
+        deTai.setMaBoMon(layMaBoMonHopLe(dto.getMaBoMon(), maGiangVien));
         deTai.setTenDeTai(dto.getTenDeTai());
         deTai.setNoiDung(dto.getNoiDung());
         deTai.setYeuCau(dto.getYeuCau());
@@ -179,7 +188,7 @@ public class DeTaiService {
             deTai.setYeuCau(dto.getYeuCau().trim());
         }
         if (dto.getMaBoMon() != null && !dto.getMaBoMon().isBlank()) {
-            deTai.setMaBoMon(dto.getMaBoMon().trim());
+            deTai.setMaBoMon(layMaBoMonHopLe(dto.getMaBoMon(), maNguoiCapNhat));
         }
 
         // Cập nhật trạng thái đề tài nếu có trong DTO
@@ -217,6 +226,24 @@ public class DeTaiService {
         }
 
         return deTaiRepository.save(deTai);
+    }
+
+    // Ưu tiên bộ môn được chọn; nếu thiếu thì lấy bộ môn thật của người đề xuất.
+    private String layMaBoMonHopLe(String maBoMonNhap, String maNguoiDeXuat) {
+        String ma = maBoMonNhap == null ? "" : maBoMonNhap.strip();
+        if (ma.isEmpty()) {
+            var nguoiDeXuat = nguoiDungRepository.findById(maNguoiDeXuat)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người đề xuất."));
+            if (nguoiDeXuat.getBoMon() == null) {
+                throw new IllegalArgumentException("Vui lòng chọn bộ môn quản lý đề tài.");
+            }
+            ma = nguoiDeXuat.getBoMon().getMaBoMon();
+        }
+        String maChuanHoa = ma.strip().toUpperCase(Locale.ROOT);
+        return boMonRepository.findById(maChuanHoa)
+                .filter(boMon -> Boolean.TRUE.equals(boMon.getHoatDong()))
+                .orElseThrow(() -> new IllegalArgumentException("Bộ môn không tồn tại hoặc đã ngừng hoạt động."))
+                .getMaBoMon();
     }
 
     // Cơ chế ngừng nhận đăng ký thay vì xóa vật lý đề tài đã có dữ liệu

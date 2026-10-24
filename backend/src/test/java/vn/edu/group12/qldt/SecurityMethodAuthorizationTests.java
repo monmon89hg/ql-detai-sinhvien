@@ -181,6 +181,10 @@ class SecurityMethodAuthorizationTests {
         DeTaiDto dto = new DeTaiDto();
         dto.setMaDeTai("DT01");
         dto.setMaDot("DOT01");
+        dto.setMaBoMon("CNPM");
+        var boMon = new vn.edu.group12.qldt.entity.admin.BoMon();
+        boMon.setMaBoMon("CNPM");
+        when(departmentRepo.findById("CNPM")).thenReturn(Optional.of(boMon));
         dto.setTenDeTai("Security regression fixture");
         topics.deXuatDeTai(dto, "DB_GV");
         verify(assignmentRepo).save(argThat(assignment ->
