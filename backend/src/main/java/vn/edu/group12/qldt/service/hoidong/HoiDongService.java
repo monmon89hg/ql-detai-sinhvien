@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import vn.edu.group12.qldt.dto.hoidong.HoiDongForm;
+import vn.edu.group12.qldt.dto.hoidong.HoiDongSuaForm;
 import vn.edu.group12.qldt.entity.hoidong.HoiDong;
 import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
 import vn.edu.group12.qldt.repository.hoidong.HoiDongRepository;
@@ -110,6 +111,63 @@ public class HoiDongService {
         hoiDong.setMaNguoiTao(maNguoiTao);
 
         return hoiDongRepository.saveAndFlush(hoiDong);
+    }
+
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @Transactional(readOnly = true)
+    public HoiDong layDeSua(@NotBlank String maHoiDong) {
+        kiemTraQuyenSua();
+        HoiDong hoiDong = hoiDongRepository.findById(maHoiDong)
+            .orElseThrow(() -> new EntityNotFoundException("Hội đồng không tồn tại."));
+        kiemTraConNhap(hoiDong);
+        return hoiDong;
+    }
+
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public HoiDong suaThongTin(@NotBlank String maHoiDong,
+            @NotNull @Valid HoiDongSuaForm form) {
+        kiemTraQuyenSua();
+        HoiDong hoiDong = hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
+            .orElseThrow(() -> new EntityNotFoundException("Hội đồng không tồn tại."));
+        kiemTraConNhap(hoiDong);
+
+        if (!form.getVersion().equals(hoiDong.getVersion())) {
+            throw new IllegalArgumentException(
+                "Thông tin hội đồng đã thay đổi. Vui lòng tải lại trang trước khi sửa."
+            );
+        }
+
+        String maMoi = form.getMaHoiDong().trim();
+        if (!maMoi.equals(maHoiDong) && hoiDongRepository.existsById(maMoi)) {
+            throw new IllegalArgumentException("Mã hội đồng đã tồn tại.");
+        }
+
+        String diaDiem = form.getDiaDiem();
+        int soDong = hoiDongRepository.suaThongTin(
+            maHoiDong, maMoi, form.getTenHoiDong().trim(),
+            diaDiem == null || diaDiem.isBlank() ? null : diaDiem.trim(),
+            form.getVersion()
+        );
+        if (soDong != 1) {
+            throw new IllegalArgumentException(
+                "Thông tin hội đồng đã thay đổi. Vui lòng tải lại trang trước khi sửa."
+            );
+        }
+        return hoiDongRepository.findById(maMoi)
+            .orElseThrow(() -> new EntityNotFoundException("Hội đồng không tồn tại."));
+    }
+
+    private void kiemTraQuyenSua() {
+        if (hoiDongRepository.demTruongKhoaHoatDong(CurrentUser.maNguoiDung()) == 0) {
+            throw new AccessDeniedException("Tài khoản không có quyền sửa thông tin hội đồng.");
+        }
+    }
+
+    private void kiemTraConNhap(HoiDong hoiDong) {
+        if (hoiDong.getTrangThai() != TrangThaiHoiDong.NHAP) {
+            throw new IllegalArgumentException("Chỉ được sửa thông tin khi hội đồng còn ở trạng thái nháp.");
+        }
     }
 
     @PreAuthorize("hasRole('TRUONG_KHOA')")

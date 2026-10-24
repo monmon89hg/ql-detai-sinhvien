@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import vn.edu.group12.qldt.service.hoidong.HoiDongService;
 import vn.edu.group12.qldt.dto.hoidong.HoiDongForm;
+import vn.edu.group12.qldt.dto.hoidong.HoiDongSuaForm;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -136,6 +138,8 @@ public class HoiDongController {
                 coQuyenThemThanhVien
             );
 
+            model.addAttribute("coQuyenSuaThongTin", coQuyenThemThanhVien);
+
             model.addAttribute(
                 "coQuyenXoaThanhVien",
                 coQuyenThemThanhVien
@@ -239,6 +243,71 @@ public class HoiDongController {
         );
 
         return "redirect:/hoi-dong";
+    }
+
+    @GetMapping("/hoi-dong/{maHoiDong}/sua")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String hienThiFormSua(
+            @PathVariable String maHoiDong,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            HoiDong hoiDong = hoiDongService.layDeSua(maHoiDong);
+            HoiDongSuaForm form = new HoiDongSuaForm();
+            form.setMaHoiDong(hoiDong.getMaHoiDong());
+            form.setTenHoiDong(hoiDong.getTenHoiDong());
+            form.setDiaDiem(hoiDong.getDiaDiem());
+            form.setVersion(hoiDong.getVersion());
+            model.addAttribute("hoiDong", hoiDong);
+            model.addAttribute("hoiDongSuaForm", form);
+            model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
+            return "assessment/hoi-dong/sua-form";
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addAttribute("maHoiDong", maHoiDong);
+            return "redirect:/hoi-dong/{maHoiDong}";
+        }
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/sua")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String suaThongTin(
+            @PathVariable String maHoiDong,
+            @Valid @ModelAttribute("hoiDongSuaForm") HoiDongSuaForm form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        HoiDong hoiDong;
+        try {
+            hoiDong = hoiDongService.layDeSua(maHoiDong);
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addAttribute("maHoiDong", maHoiDong);
+            return "redirect:/hoi-dong/{maHoiDong}";
+        }
+        model.addAttribute("hoiDong", hoiDong);
+        model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
+        if (bindingResult.hasErrors()) {
+            return "assessment/hoi-dong/sua-form";
+        }
+        try {
+            HoiDong daLuu = hoiDongService.suaThongTin(maHoiDong, form);
+            redirectAttributes.addAttribute("maHoiDong", daLuu.getMaHoiDong());
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin hội đồng thành công.");
+            return "redirect:/hoi-dong/{maHoiDong}";
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+        } catch (DataIntegrityViolationException ex) {
+            model.addAttribute("errorMessage",
+                "Không thể cập nhật vì mã bị trùng hoặc dữ liệu đã thay đổi. Vui lòng tải lại trang và kiểm tra.");
+        }
+        return "assessment/hoi-dong/sua-form";
     }
 
     @PostMapping("/hoi-dong/{maHoiDong}/thanh-vien")

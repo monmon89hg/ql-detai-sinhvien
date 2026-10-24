@@ -40,6 +40,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 import static org.hamcrest.Matchers.not;
+import org.springframework.test.util.ReflectionTestUtils;
+import vn.edu.group12.qldt.dto.hoidong.HoiDongSuaForm;
+import static org.mockito.ArgumentMatchers.argThat;
 
 // Render the real templates and serve the real assets without accessing MySQL.
 @WebMvcTest(HoiDongController.class)
@@ -74,6 +77,70 @@ class FrontendIntegrationTests {
                 "/css/components.css", "/js/common.js", "/images/ute_logo.png")) {
             mvc.perform(get(url)).andExpect(status().isOk());
         }
+    }
+
+    @Test
+    void editButtonOnlyAppearsForDeanAndDraftCouncil() throws Exception {
+        HoiDong hoiDong = council();
+        hoiDong.setTrangThai(TrangThaiHoiDong.NHAP);
+        when(hoiDongService.layChiTiet("HD_TEST")).thenReturn(hoiDong);
+        mvc.perform(get("/hoi-dong/HD_TEST").with(user("TK").roles("TRUONG_KHOA")))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("/hoi-dong/HD_TEST/sua")));
+        mvc.perform(get("/hoi-dong/HD_TEST").with(user("ADMIN").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(content().string(not(containsString("/hoi-dong/HD_TEST/sua"))));
+        hoiDong.setTrangThai(TrangThaiHoiDong.SAN_SANG);
+        mvc.perform(get("/hoi-dong/HD_TEST").with(user("TK").roles("TRUONG_KHOA")))
+            .andExpect(status().isOk())
+            .andExpect(content().string(not(containsString("/hoi-dong/HD_TEST/sua"))));
+    }
+
+    @Test
+    void editFormKeepsRoundReadOnlyAndValidationKeepsSubmittedValues() throws Exception {
+        HoiDong hoiDong = council();
+        hoiDong.setTrangThai(TrangThaiHoiDong.NHAP);
+        ReflectionTestUtils.setField(hoiDong, "version", 2L);
+        when(hoiDongService.layDeSua("HD_TEST")).thenReturn(hoiDong);
+        mvc.perform(get("/hoi-dong/HD_TEST/sua").with(user("TK").roles("TRUONG_KHOA")))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("value=\"DOT_TEST\" readonly")))
+            .andExpect(content().string(not(containsString("name=\"maDot\""))))
+            .andExpect(content().string(containsString("name=\"_csrf\"")));
+        mvc.perform(post("/hoi-dong/HD_TEST/sua").with(user("TK").roles("TRUONG_KHOA"))
+                .with(csrf()).param("maHoiDong", "NEW").param("tenHoiDong", " ").param("version", "2"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Vui lòng nhập tên hội đồng.")))
+            .andExpect(content().string(containsString("value=\"NEW\"")));
+        verify(hoiDongService, never()).suaThongTin(any(), any());
+    }
+
+    @Test
+    void validEditRedirectsToNewCodeAndIgnoresUneditableFields() throws Exception {
+        when(hoiDongService.layDeSua("HD_TEST")).thenReturn(council());
+        HoiDong daLuu = council();
+        daLuu.setMaHoiDong("NEW");
+        when(hoiDongService.suaThongTin(eq("HD_TEST"), any(HoiDongSuaForm.class))).thenReturn(daLuu);
+        mvc.perform(post("/hoi-dong/HD_TEST/sua").with(user("TK").roles("TRUONG_KHOA"))
+                .with(csrf()).param("maHoiDong", "NEW").param("tenHoiDong", "Tên mới")
+                .param("version", "2").param("maDot", "FAKE").param("trangThai", "DA_KHOA"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/hoi-dong/NEW"));
+        verify(hoiDongService).suaThongTin(eq("HD_TEST"), argThat(form ->
+            "NEW".equals(form.getMaHoiDong()) && form.getVersion().equals(2L)));
+    }
+
+    @Test
+    void editRequiresDeanRoleAndCsrf() throws Exception {
+        for (String role : List.of("ADMIN", "GIANG_VIEN", "SINH_VIEN", "TRUONG_BO_MON")) {
+            mvc.perform(get("/hoi-dong/HD_TEST/sua").with(user("U").roles(role)))
+                .andExpect(status().isForbidden());
+            mvc.perform(post("/hoi-dong/HD_TEST/sua").with(user("U").roles(role)).with(csrf()))
+                .andExpect(status().isForbidden());
+        }
+        mvc.perform(post("/hoi-dong/HD_TEST/sua").with(user("TK").roles("TRUONG_KHOA")))
+            .andExpect(status().isForbidden());
+        verify(hoiDongService, never()).suaThongTin(any(), any());
     }
 
     @Test
