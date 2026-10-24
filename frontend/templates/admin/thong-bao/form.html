@@ -75,11 +75,26 @@
                     <label for="phamVi">Phạm vi nhận thông báo</label>
                     <select id="phamVi" th:field="*{phamVi}" required>
                         <option value="TAT_CA">Tất cả người dùng</option>
-                        <option value="SINH_VIEN">Sinh viên</option>
-                        <option value="GIANG_VIEN">Giảng viên</option>
+                        <option value="CA_NHAN">Thông báo cá nhân (chọn người nhận)</option>
                     </select>
                     <small class="form-error"
                            th:errors="*{phamVi}"></small>
+                </div>
+
+                <div class="form-group" id="recipientGroup"
+                     th:style="${form.phamVi == 'CA_NHAN'} ? 'display:block' : 'display:none'">
+                    <label for="maNguoiNhan">Người nhận</label>
+                    <select id="maNguoiNhan"
+                            th:field="*{maNguoiNhan}"
+                            multiple
+                            size="8">
+                        <option th:each="nguoiNhan : ${danhSachNguoiNhan}"
+                                th:value="${nguoiNhan.maNguoiDung}"
+                                th:text="${nguoiNhan.hoTen + ' — ' + (nguoiNhan.loaiNguoiDung == 'CAN_BO' ? 'TRƯỞNG KHOA' : nguoiNhan.loaiNguoiDung) + ' (' + nguoiNhan.maNguoiDung + ')'}">
+                        </option>
+                    </select>
+                    <small>Giữ Ctrl (Windows) hoặc Command (Mac) để chọn nhiều tài khoản.</small>
+                    <small class="form-error" th:errors="*{maNguoiNhan}"></small>
                 </div>
 
                 <div class="form-group">
@@ -107,5 +122,21 @@
         <div th:replace="~{fragments/footer :: footer}"></div>
     </main>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const scope = document.getElementById("phamVi");
+        const group = document.getElementById("recipientGroup");
+        const recipients = document.getElementById("maNguoiNhan");
+
+        const updateRecipientVisibility = () => {
+            const personal = scope.value === "CA_NHAN";
+            group.style.display = personal ? "block" : "none";
+            recipients.required = personal;
+        };
+
+        scope.addEventListener("change", updateRecipientVisibility);
+        updateRecipientVisibility();
+    });
+</script>
 </body>
 </html>

@@ -3,6 +3,102 @@
       xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head(${isEdit} ? 'Sửa bộ môn' : 'Thêm bộ môn')}"></head>
 <body>
+<style>
+    /* Styles are scoped to this form so other Base UI pages are unaffected. */
+    .department-form-card {
+        max-width: 1080px;
+        padding: 28px 30px;
+        background: #fff;
+        border: 1px solid #e1e7ed;
+        border-radius: 8px;
+    }
+
+    .department-form {
+        width: 100%;
+    }
+
+    .department-form .form-group {
+        display: grid;
+        grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+        align-items: start;
+        column-gap: 26px;
+        row-gap: 8px;
+        margin: 0 0 22px;
+    }
+
+    .department-form .form-group > label {
+        grid-column: 1;
+        padding-top: 12px;
+        color: #293b4d;
+        font-weight: 500;
+    }
+
+    .department-form .form-group > input,
+    .department-form .form-group > textarea {
+        grid-column: 2;
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 13px;
+        color: #263747;
+        background: #fff;
+        border: 1px solid #cfd7df;
+        border-radius: 4px;
+        font: inherit;
+        box-sizing: border-box;
+    }
+
+    .department-form .form-group > textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    .department-form .form-group > input:focus,
+    .department-form .form-group > textarea:focus {
+        border-color: #2b719b;
+        outline: 3px solid rgb(43 113 155 / 14%);
+    }
+
+    .department-form .form-group > small {
+        grid-column: 2;
+        margin: 0;
+    }
+
+    .department-form .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1px solid #e6ebef;
+    }
+
+    @media (max-width: 700px) {
+        .department-form-card {
+            padding: 20px 16px;
+        }
+
+        .department-form .form-group {
+            grid-template-columns: minmax(0, 1fr);
+            row-gap: 7px;
+        }
+
+        .department-form .form-group > label,
+        .department-form .form-group > input,
+        .department-form .form-group > textarea,
+        .department-form .form-group > small {
+            grid-column: 1;
+        }
+
+        .department-form .form-group > label {
+            padding-top: 0;
+        }
+
+        .department-form .form-actions > * {
+            flex: 1;
+            text-align: center;
+        }
+    }
+</style>
 <div th:replace="~{fragments/header :: header}"></div>
 
 <div class="app-grid">
@@ -23,8 +119,9 @@
 
         <div th:replace="~{fragments/messages :: messages}"></div>
 
-        <section class="card">
+        <section class="card department-form-card">
             <form th:object="${form}"
+                  class="department-form"
                   th:action="${isEdit}
                       ? @{/admin/bo-mon/{maBoMon}(maBoMon=${maBoMon})}
                       : @{/admin/bo-mon}"

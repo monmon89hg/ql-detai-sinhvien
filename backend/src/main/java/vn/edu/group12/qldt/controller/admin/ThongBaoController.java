@@ -12,14 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/thong-bao")
@@ -43,17 +41,16 @@ public class ThongBaoController {
             Authentication authentication,
             Model model
     ) {
-        List<String> maVaiTros = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(authority -> authority.startsWith("ROLE_")
-                        ? authority.substring(5)
-                        : authority)
-                .toList();
+        String maNguoiDung = nguoiDungRepository
+                .findByEmailIgnoreCase(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy tài khoản đang đăng nhập"
+                ))
+                .getMaNguoiDung();
 
         Page<ThongBaoDanhSachDto> thongBaos =
                 thongBaoService.layThongBaoChoNguoiDung(
-                        maVaiTros,
+                        maNguoiDung,
                         PageRequest.of(
                                 Math.max(page, 0),
                                 20,
@@ -90,6 +87,7 @@ public class ThongBaoController {
     public String formTao(Model model) {
         model.addAttribute("form", new ThongBaoForm());
         model.addAttribute("isEdit", false);
+        napDanhSachNguoiNhan(model);
         return "admin/thong-bao/form";
     }
 
@@ -104,6 +102,7 @@ public class ThongBaoController {
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("isEdit", false);
+            napDanhSachNguoiNhan(model);
             return "admin/thong-bao/form";
         }
 
@@ -124,6 +123,7 @@ public class ThongBaoController {
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("form", exception.getMessage());
             model.addAttribute("isEdit", false);
+            napDanhSachNguoiNhan(model);
             return "admin/thong-bao/form";
         }
     }
@@ -140,6 +140,7 @@ public class ThongBaoController {
         );
         model.addAttribute("maThongBao", maThongBao);
         model.addAttribute("isEdit", true);
+        napDanhSachNguoiNhan(model);
         return "admin/thong-bao/form";
     }
 
@@ -155,6 +156,7 @@ public class ThongBaoController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("maThongBao", maThongBao);
             model.addAttribute("isEdit", true);
+            napDanhSachNguoiNhan(model);
             return "admin/thong-bao/form";
         }
 
@@ -169,6 +171,7 @@ public class ThongBaoController {
             bindingResult.reject("form", exception.getMessage());
             model.addAttribute("maThongBao", maThongBao);
             model.addAttribute("isEdit", true);
+            napDanhSachNguoiNhan(model);
             return "admin/thong-bao/form";
         }
     }
@@ -215,5 +218,12 @@ public class ThongBaoController {
         }
 
         return "redirect:/thong-bao/quan-ly";
+    }
+
+    private void napDanhSachNguoiNhan(Model model) {
+        model.addAttribute(
+                "danhSachNguoiNhan",
+                nguoiDungRepository.findActiveNotificationRecipients()
+        );
     }
 }

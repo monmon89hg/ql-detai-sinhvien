@@ -15,16 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ThongBaoService {
 
     private static final Set<String> PHAM_VI_HOP_LE =
-            Set.of("TAT_CA", "SINH_VIEN", "GIANG_VIEN");
+            Set.of("TAT_CA", "CA_NHAN");
 
     private final ThongBaoRepository thongBaoRepository;
     private final NguoiDungRepository nguoiDungRepository;
@@ -77,6 +79,9 @@ public class ThongBaoService {
         thongBao.setNguoiDang(nguoiDang);
         thongBao.setMaDot(chuanHoaCoTheTrong(form.getMaDot()));
         thongBao.setPhamVi(phamVi);
+        thongBao.setMaNguoiNhanIds(
+                chuanHoaMaNguoiNhan(phamVi, form.getMaNguoiNhan())
+        );
         thongBao.setTrangThai("NHAP");
         thongBao.setCongBoLuc(null);
 
@@ -101,7 +106,11 @@ public class ThongBaoService {
         thongBao.setTieuDe(form.getTieuDe().trim());
         thongBao.setNoiDung(form.getNoiDung().trim());
         thongBao.setMaDot(chuanHoaCoTheTrong(form.getMaDot()));
-        thongBao.setPhamVi(chuanHoaPhamVi(form.getPhamVi()));
+        String phamVi = chuanHoaPhamVi(form.getPhamVi());
+        thongBao.setPhamVi(phamVi);
+        thongBao.setMaNguoiNhanIds(
+                chuanHoaMaNguoiNhan(phamVi, form.getMaNguoiNhan())
+        );
 
         thongBaoRepository.save(thongBao);
     }
@@ -137,31 +146,17 @@ public class ThongBaoService {
     @Transactional(readOnly = true)
     @PreAuthorize("isAuthenticated()")
     public Page<ThongBaoDanhSachDto> layThongBaoChoNguoiDung(
-            Collection<String> maVaiTros,
+            String maNguoiDung,
             Pageable pageable
     ) {
-        Set<String> phamViDuocXem = new LinkedHashSet<>();
-        phamViDuocXem.add("TAT_CA");
-
-        if (maVaiTros != null) {
-            if (maVaiTros.contains("SINH_VIEN")) {
-                phamViDuocXem.add("SINH_VIEN");
-            }
-            if (maVaiTros.contains("GIANG_VIEN")) {
-                phamViDuocXem.add("GIANG_VIEN");
-            }
+        if (maNguoiDung == null || maNguoiDung.isBlank()) {
+            throw new IllegalArgumentException("Không xác định được tài khoản nhận thông báo");
         }
 
         LocalDateTime bayGio =
                 LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
 
-        return thongBaoRepository
-                .findAllByTrangThaiAndPhamViInAndCongBoLucLessThanEqualOrderByCongBoLucDesc(
-                        "CONG_BO",
-                        phamViDuocXem,
-                        bayGio,
-                        pageable
-                )
+        return thongBaoRepository.findInboxForUser(maNguoiDung, bayGio, pageable)
                 .map(this::sangDto);
     }
 
@@ -182,6 +177,7 @@ public class ThongBaoService {
         form.setNoiDung(thongBao.getNoiDung());
         form.setMaDot(thongBao.getMaDot());
         form.setPhamVi(thongBao.getPhamVi());
+        form.setMaNguoiNhan(new ArrayList<>(thongBao.getMaNguoiNhanIds()));
 
         return form;
     }
@@ -223,6 +219,42 @@ public class ThongBaoService {
         }
 
         return phamVi;
+    }
+
+    private Set<String> chuanHoaMaNguoiNhan(
+            String phamVi,
+            Collection<String> maNguoiNhanNhap
+    ) {
+        if ("TAT_CA".equals(phamVi)) {
+            return Set.of();
+        }
+
+        Set<String> maNguoiNhans = maNguoiNhanNhap == null
+                ? Set.of()
+                : maNguoiNhanNhap.stream()
+                        .filter(ma -> ma != null && !ma.isBlank())
+                        .map(String::trim)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (maNguoiNhans.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Hãy chọn ít nhất một người nhận cho thông báo cá nhân"
+            );
+        }
+
+        Set<String> maNguoiNhanHopLe = nguoiDungRepository
+                .findActiveNotificationRecipientsByIds(maNguoiNhans)
+                .stream()
+                .map(NguoiDung::getMaNguoiDung)
+                .collect(Collectors.toSet());
+
+        if (!maNguoiNhanHopLe.equals(maNguoiNhans)) {
+            throw new IllegalArgumentException(
+                    "Có người nhận không tồn tại, đã khóa hoặc không thuộc nhóm được nhận thông báo"
+            );
+        }
+
+        return maNguoiNhanHopLe;
     }
 
     private String chuanHoaCoTheTrong(String giaTri) {

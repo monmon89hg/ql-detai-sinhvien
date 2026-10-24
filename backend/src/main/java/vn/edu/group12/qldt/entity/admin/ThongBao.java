@@ -1,6 +1,8 @@
 package vn.edu.group12.qldt.entity.admin;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -9,6 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "thong_bao")
@@ -34,6 +38,13 @@ public class ThongBao extends AuditedEntity {
 
     @Column(name = "pham_vi", length = 15, nullable = false)
     private String phamVi = "TAT_CA";
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "thong_bao_nguoi_nhan",
+            joinColumns = @JoinColumn(name = "ma_thong_bao",
+                    referencedColumnName = "ma_thong_bao"))
+    @Column(name = "ma_nguoi_dung", length = 30, nullable = false)
+    private Set<String> maNguoiNhanIds = new LinkedHashSet<>();
 
     @Column(name = "trang_thai", length = 15, nullable = false)
     private String trangThai = "NHAP";
@@ -90,6 +101,17 @@ public class ThongBao extends AuditedEntity {
 
     public void setPhamVi(String phamVi) {
         this.phamVi = phamVi;
+    }
+
+    public Set<String> getMaNguoiNhanIds() {
+        return maNguoiNhanIds;
+    }
+
+    public void setMaNguoiNhanIds(Set<String> maNguoiNhanIds) {
+        this.maNguoiNhanIds.clear();
+        if (maNguoiNhanIds != null) {
+            this.maNguoiNhanIds.addAll(maNguoiNhanIds);
+        }
     }
 
     public String getTrangThai() {

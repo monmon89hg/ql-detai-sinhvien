@@ -14,7 +14,7 @@
             <h1>THÔNG BÁO</h1>
         </section>
 
-        <section class="notice-panel">
+        <section class="notice-panel" id="noticeListView">
             <div class="notice-tabs" role="tablist" aria-label="Loại thông báo">
                 <button type="button"
                         class="notice-tab is-active"
@@ -56,8 +56,14 @@
                         th:attr="data-scope=${thongBao.phamVi},
                                  data-search=${thongBao.tieuDe + ' ' + thongBao.tenNguoiDang + ' ' + thongBao.noiDung}">
                         <td>
-                            <span class="notice-title" th:text="${thongBao.tieuDe}"></span>
-                            <span class="notice-content" th:text="${thongBao.noiDung}"></span>
+                            <button type="button"
+                                    class="notice-title-link"
+                                    data-notice-open
+                                    th:text="${thongBao.tieuDe}">
+                            </button>
+                            <div class="notice-content-source"
+                                 hidden
+                                 th:text="${thongBao.noiDung}"></div>
                         </td>
                         <td th:text="${thongBao.tenNguoiDang}"></td>
                         <td>
@@ -96,6 +102,18 @@
             </nav>
         </section>
 
+        <section class="notice-panel notice-detail-view" id="noticeDetailView" hidden>
+            <div class="notice-tabs" id="noticeDetailTabs" role="tablist" aria-label="Loại thông báo">
+                <span class="notice-tab is-active" data-detail-tab="CHUNG" role="tab" aria-selected="true">THÔNG BÁO CHUNG</span>
+                <span class="notice-tab" data-detail-tab="CA_NHAN" role="tab" aria-selected="false">THÔNG BÁO CÁ NHÂN</span>
+            </div>
+            <article class="notice-detail-panel" aria-live="polite">
+                <h2 class="notice-detail-title" id="noticeDetailTitle"></h2>
+                <p class="notice-detail-content" id="noticeDetailContent"></p>
+                <button class="btn btn-primary btn-sm notice-detail-back" id="noticeBackButton" type="button">Quay lại</button>
+            </article>
+        </section>
+
         <div th:replace="~{fragments/footer :: footer}"></div>
     </main>
 </div>
@@ -106,6 +124,13 @@
         const rows = [...document.querySelectorAll(".notice-row")];
         const searchInput = document.getElementById("noticeSearch");
         const noMatch = document.getElementById("noticeNoMatch");
+        const listView = document.getElementById("noticeListView");
+        const detailView = document.getElementById("noticeDetailView");
+        const detailTitle = document.getElementById("noticeDetailTitle");
+        const detailContent = document.getElementById("noticeDetailContent");
+        const detailTabs = [...document.querySelectorAll("[data-detail-tab]")];
+        const backButton = document.getElementById("noticeBackButton");
+        let lastOpenedTitle = null;
 
         let activeTab = "CHUNG";
 
@@ -150,6 +175,34 @@
         });
 
         searchInput.addEventListener("input", filterRows);
+
+        document.querySelectorAll("[data-notice-open]").forEach((titleButton) => {
+            titleButton.addEventListener("click", () => {
+                const row = titleButton.closest(".notice-row");
+                const contentSource = row.querySelector(".notice-content-source");
+                const scope = row.dataset.scope === "TAT_CA" ? "CHUNG" : "CA_NHAN";
+
+                detailTitle.textContent = titleButton.textContent.trim();
+                detailContent.textContent = contentSource.textContent.trim() || "Thông báo này chưa có nội dung.";
+                detailTabs.forEach((tab) => {
+                    const selected = tab.dataset.detailTab === scope;
+                    tab.classList.toggle("is-active", selected);
+                    tab.setAttribute("aria-selected", String(selected));
+                });
+
+                lastOpenedTitle = titleButton;
+                listView.hidden = true;
+                detailView.hidden = false;
+                backButton.focus();
+            });
+        });
+
+        backButton.addEventListener("click", () => {
+            detailView.hidden = true;
+            listView.hidden = false;
+            if (lastOpenedTitle) lastOpenedTitle.focus();
+        });
+
         filterRows();
     });
 </script>
