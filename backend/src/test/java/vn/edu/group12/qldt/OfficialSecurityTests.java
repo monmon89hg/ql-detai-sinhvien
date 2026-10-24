@@ -80,6 +80,7 @@ class OfficialSecurityTests {
     @MockitoBean DeTaiService deTaiService;
     @MockitoBean DeTaiGiangVienService deTaiGiangVienService;
     @MockitoBean DotDangKyService dotDangKyService;
+    @MockitoBean LichIcsService lichIcsService;
     @MockitoBean HoiDongService hoiDongService;
     @MockitoBean ThanhVienHoiDongService thanhVienHoiDongService;
     @MockitoBean PhanCongHoiDongService phanCongHoiDongService;

@@ -101,4 +101,14 @@ public class DotDangKy {
 
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
+
+    public String getTenTrangThaiHienThi() {
+        if (trangThai == null) return "";
+        return switch (trangThai) {
+            case "CONG_BO" -> "Đã công bố";
+            case "NHAP" -> "Bản nháp";
+            case "DONG" -> "Đã đóng";
+            default -> trangThai;
+        };
+    }
 }
