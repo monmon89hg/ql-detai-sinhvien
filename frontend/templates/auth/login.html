@@ -3,7 +3,16 @@
 <head th:replace="~{fragments/head :: head('Đăng nhập')}"></head>
 
 <body class="login-page">
-<main class="login-container">
+<main class="login-shell">
+    <header class="login-brand">
+        <img src="/images/ute_logo.png"
+             th:src="@{/images/ute_logo.png}"
+             alt="Logo HCM-UTE"
+             class="login-logo">
+
+        <h2>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP.HCM</h2>
+    </header>
+
     <section class="login-card">
         <h1>Đăng nhập</h1>
 
@@ -16,26 +25,28 @@
         </p>
 
         <form th:action="@{/login}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
             <div class="form-field">
-                <label for="email">Email</label>
-                <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autocomplete="username"
-                    required
-                >
+                <label for="email" class="visually-hidden">Tên đăng nhập</label>
+                <input id="email"
+                       name="email"
+                       type="email"
+                       placeholder="Tên đăng nhập"
+                       autocomplete="username"
+                       required>
             </div>
 
             <div class="form-field">
-                <label for="matKhau">Mật khẩu</label>
-                <input
-                    id="matKhau"
-                    name="matKhau"
-                    type="password"
-                    autocomplete="current-password"
-                    required
-                >
+                <label for="matKhau" class="visually-hidden">Mật khẩu</label>
+                <input id="matKhau"
+                       name="matKhau"
+                       type="password"
+                       placeholder="Mật khẩu"
+                       autocomplete="current-password"
+                       required>
             </div>
 
             <button type="submit">Đăng nhập</button>
