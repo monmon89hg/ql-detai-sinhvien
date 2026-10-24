@@ -93,7 +93,20 @@
                                             th:text="${#strings.isEmpty(hoiDong.diaDiem)
                                                 ? 'Chưa cập nhật' : hoiDong.diaDiem}"
                                         ></td>
-                                        <td th:text="${hoiDong.trangThai.tenHienThi}"></td>
+                                        <td>
+                                            <span class="workflow-status workflow-status--neutral"
+                                                  th:if="${hoiDong.trangThai.name() == 'NHAP'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--waiting"
+                                                  th:if="${hoiDong.trangThai.name() == 'SAN_SANG'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--active"
+                                                  th:if="${hoiDong.trangThai.name() == 'DANG_CHAM'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--completed"
+                                                  th:if="${hoiDong.trangThai.name() == 'DA_KHOA'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                        </td>
                                         <td th:if="${coQuyenTaoHoiDong}">
                                             <form th:if="${maHoiDongCoTheXoa.contains(hoiDong.maHoiDong)}"
                                                   th:action="@{/hoi-dong/{maHoiDong}/xoa(maHoiDong=${hoiDong.maHoiDong})}"
