@@ -156,17 +156,20 @@ public class DotDangKyService {
 
     // Hiển thị trạng thái tiến trình giai đoạn của đợt
     public String getGiaiDoanHienTai(DotDangKy dot) {
+        if ("DONG".equals(dot.getTrangThai())) {
+            return "Đã đóng đợt";
+        }
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(dot.getBatDauGv())) {
-            return "Chưa bắt đầu (Sắp diễn ra)";
+            return "Sắp diễn ra";
         } else if (isGiaiDoan1(dot)) {
-            return "Giai đoạn 1: GV đề xuất đề tài";
+            return "GV đề xuất";
         } else if (now.isAfter(dot.getKetThucGv()) && now.isBefore(dot.getBatDauSv())) {
-            return "Thời gian chờ công bố (TK xét duyệt)";
+            return "Chờ duyệt đề tài";
         } else if (isGiaiDoan2(dot)) {
-            return "Giai đoạn 2: SV chọn đề tài";
+            return "Đang mở đăng ký";
         } else {
-            return "Đã kết thúc đăng ký";
+            return "Hết hạn đăng ký";
         }
     }
 }

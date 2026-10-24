@@ -35,10 +35,10 @@
                         <tr>
                             <th>Mã đợt</th>
                             <th>Tên đợt</th>
-                            <th>Loại đề tài</th>
-                            <th>Giai đoạn 1 (GV Đề xuất)</th>
-                            <th>Giai đoạn 2 (SV Đăng ký)</th>
-                            <th>Trạng thái tiến trình</th>
+                            <th>Loại</th>
+                            <th>Hạn GV đề xuất</th>
+                            <th>Hạn SV đăng ký</th>
+                            <th>Tiến độ</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -59,8 +59,9 @@
                                 <span style="font-size:12px;" th:text="${#temporals.format(dot.batDauSv, 'dd/MM/yyyy HH:mm')} + ' - ' + ${#temporals.format(dot.ketThucSv, 'dd/MM/yyyy HH:mm')}"></span>
                             </td>
                             <td>
-                                <span class="status-pill" style="background:#e8f4fc; color:#1f5e8d;"
-                                      th:text="${giaiDoanMap[dot.maDot]}">Giai đoạn 1: GV</span>
+                                <span class="status-pill"
+                                      th:style="${giaiDoanMap[dot.maDot] == 'Đang mở đăng ký' || giaiDoanMap[dot.maDot] == 'GV đề xuất' ? 'background:#e6f9f0; color:#18794e;' : ((giaiDoanMap[dot.maDot] == 'Sắp diễn ra' || giaiDoanMap[dot.maDot] == 'Chờ duyệt đề tài') ? 'background:#fef3c7; color:#92400e;' : 'background:#fdeeee; color:#b3261e;')}"
+                                      th:text="${giaiDoanMap[dot.maDot]}">Đang mở đăng ký</span>
                             </td>
                             <td>
                                 <div class="btn-row">
