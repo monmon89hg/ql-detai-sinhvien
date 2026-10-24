@@ -512,6 +512,8 @@ class OfficialSecurityTests {
 
     @Test
     void allowedRolesReachTheirActualControllers() throws Exception {
+        when(hoiDongService.traCuuDanhSach(null)).thenReturn(
+            new vn.edu.group12.qldt.dto.hoidong.DanhSachHoiDong(List.of(), "", List.of(), java.util.Set.of()));
         mvc.perform(get("/hoi-dong").with(user(SecurityTestUsers.user("TK", "TRUONG_KHOA"))))
             .andExpect(status().isOk()).andExpect(view().name("assessment/hoi-dong/list"));
         mvc.perform(get("/cham-diem").with(user(SecurityTestUsers.user("GV", "GIANG_VIEN"))))

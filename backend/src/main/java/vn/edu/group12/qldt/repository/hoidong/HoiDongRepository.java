@@ -20,6 +20,41 @@ import org.springframework.data.jpa.repository.Lock;
 public interface HoiDongRepository
         extends JpaRepository<HoiDong, String> {
 
+        List<HoiDong> findByMaDotOrderByMaHoiDongAsc(String maDot);
+
+        @Query(value = """
+                SELECT ma_dot AS maDot, ten_dot AS tenDot
+                FROM dot_dang_ky
+                ORDER BY created_at DESC, ma_dot ASC
+                """, nativeQuery = true)
+        List<DotDangKyLuaChon> layDanhSachDotMoiNhatTruoc();
+
+        @Query(value = """
+                SELECT hd.ma_hoi_dong
+                FROM hoi_dong hd
+                WHERE (:maDot IS NULL OR hd.ma_dot = :maDot)
+                  AND hd.trang_thai = 'NHAP'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM thanh_vien_hoi_dong tv
+                      WHERE tv.ma_hoi_dong = hd.ma_hoi_dong)
+                  AND NOT EXISTS (
+                      SELECT 1 FROM hoi_dong_de_tai pc
+                      WHERE pc.ma_hoi_dong = hd.ma_hoi_dong)
+                """, nativeQuery = true)
+        List<String> layMaHoiDongCoTheXoa(@Param("maDot") String maDot);
+
+        @Query(value = """
+                SELECT COUNT(*) FROM thanh_vien_hoi_dong
+                WHERE ma_hoi_dong = :maHoiDong
+                """, nativeQuery = true)
+        long demThanhVien(@Param("maHoiDong") String maHoiDong);
+
+        @Query(value = """
+                SELECT COUNT(*) FROM hoi_dong_de_tai
+                WHERE ma_hoi_dong = :maHoiDong
+                """, nativeQuery = true)
+        long demNhomDaPhanCong(@Param("maHoiDong") String maHoiDong);
+
         @Query(
                 value = """
                 SELECT COUNT(*)

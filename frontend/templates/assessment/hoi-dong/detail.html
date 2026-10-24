@@ -34,7 +34,7 @@
                                    th:href="@{/hoi-dong/{maHoiDong}/sua(maHoiDong=${hoiDong.maHoiDong})}">
                                     Sửa thông tin
                                 </a>
-                                <a class="btn btn-outline" th:href="@{/hoi-dong}">
+                                <a class="btn btn-outline" th:href="@{/hoi-dong(maDot=${hoiDong.maDot})}">
                                     Quay lại danh sách
                                 </a>
                             </div>
@@ -67,7 +67,7 @@
 
                                 <tr>
                                     <th scope="row">Trạng thái</th>
-                                    <td th:text="${hoiDong.trangThai}"></td>
+                                    <td th:text="${hoiDong.trangThai.tenHienThi}"></td>
                                 </tr>
 
                                 <tr>

@@ -3,9 +3,11 @@ package vn.edu.group12.qldt.service.hoidong;
 import vn.edu.group12.qldt.service.auth.CurrentUser;
 
 import java.util.List;
+import java.util.Set;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import vn.edu.group12.qldt.dto.hoidong.HoiDongForm;
+import vn.edu.group12.qldt.dto.hoidong.DanhSachHoiDong;
 import vn.edu.group12.qldt.dto.hoidong.HoiDongSuaForm;
 import vn.edu.group12.qldt.entity.hoidong.HoiDong;
 import vn.edu.group12.qldt.enums.hoidong.TrangThaiHoiDong;
@@ -52,6 +55,54 @@ public class HoiDongService {
         return hoiDongRepository.findAll(
             Sort.by(Sort.Direction.ASC, "maHoiDong")
         );
+    }
+
+    @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
+    @Transactional(readOnly = true)
+    public DanhSachHoiDong traCuuDanhSach(String maDot) {
+        List<DotDangKyLuaChon> danhSachDot = hoiDongRepository.layDanhSachDotMoiNhatTruoc();
+        if (danhSachDot.isEmpty()) {
+            if (maDot != null && !maDot.isBlank()) {
+                throw new EntityNotFoundException("Đợt đăng ký không tồn tại.");
+            }
+            return new DanhSachHoiDong(danhSachDot, "", List.of(), Set.of());
+        }
+
+        // Không truyền tham số: chọn đợt được tạo mới nhất. Chuỗi rỗng: xem tất cả đợt.
+        String maDuocChon = maDot == null ? danhSachDot.getFirst().getMaDot() : maDot.trim();
+        if (!maDuocChon.isEmpty() && hoiDongRepository.demDotTheoMa(maDuocChon) == 0) {
+            throw new EntityNotFoundException("Đợt đăng ký không tồn tại.");
+        }
+
+        List<HoiDong> danhSach = maDuocChon.isEmpty()
+            ? hoiDongRepository.findAll(Sort.by(Sort.Direction.ASC, "maHoiDong"))
+            : hoiDongRepository.findByMaDotOrderByMaHoiDongAsc(maDuocChon);
+        Set<String> maCoTheXoa = danhSach.isEmpty() ? Set.of()
+            : Set.copyOf(hoiDongRepository.layMaHoiDongCoTheXoa(
+                maDuocChon.isEmpty() ? null : maDuocChon));
+        return new DanhSachHoiDong(danhSachDot, maDuocChon, danhSach, maCoTheXoa);
+    }
+
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void xoaHoiDong(@NotBlank String maHoiDong, @NotNull @PositiveOrZero Long version) {
+        if (hoiDongRepository.demTruongKhoaHoatDong(CurrentUser.maNguoiDung()) == 0) {
+            throw new AccessDeniedException("Tài khoản không có quyền xóa hội đồng.");
+        }
+        HoiDong hoiDong = hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
+            .orElseThrow(() -> new EntityNotFoundException("Hội đồng không tồn tại."));
+        if (hoiDong.getTrangThai() != TrangThaiHoiDong.NHAP) {
+            throw new IllegalArgumentException("Chỉ được xóa hội đồng còn ở trạng thái nháp.");
+        }
+        if (!version.equals(hoiDong.getVersion())) {
+            throw new IllegalArgumentException("Thông tin hội đồng đã thay đổi. Vui lòng tải lại trang trước khi xóa.");
+        }
+        if (hoiDongRepository.demThanhVien(maHoiDong) > 0
+                || hoiDongRepository.demNhomDaPhanCong(maHoiDong) > 0) {
+            throw new IllegalArgumentException("Chỉ được xóa hội đồng chưa có thành viên và chưa được phân công nhóm.");
+        }
+        hoiDongRepository.delete(hoiDong);
+        hoiDongRepository.flush();
     }
 
     @PreAuthorize("hasAnyRole('TRUONG_KHOA', 'ADMIN')")
