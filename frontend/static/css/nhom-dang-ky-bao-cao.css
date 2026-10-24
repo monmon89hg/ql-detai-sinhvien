@@ -56,3 +56,71 @@
     .sv-module .sv-filter-button { width:100%; }
     .sv-module .sv-heading-wrap { align-items:flex-start; }
 }
+/* WEPR TV3: căn giữa form tạo nhóm và phân cấp mức độ cảnh báo */
+.sv-module.sv-create-layout {
+    width: 100%;
+    max-width: 1180px;
+    margin-inline: auto;
+}
+.sv-module.sv-create-layout .sv-panel-form {
+    width: 100%;
+    max-width: none;
+    margin: 18px auto;
+    padding: clamp(20px, 2.6vw, 32px);
+}
+.sv-module.sv-create-layout .sv-two-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 24px;
+}
+.sv-module.sv-create-layout .sv-panel-heading p {
+    margin: 7px 0 0;
+    color: #647c8d;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.sv-module.sv-create-layout .sv-create-actions {
+    padding-top: 16px;
+    border-top: 1px solid #e8eef3;
+}
+.sv-module .sv-create-followup {
+    line-height: 1.75;
+}
+.sv-module .sv-create-followup a {
+    color: #155d91;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 700;
+}
+/* Vàng/cam: cần lưu ý trước khi thao tác. */
+.sv-module .sv-info.sv-alert-warning {
+    color: #744a13;
+    background: #fff7e8;
+    border: 1px solid #e9c78d;
+    border-left: 4px solid #d58d29;
+    line-height: 1.7;
+}
+/* Đỏ: điều kiện chặn thao tác hoặc hệ quả khó thay đổi. */
+.sv-module .sv-info.sv-alert-danger {
+    color: #942b2b;
+    background: #fff1f0;
+    border: 1px solid #eab7b2;
+    border-left: 4px solid #cd4039;
+    line-height: 1.7;
+}
+.sv-module .sv-info.sv-alert-warning strong,
+.sv-module .sv-info.sv-alert-danger strong {
+    color: inherit;
+}
+.sv-module .sv-info.sv-alert-warning p,
+.sv-module .sv-info.sv-alert-danger p {
+    margin-top: 6px;
+}
+@media (max-width: 800px) {
+    .sv-module.sv-create-layout .sv-two-col {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .sv-module.sv-create-layout .sv-panel-form {
+        padding: 18px 16px;
+    }
+}
