@@ -28,12 +28,16 @@
                         <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Thông tin hội đồng</h2>
 
-                            <a
-                                class="btn btn-outline"
-                                th:href="@{/hoi-dong}"
-                            >
-                                Quay lại danh sách
-                            </a>
+                            <div class="btn-row">
+                                <a class="btn btn-primary"
+                                   th:if="${coQuyenSuaThongTin}"
+                                   th:href="@{/hoi-dong/{maHoiDong}/sua(maHoiDong=${hoiDong.maHoiDong})}">
+                                    Sửa thông tin
+                                </a>
+                                <a class="btn btn-outline" th:href="@{/hoi-dong}">
+                                    Quay lại danh sách
+                                </a>
+                            </div>
                         </div>
 
                         <table class="data-table">

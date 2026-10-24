@@ -77,13 +77,13 @@ public class SecurityConfig {
                 // TV4: assignment/ownership checks still run inside the real services.
                 .requestMatchers(HttpMethod.GET, "/hoi-dong")
                     .hasAnyRole("TRUONG_KHOA", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/hoi-dong/tao")
+                .requestMatchers(HttpMethod.GET, "/hoi-dong/tao", "/hoi-dong/{id}/sua")
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/hoi-dong/{id}")
                     .hasAnyRole("TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/hoi-dong/tao", "/hoi-dong/{id}/thanh-vien",
                         "/hoi-dong/{id}/thanh-vien/{lecturer}/xoa",
-                        "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong")
+                        "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong", "/hoi-dong/{id}/sua")
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
