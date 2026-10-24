@@ -20,7 +20,8 @@
                     <h1>Danh sách đề tài nghiên cứu</h1>
                     <p>Tra cứu và tìm kiếm đề tài theo đợt đăng ký, bộ môn và trạng thái.</p>
                 </div>
-                <div>
+                <div style="display:flex; gap:10px;">
+                    <a th:if="${selectedMaDot != null and !selectedMaDot.isEmpty()}" th:href="@{/dot-dang-ky/{maDot}/lich.ics(maDot=${selectedMaDot})}" class="btn btn-outline" style="color:#1a73e8; border-color:#1a73e8;">📅 Lịch đợt này (.ics)</a>
                     <a th:href="@{/de-tai/de-xuat}" class="btn btn-primary">+ Đề xuất đề tài mới</a>
                 </div>
             </div>
@@ -83,8 +84,8 @@
                             <td><span class="status-pill" th:text="${dt.maDot}">DOT-01</span></td>
                             <td>
                                 <span class="status-pill"
-                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#eaf2fa; color:#214967;'))}"
-                                      th:text="${dt.trangThai}">CONG_BO</span>
+                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (dt.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1;' : (dt.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#f1f5f9; color:#475569;'))))}"
+                                      th:text="${dt.tenTrangThaiHienThi}">Đã công bố</span>
                             </td>
                             <td>
                                 <div class="btn-row" style="gap: 6px;">

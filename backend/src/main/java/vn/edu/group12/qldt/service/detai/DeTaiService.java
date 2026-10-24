@@ -182,12 +182,38 @@ public class DeTaiService {
             deTai.setMaBoMon(dto.getMaBoMon().trim());
         }
 
-        // Nếu đề tài đang bị từ chối mà giảng viên sửa lại nội dung, tự động chuyển về CHO_DUYET để Trưởng khoa xem lại
-        if ("TU_CHOI".equals(deTai.getTrangThai())) {
-            deTai.setTrangThai("CHO_DUYET");
-            deTai.setLyDoTuChoi(null);
-        } else if ("DA_DUYET".equals(deTai.getTrangThai()) && !laTruongKhoaHoacAdmin) {
-            deTai.setTrangThai("CHO_DUYET");
+        // Cập nhật trạng thái đề tài nếu có trong DTO
+        if (dto.getTrangThai() != null && !dto.getTrangThai().isBlank()) {
+            String trangThaiMoi = dto.getTrangThai().trim();
+            if (!laTruongKhoaHoacAdmin && ("DA_DUYET".equals(trangThaiMoi) || "CONG_BO".equals(trangThaiMoi))) {
+                throw new AccessDeniedException("Chỉ Trưởng khoa hoặc Quản trị viên mới có quyền duyệt hoặc công bố đề tài!");
+            }
+            if ("CONG_BO".equals(trangThaiMoi)) {
+                DotDangKy dot = dotDangKyService.getDotDangKyByMa(deTai.getMaDot());
+                if (dot != null && "DONG".equals(dot.getTrangThai())) {
+                    throw new IllegalStateException("Không thể chuyển đề tài sang Đã công bố khi đợt đăng ký đã đóng!");
+                }
+                long countGvhd = deTaiGiangVienService.countGvhd(maDeTai);
+                if (countGvhd < 1) {
+                    throw new IllegalStateException("Đề tài chưa có Giảng viên hướng dẫn nên không thể chuyển sang Đã công bố!");
+                }
+                if (deTai.getCongBoLuc() == null) {
+                    deTai.setCongBoLuc(LocalDateTime.now());
+                }
+            }
+            deTai.setTrangThai(trangThaiMoi);
+            if (!"TU_CHOI".equals(trangThaiMoi)) {
+                deTai.setLyDoTuChoi(null);
+            }
+        } else {
+            // Nếu không truyền trạng thái chỉ định, áp dụng luật chuyển trạng thái mặc định:
+            // Nếu đề tài đang bị từ chối mà giảng viên sửa lại nội dung, tự động chuyển về CHO_DUYET để Trưởng khoa xem lại
+            if ("TU_CHOI".equals(deTai.getTrangThai())) {
+                deTai.setTrangThai("CHO_DUYET");
+                deTai.setLyDoTuChoi(null);
+            } else if ("DA_DUYET".equals(deTai.getTrangThai()) && !laTruongKhoaHoacAdmin) {
+                deTai.setTrangThai("CHO_DUYET");
+            }
         }
 
         return deTaiRepository.save(deTai);

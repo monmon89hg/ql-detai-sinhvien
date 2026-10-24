@@ -197,6 +197,26 @@ class DeTaiStateTransitionTests {
     }
 
     @Test
+    void capNhatDeTai_CapNhatTrangThaiThanhCong_KhiChonTrangThaiMoi() {
+        DeTai deTai = new DeTai();
+        deTai.setMaDeTai("DT01");
+        deTai.setMaNguoiDeXuat("GV01");
+        deTai.setTrangThai("CHO_DUYET");
+
+        vn.edu.group12.qldt.dto.detai.DeTaiDto dto = new vn.edu.group12.qldt.dto.detai.DeTaiDto();
+        dto.setTrangThai("NGUNG_NHAN");
+
+        when(deTaiRepository.findById("DT01")).thenReturn(Optional.of(deTai));
+        when(deTaiRepository.countDangKyByMaDeTai("DT01")).thenReturn(0L);
+        when(deTaiRepository.save(any(DeTai.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeTai ketQua = deTaiService.capNhatDeTai("DT01", dto, "GV01");
+
+        assertEquals("NGUNG_NHAN", ketQua.getTrangThai());
+        verify(deTaiRepository).save(deTai);
+    }
+
+    @Test
     void capNhatDeTai_NemLoi_KhiKhongPhaiNguoiDeXuat() {
         DeTai deTai = new DeTai();
         deTai.setMaDeTai("DT01");

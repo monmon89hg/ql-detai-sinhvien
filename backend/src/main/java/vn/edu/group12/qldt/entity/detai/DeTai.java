@@ -100,4 +100,17 @@ public class DeTai {
 
     public Long getVersion() { return version; }
     public void setVersion(Long version) { this.version = version; }
+
+    public String getTenTrangThaiHienThi() {
+        if (trangThai == null) return "";
+        return switch (trangThai) {
+            case "CONG_BO" -> "Đã công bố";
+            case "CHO_DUYET" -> "Chờ duyệt";
+            case "DA_DUYET" -> "Đã duyệt";
+            case "TU_CHOI" -> "Bị từ chối";
+            case "NHAP" -> "Bản nháp";
+            case "NGUNG_NHAN" -> "Ngừng nhận";
+            default -> trangThai;
+        };
+    }
 }

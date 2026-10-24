@@ -45,8 +45,8 @@
                             </td>
                             <td>
                                 <span class="status-pill"
-                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#eaf2fa; color:#214967;'))}"
-                                      th:text="${dt.trangThai}">CHO_DUYET</span>
+                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (dt.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1;' : (dt.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#f1f5f9; color:#475569;'))))}"
+                                      th:text="${dt.tenTrangThaiHienThi}">Chờ duyệt</span>
                             </td>
                             <td>
                                 <span style="color:#c0392b; font-size:12px;" th:text="${dt.lyDoTuChoi}">-</span>

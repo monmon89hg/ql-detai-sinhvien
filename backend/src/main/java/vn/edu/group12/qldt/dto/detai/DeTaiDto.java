@@ -8,6 +8,7 @@ public class DeTaiDto {
     private String tenDeTai;
     private String noiDung;
     private String yeuCau;
+    private String trangThai;
 
     public DeTaiDto() {}
 
@@ -28,4 +29,7 @@ public class DeTaiDto {
 
     public String getYeuCau() { return yeuCau; }
     public void setYeuCau(String yeuCau) { this.yeuCau = yeuCau; }
+
+    public String getTrangThai() { return trangThai; }
+    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 }

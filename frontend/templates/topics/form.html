@@ -17,7 +17,11 @@
 
             <div class="page-heading">
                 <h1>Chỉnh sửa Đề tài nghiên cứu</h1>
-                <p>Mã đề tài: <strong th:text="${deTai.maDeTai}">DT001</strong> | Trạng thái hiện tại: <span class="status-pill" th:text="${deTai.trangThai}">CHO_DUYET</span></p>
+                <p>Mã đề tài: <strong th:text="${deTai.maDeTai}">DT001</strong> | Trạng thái hiện tại: 
+                    <span class="status-pill"
+                          th:style="${deTai.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (deTai.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1;' : (deTai.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#f1f5f9; color:#475569;'))))}"
+                          th:text="${deTai.tenTrangThaiHienThi}">Chờ duyệt</span>
+                </p>
             </div>
 
             <div class="placeholder" style="max-width: 800px;">
@@ -34,9 +38,22 @@
                         </div>
                     </div>
 
-                    <div class="form-field">
-                        <label>Mã Bộ môn quản lý *</label>
-                        <input type="text" class="form-control" th:field="*{maBoMon}" placeholder="VD: DEMO_CNPM, DEMO_HTTT, DEMO_KHMT" required>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                        <div class="form-field">
+                            <label><strong>Mã Bộ môn quản lý *</strong></label>
+                            <input type="text" class="form-control" th:field="*{maBoMon}" placeholder="VD: DEMO_CNPM, DEMO_HTTT, DEMO_KHMT" required>
+                        </div>
+                        <div class="form-field">
+                            <label><strong>Trạng thái đề tài *</strong></label>
+                            <select class="form-control" th:field="*{trangThai}" required>
+                                <option value="CHO_DUYET">Chờ duyệt</option>
+                                <option value="DA_DUYET">Đã duyệt</option>
+                                <option value="CONG_BO">Đã công bố (SV xem)</option>
+                                <option value="NGUNG_NHAN">Ngừng nhận đăng ký</option>
+                                <option value="TU_CHOI">Bị từ chối</option>
+                                <option value="NHAP">Bản nháp</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-field">

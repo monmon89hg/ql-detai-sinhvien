@@ -19,8 +19,8 @@
                 <h1 th:text="${deTai.tenDeTai}">Tên đề tài</h1>
                 <p>Mã: <strong th:text="${deTai.maDeTai}">DT001</strong> | Đợt: <strong th:text="${dot.tenDot}">Đợt 1</strong> | Trạng thái: 
                     <span class="status-pill"
-                          th:style="${deTai.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#eaf2fa; color:#214967;'))}"
-                          th:text="${deTai.trangThai}">CONG_BO</span>
+                          th:style="${deTai.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (deTai.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1;' : (deTai.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#f1f5f9; color:#475569;'))))}"
+                          th:text="${deTai.tenTrangThaiHienThi}">Đã công bố</span>
                 </p>
             </div>
 
@@ -109,6 +109,8 @@
                 <form th:action="@{/de-tai/{maDeTai}/xoa(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Bạn có chắc chắn muốn xóa/hủy đề tài này? Nếu đề tài đã có dữ liệu liên quan, hệ thống sẽ tự động chuyển sang NGỪNG NHẬN để bảo toàn lịch sử.');">Xóa / Hủy đề tài</button>
                 </form>
+
+                <a th:href="@{/de-tai/lich/{maDot}.ics(maDot=${dot.maDot})}" class="btn btn-outline" style="color:#1a73e8; border-color:#1a73e8;" title="Tải file .ics để thêm mốc thời gian vào Google Calendar / Apple Calendar">📅 Xuất Google Calendar (.ics)</a>
 
                 <a th:href="@{/de-tai}" class="btn btn-outline">Quay lại danh sách đề tài</a>
                 <a th:href="@{/de-tai/duyet}" class="btn btn-outline">Sang trang duyệt đề tài</a>
