@@ -34,13 +34,15 @@ class HoiDongDanhSachXoaMySqlTests {
     }
 
     @Test
-    void latestCreationTimeWinsOverCodeAndStatusWithoutFallingBackToOldCouncils() {
+    void defaultShowsAllCouncilsWhileRoundOptionsRemainNewestFirst() {
         DuLieu data = taoDuLieu();
         taoHoiDong(data.maHoiDong(), data.maCu(), data.maTk(), "DA_KHOA");
-        var latest = service.traCuuDanhSach(null);
-        assertThat(latest.maDotDuocChon()).isEqualTo(data.maMoi());
-        assertThat(latest.danhSachHoiDong()).isEmpty();
-        assertThat(latest.danhSachDot().getFirst().getMaDot()).isEqualTo(data.maMoi());
+        var all = service.traCuuDanhSach(null);
+        assertThat(all.maDotDuocChon()).isEmpty();
+        assertThat(all.danhSachHoiDong()).extracting(HoiDong::getMaHoiDong)
+            .contains(data.maHoiDong());
+        assertThat(all.danhSachDot().getFirst().getMaDot()).isEqualTo(data.maMoi());
+        assertThat(service.traCuuDanhSach(data.maMoi()).danhSachHoiDong()).isEmpty();
 
         var history = service.traCuuDanhSach(data.maCu());
         assertThat(history.danhSachHoiDong()).extracting(HoiDong::getMaHoiDong)

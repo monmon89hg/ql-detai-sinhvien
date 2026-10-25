@@ -110,7 +110,14 @@ public class MoChamService {
             .orElseThrow(() -> new AccessDeniedException("Nhóm không thuộc phạm vi tổng hợp hoặc quản lý của bạn."));
         KetQuaTinhDiem diem=null;
         String loi=null;
-        try { diem=tinhDiem.tinhDiem(maNhom); } catch (IllegalArgumentException ex) { loi=ex.getMessage(); }
+        if ("DA_DUYET".equals(nhom.getTrangThaiDangKy())
+                || "DANG_THUC_HIEN".equals(nhom.getTrangThaiDangKy())) {
+            loi="Nhóm chưa mở chấm.";
+        } else {
+            var xemTruoc=tinhDiem.xemTruoc(maNhom);
+            diem=xemTruoc.diem();
+            loi=xemTruoc.lyDoChuaDu();
+        }
         return new ChiTiet(nhom,phieu.findById_MaNhomOrderById_MaGiangVienAsc(maNhom),
             phieu.layPhieuChamYeuCau(maNhom),diem,loi,danhGia.dauVao(maNhom).orElseThrow(() -> new IllegalArgumentException("Nhóm chưa có đăng ký hợp lệ.")).phienBanBaoCao(),
             !quanLy && "DANG_CHAM".equals(nhom.getTrangThaiDangKy()) && nhom.getTrangThaiKetQua()==null,
