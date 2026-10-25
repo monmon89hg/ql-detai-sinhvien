@@ -6,7 +6,7 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <div class="app-grid">
-    <aside th:replace="~{fragments/sidebar :: sidebar('announcements')}"></aside>
+    <aside th:replace="~{fragments/sidebar :: sidebar('announcement-management')}"></aside>
 
     <main class="page" id="content">
         <div th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý thông báo')}"></div>
@@ -23,8 +23,8 @@
 
         <div th:replace="~{fragments/messages :: messages}"></div>
 
-        <section class="card">
-            <form th:object="${form}"
+        <section class="card admin-list-card admin-notice-form-card">
+            <form class="admin-notice-form" th:object="${form}"
                   th:action="${isEdit}
                       ? @{/thong-bao/quan-ly/{id}(id=${maThongBao})}
                       : @{/thong-bao/quan-ly}"

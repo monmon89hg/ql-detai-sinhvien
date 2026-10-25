@@ -96,6 +96,29 @@
                     </svg>
                     <span>Thông báo</span>
                 </a>
+<a
+                    class="side-link"
+                    href="/thong-bao/quan-ly"
+                    th:href="@{/thong-bao/quan-ly}"
+                    th:classappend="${activeMenu == 'announcement-management'} ? ' is-active' : ''"
+                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
+                >
+                    <svg
+                        class="icon"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M3 11v2a1 1 0 0 0 1 1h2l11 4V6L6 10H4a1 1 0 0 0-1 1z"/>
+                        <path d="M11.6 16.8 13 21l-3.5-1.2L8 16"/>
+                        <path d="M20 9a4 4 0 0 1 0 6"/>
+                    </svg>
+                    <span>Quản lý thông báo</span>
+                </a>
             </div>
             <div class="side-group" sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA') or hasRole('TRUONG_BO_MON') or hasRole('GIANG_VIEN') or hasRole('SINH_VIEN')">
                 <div class="side-heading">Đợt đăng ký &amp; đề tài</div>

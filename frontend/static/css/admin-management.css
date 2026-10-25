@@ -169,3 +169,177 @@
     grid-column: 3;
     justify-self: end;
 }
+
+/* Bảng quản lý thông báo: nhãn rõ nghĩa và bảng có đường viền gọn */
+.admin-notice-table {
+    min-width: 1080px;
+    border: 1px solid #d7e2ec;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.admin-notice-table th,
+.admin-notice-table td {
+    border-right: 1px solid #d7e2ec;
+    border-bottom: 1px solid #d7e2ec;
+}
+.admin-notice-table th:last-child,
+.admin-notice-table td:last-child {
+    border-right: 0;
+}
+.admin-notice-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+.admin-notice-table th:first-child {
+    border-top-left-radius: 9px;
+}
+.admin-notice-table th:last-child {
+    border-top-right-radius: 9px;
+}
+.admin-notice-title {
+    display: block;
+    color: #263f52;
+    font-weight: 700;
+}
+.admin-notice-content {
+    max-width: 540px;
+    margin-top: 4px;
+    color: #60758a;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.notice-scope-pill,
+.notice-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 25px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.notice-scope-pill {
+    color: #286749;
+    background: #e8f4ee;
+}
+.notice-state--published {
+    color: #176345;
+    background: #e6f4ed;
+}
+.notice-state--hidden {
+    color: #9a3f36;
+    background: #fff0ee;
+}
+.notice-state--draft {
+    color: #855d13;
+    background: #fff5dc;
+}
+.admin-notice-actions > form {
+    margin: 0;
+}
+.admin-notice-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.admin-notice-actions .btn {
+    min-height: 30px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+}
+
+/* Form tạo/sửa thông báo */
+.admin-notice-form-card {
+    max-width: 1040px;
+    padding: 24px 26px;
+    border-radius: 14px;
+}
+.admin-notice-form {
+    width: 100%;
+}
+.admin-notice-form .form-group {
+    display: grid;
+    grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+    align-items: start;
+    gap: 8px 18px;
+    margin: 0 0 18px;
+}
+.admin-notice-form .form-group > label {
+    padding-top: 10px;
+    color: #263f52;
+    font-size: 13px;
+    font-weight: 700;
+}
+.admin-notice-form input[type="text"],
+.admin-notice-form select,
+.admin-notice-form textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #cbd8e4;
+    border-radius: 8px;
+    background: #fff;
+    color: #263f52;
+    font: inherit;
+    font-size: 13px;
+    transition: border-color .15s, box-shadow .15s;
+}
+.admin-notice-form input[type="text"]:focus,
+.admin-notice-form select:focus,
+.admin-notice-form textarea:focus {
+    outline: none;
+    border-color: #2b789f;
+    box-shadow: 0 0 0 3px rgba(43, 120, 159, .13);
+}
+.admin-notice-form textarea {
+    min-height: 190px;
+    resize: vertical;
+    line-height: 1.6;
+}
+.admin-notice-form select[multiple] {
+    min-height: 190px;
+    padding: 6px;
+}
+.admin-notice-form select[multiple] option {
+    padding: 7px 9px;
+    border-radius: 5px;
+}
+.admin-notice-form .form-group > small {
+    grid-column: 2;
+    color: #718397;
+    font-size: 11px;
+    line-height: 1.5;
+}
+.admin-notice-form .form-group > small.form-error,
+.admin-notice-form .form-error {
+    color: #a13f39;
+}
+.admin-notice-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #e1e8ef;
+}
+@media (max-width: 700px) {
+    .admin-notice-form-card {
+        padding: 18px 16px;
+    }
+    .admin-notice-form .form-group {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    .admin-notice-form .form-group > label {
+        padding-top: 0;
+    }
+    .admin-notice-form .form-group > small {
+        grid-column: 1;
+    }
+}
