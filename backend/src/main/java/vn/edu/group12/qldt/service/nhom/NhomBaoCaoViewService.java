@@ -31,7 +31,8 @@ public class NhomBaoCaoViewService {
     }
 
     public Map<String, Object> danhSachNhom(String keyword, String round, String status, int page) {
-        var m = model(quyen.hienTai());
+        var u = quyen.hienTai();
+        var m = model(u);
         keyword = loc(keyword, 255);
         round = loc(round, 30);
         status = loc(status, 20);
@@ -40,6 +41,9 @@ public class NhomBaoCaoViewService {
         m.put("trangThai", status);
         m.put("danhSachDot", danhMuc.danhSachDot(false, now()));
         trang(m, "danhSachNhom", repo.danhSachNhom(keyword, round, status, offset(page)), page);
+        // Chỉ truy vấn một lần cho sinh viên hiện tại; không tạo N+1 query trên từng dòng.
+        m.put("nhomDaGuiYeuCau", u.laSinhVien()
+                ? repo.nhomDaGuiYeuCau(u.maNguoiDung()) : Set.of());
         return m;
     }
 
@@ -57,12 +61,16 @@ public class NhomBaoCaoViewService {
                         .orElseThrow(() -> NghiepVuNhomException.thieu("Không tìm thấy nhóm sinh viên."));
         m.put("nhom", n);
         m.put("danhSachThanhVien", repo.thanhVien(ma, "THAM_GIA"));
+        String trangThaiYeuCau = u.laSinhVien()
+                ? repo.thanhVien(ma, u.maNguoiDung(), false).map(ThanhVien::trangThai).orElse(null)
+                : null;
+        m.put("trangThaiYeuCauCuaToi", trangThaiYeuCau);
         boolean duoc =
                 u.laSinhVien()
                         && "DANG_LAP".equals(n.trangThai())
                         && n.soThanhVien() < 5
                         && repo.nhomHienTai(u.maNguoiDung()).isEmpty()
-                        && repo.thanhVien(ma, u.maNguoiDung(), false).isEmpty()
+                        && trangThaiYeuCau == null
                         && danhMuc.dot(n.maDot(), false).map(d -> d.dangMo(now())).orElse(false);
         m.put("coTheGuiYeuCau", duoc);
         return m;

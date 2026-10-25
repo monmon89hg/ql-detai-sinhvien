@@ -20,6 +20,94 @@
         });
     });
 
+    // Modal từ chối đăng ký: URL theo đúng nhóm, CSRF có sẵn trong form Thymeleaf.
+    const rejectOverlay = document.querySelector('[data-sv-reject-dialog]');
+    if (rejectOverlay) {
+        const panel = rejectOverlay.querySelector('[data-sv-reject-panel]');
+        const rejectForm = rejectOverlay.querySelector('[data-sv-reject-form]');
+        const reason = rejectOverlay.querySelector('[data-sv-reject-reason]');
+        const errorEl = rejectOverlay.querySelector('[data-sv-reject-error]');
+        const groupLabel = rejectOverlay.querySelector('[data-sv-reject-group]');
+        const submitBtn = rejectOverlay.querySelector('[data-sv-reject-submit]');
+        let lastTrigger = null;
+
+        function resetReasonError() {
+            reason.setCustomValidity('');
+            reason.removeAttribute('aria-invalid');
+            errorEl.textContent = '';
+            errorEl.hidden = true;
+        }
+
+        function closeRejectModal() {
+            rejectOverlay.hidden = true;
+            document.body.classList.remove('sv-reject-modal-open');
+            rejectForm.reset();
+            rejectForm.removeAttribute('action');
+            resetReasonError();
+            submitBtn.disabled = false;
+            if (lastTrigger) lastTrigger.focus();
+        }
+
+        document.querySelectorAll('[data-sv-reject-open]').forEach(button => {
+            button.addEventListener('click', () => {
+                const url = button.getAttribute('data-sv-reject-url');
+                if (!url) return;
+                lastTrigger = button;
+                rejectForm.reset();
+                resetReasonError();
+                submitBtn.disabled = false;
+                rejectForm.action = url;
+                groupLabel.textContent = button.getAttribute('data-sv-reject-group') || '';
+                rejectOverlay.hidden = false;
+                document.body.classList.add('sv-reject-modal-open');
+                reason.focus();
+            });
+        });
+
+        rejectOverlay.querySelectorAll('[data-sv-reject-close]').forEach(button => {
+            button.addEventListener('click', closeRejectModal);
+        });
+        rejectOverlay.addEventListener('click', event => {
+            if (event.target === rejectOverlay) closeRejectModal();
+        });
+        rejectOverlay.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeRejectModal();
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = [...panel.querySelectorAll('button:not([disabled]), textarea:not([disabled]), input:not([type="hidden"]):not([disabled])')];
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+        reason.addEventListener('input', resetReasonError);
+
+        rejectForm.addEventListener('submit', event => {
+            const trimmed = reason.value.trim();
+            if (!trimmed || trimmed.length > 1000) {
+                event.preventDefault();
+                const message = 'Vui lòng nhập lý do từ chối từ 1 đến 1.000 ký tự.';
+                reason.setCustomValidity(message);
+                reason.setAttribute('aria-invalid', 'true');
+                errorEl.textContent = message;
+                errorEl.hidden = false;
+                reason.reportValidity();
+                return;
+            }
+            // Xác nhận bằng nút trong modal, sau đó gửi form POST thật đến backend.
+            reason.value = trimmed;
+            submitBtn.disabled = true;
+        });
+    }
+
     document.querySelectorAll('[data-sv-upload]').forEach(form => {
         const fileInput = form.querySelector('[data-sv-pdf]');
         const errorEl = form.querySelector('[data-sv-file-error]');
