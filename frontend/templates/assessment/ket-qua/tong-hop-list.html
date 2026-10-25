@@ -47,7 +47,8 @@
                             <option value="">Tất cả loại</option><option value="MON_HOC" th:selected="${loai == 'MON_HOC'}">Môn học</option>
                             <option value="NCKH" th:selected="${loai == 'NCKH'}">NCKH</option><option value="TLCN" th:selected="${loai == 'TLCN'}">TLCN</option>
                             <option value="KLTN" th:selected="${loai == 'KLTN'}">KLTN</option>
-                        </select><button class="btn btn-primary" type="submit">Lọc kết quả</button>
+                        </select>
+                        <button class="btn btn-primary result-filter-button" type="submit">Lọc kết quả</button>
                     </form>
                     <section class="section sv-panel">
                         <div class="section-top sv-panel-heading">
@@ -112,10 +113,11 @@
                                         th:text="${nhom.diemCuoi != null
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
-                                    <td>
+                                    <td class="result-actions">
                                         <a class="btn btn-primary" th:if="${!chiXem and nhom.trangThaiKetQua == null}"
                                            th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem và tổng hợp</a>
-                                        <a class="btn btn-outline" th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem căn cứ</a>
+                                        <a class="btn btn-outline" th:if="${!chiXem}"
+                                           th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem chi tiết</a>
 
 
                                         <span th:if="${chiXem}">Chỉ xem</span>
