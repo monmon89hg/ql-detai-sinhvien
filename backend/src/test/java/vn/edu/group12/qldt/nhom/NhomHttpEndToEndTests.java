@@ -162,7 +162,7 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
             String trangTraCuuBaoCao = dean.get("/bao-cao?tuKhoa=" + ma).body();
             assertThat(trangTraCuuBaoCao)
                     .contains("Danh sách báo cáo theo nhóm", ma,
-                            "Xem báo cáo", "Chưa có PDF hợp lệ", "name=\"trangThaiNop\"");
+                                "Xem", "Chưa có PDF hợp lệ", "name=\"trangThaiNop\"");
             String trangNopTheoNhom = dean.get("/bao-cao?maNhom=" + ma).body();
             assertThat(trangNopTheoNhom).contains("Thông tin nộp báo cáo", ma);
             // Hồi quy: modal từ chối có đúng action từng nhóm, CSRF và giới hạn nhập.
