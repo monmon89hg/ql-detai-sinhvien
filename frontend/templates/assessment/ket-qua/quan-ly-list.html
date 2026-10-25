@@ -106,7 +106,7 @@
                                         th:text="${nhom.diemCuoi != null
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
-                                    <td>
+                                    <td class="result-actions">
                                         <a class="btn btn-outline" th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem căn cứ</a>
                                         <form th:if="${!laAdmin and (nhom.trangThaiDangKy == 'DA_DUYET' or nhom.trangThaiDangKy == 'DANG_THUC_HIEN')}"
                                               th:action="@{/ket-qua/{ma}/mo-cham(ma=${nhom.maNhom})}" method="post"

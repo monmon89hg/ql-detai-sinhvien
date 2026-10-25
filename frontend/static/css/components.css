@@ -251,6 +251,14 @@
     flex-wrap: wrap
 }
 
+.result-actions .btn {
+    white-space: nowrap;
+}
+
+.result-actions form {
+    margin-top: 8px;
+}
+
 .breadcrumbs-helper {
     color: #6b8194;
     font-size: 12px
