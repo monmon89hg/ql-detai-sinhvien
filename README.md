@@ -11,7 +11,9 @@
 
 Ứng dụng web hỗ trợ Khoa CNTT quản lý các đợt đăng ký, đề tài, nhóm sinh viên, việc nộp báo cáo, hội đồng chấm điểm và kết quả. Hệ thống được xây dựng theo kiến trúc **Spring Boot MVC + Thymeleaf**, sử dụng **MySQL** để lưu trữ dữ liệu.
 
-> **Lưu ý:** Các chức năng dưới đây là **phạm vi triển khai của đồ án**, không phải xác nhận rằng tất cả đã hoàn thành hoặc kiểm thử thành công. README sẽ được cập nhật theo mã nguồn thực tế sau khi tích hợp.
+Ứng dụng được đóng gói bằng **Docker**, triển khai trên **Render**; **Railway MySQL 8.4** lưu dữ liệu nghiệp vụ và **Cloudflare R2** lưu tệp báo cáo PDF. Mọi phân hệ dùng chung cơ chế xác thực, phân quyền và giao diện Thymeleaf.
+
+> **Trạng thái (25/10/2026):** Mã nguồn tích hợp trên nhánh `develop`; CI gồm kiểm thử build/MVC/Security và MySQL 8.4. Kết quả CI của một commit không thay thế kiểm thử thủ công trên môi trường triển khai.
 
 ## 1. Thành viên và phân công
 
@@ -24,7 +26,7 @@
 
 Mỗi thành viên triển khai **giao diện Thymeleaf, xử lý nghiệp vụ Spring Boot và tích hợp dữ liệu** cho phân hệ mình phụ trách. Các trang sử dụng chung Header, Sidebar, Footer và bộ CSS/JS của nhóm.
 
-## 2. Chức năng dự kiến
+## 2. Các phân hệ chính
 
 - **Quản trị và phân quyền:** đăng nhập, đăng xuất, quản lý tài khoản sinh viên/giảng viên/cán bộ, bộ môn và thông báo.
 - **Quản lý đề tài theo hai giai đoạn:** giai đoạn 1 tiếp nhận, xét duyệt và công bố đề tài; giai đoạn 2 cho phép nhóm sinh viên đăng ký các đề tài đã công bố.
@@ -34,19 +36,41 @@ Mỗi thành viên triển khai **giao diện Thymeleaf, xử lý nghiệp vụ 
 - **Hội đồng và chấm điểm:** phân công hội đồng **3–5 giảng viên**, nhập phiếu chấm, tổng hợp điểm; giảng viên không chấm đề tài mình hướng dẫn.
 - **Kết quả:** công bố, tra cứu kết quả trong phạm vi được phân quyền và thông báo đến sinh viên.
 
-## 3. Công nghệ sử dụng
+## 3. Công nghệ và kiến trúc triển khai
 
-| Thành phần | Công nghệ |
-| --- | --- |
-| Ngôn ngữ | Java 21 |
-| Backend | Spring Boot, Spring MVC, Spring Data JPA, Spring Security, Validation |
-| Frontend | Thymeleaf, HTML, CSS, JavaScript, Be Vietnam Pro |
-| Cơ sở dữ liệu | MySQL 8.4 |
-| Quản lý phiên bản CSDL | Flyway |
-| Build và quản lý dependencies | Maven Wrapper |
-| Quản lý mã nguồn và công việc | Git, GitHub Issues, Pull Requests |
+| Thành phần | Công nghệ / dịch vụ | Vai trò trong hệ thống |
+| --- | --- | --- |
+| Ngôn ngữ | Java 21, JavaScript | Xử lý nghiệp vụ phía máy chủ và tương tác giao diện |
+| Backend | Spring Boot 4.1.1, Spring MVC, Spring Security, Spring Data JPA, JDBC, Validation | Controller, Service, Repository, xác thực, phân quyền và truy cập dữ liệu |
+| Frontend | Thymeleaf, HTML5, CSS3, JavaScript, Be Vietnam Pro | Render giao diện trên server và xử lý tương tác phía trình duyệt |
+| Cơ sở dữ liệu | MySQL 8.4 (Railway) | Lưu thông tin tài khoản, đợt đăng ký, đề tài, nhóm, hội đồng và kết quả |
+| Migration CSDL | Flyway V1–V8 | Quản lý phiên bản schema; không tự ý chạy migration trên production |
+| Lưu trữ báo cáo PDF | Cloudflare R2, AWS SDK for Java v2 (S3 API) | Lưu nội dung PDF; metadata, phiên bản và SHA-256 nằm trong MySQL |
+| Xử lý tệp | Apache PDFBox, Apache POI | Kiểm tra PDF và xuất dữ liệu Excel |
+| Email thông báo | Spring Mail, SMTP | Gửi thông báo kết quả khi chức năng và SMTP được cấu hình |
+| Logging & giám sát | Spring AOP | Đo thời gian thực thi và ghi nhận lỗi ở tầng Service |
+| Build & đóng gói | Maven Wrapper, Docker (multi-stage build) | Tạo JAR và image triển khai |
+| CI | GitHub Actions | Build, unit/MVC/Security tests và kiểm thử MySQL 8.4 độc lập |
+| Triển khai ứng dụng | Render | Chạy container chứa ứng dụng Spring Boot và giao diện Thymeleaf |
+| Quản lý mã nguồn | Git, GitHub | Quản lý branch, review và Pull Request |
 
-Thiết kế CSDL của nhóm gồm **17 bảng**, sử dụng mã nghiệp vụ hoặc khóa ghép làm khóa chính; không dùng `id AUTO_INCREMENT` làm khóa chính thay thế.
+### 3.1. Kiến trúc triển khai
+
+```text
+Trình duyệt người dùng
+         |
+         v
+Render — Docker container (Spring Boot MVC + Thymeleaf)
+         |                                |
+         v                                v
+Railway — MySQL 8.4               Cloudflare R2 — PDF
+```
+
+Toàn bộ giao diện Thymeleaf và tài nguyên tĩnh được đóng gói trong cùng ứng dụng Spring Boot; **không có frontend server riêng**. Render sử dụng cổng `PORT` do môi trường cung cấp qua Dockerfile; cấu hình local dùng cổng `8081`.
+
+**CI và CD:** GitHub Actions chạy các quality gates của repository; Render phụ trách triển khai dịch vụ. Việc tự động deploy khi có commit mới phụ thuộc thiết lập của Render, không đồng nghĩa workflow CI tự thực hiện lệnh deploy.
+
+**Tài nguyên bên ngoài:** cấu hình Railway, R2 và SMTP được cung cấp qua biến môi trường / secret trên dịch vụ triển khai. Không lưu mật khẩu hoặc khóa truy cập vào repository. Flyway trong `application.properties` đang tắt mặc định; chỉ bật có kiểm soát trên schema phù hợp sau khi kiểm tra lịch sử migration.
 
 ## 4. Cấu trúc thư mục
 
@@ -95,148 +119,83 @@ Kiểm thử nghiệp vụ trên database thật vẫn cần chạy riêng với
 
 **Quy ước giao diện:** các trang nghiệp vụ sử dụng lại các Thymeleaf fragments và CSS chung; không tạo Header/Sidebar riêng cho từng phân hệ. Xem chi tiết tại [`docs/QUY_UOC_TICH_HOP_UI.md`](docs/QUY_UOC_TICH_HOP_UI.md) sau khi PR Base UI được merge.
 
-## 5. Hướng dẫn cài đặt và chạy local
+## 5. Chạy ứng dụng và kiểm thử local (Windows)
 
-Hướng dẫn dưới đây dùng **Windows PowerShell**, **MySQL 8.4** và nhánh `develop`. Các bước thực hiện trên **máy cá nhân**, không sử dụng database Railway.
+Hướng dẫn dành cho **môi trường MySQL 8.4 trên máy cá nhân**, không dùng dữ liệu Railway. Repo dùng **Java 21**, Maven Wrapper, Spring Boot MVC + Thymeleaf, Spring Security, JPA/JdbcTemplate và Cloudflare R2 cho PDF. Frontend được đóng gói chung trong JAR từ thư mục `frontend/`; không chạy server frontend riêng.
 
-### Bước 1 — Chuẩn bị
-
-Cài đặt **JDK 21**, **Git**, **MySQL Server 8.4**, **Python 3.10+** và **MySQL Workbench** (để xem dữ liệu). Dự án dùng Maven Wrapper nên không cần cài Maven riêng.
+### 5.1. Lấy code và chuẩn bị schema mới
 
 ```powershell
-java -version
-javac -version
-git --version
-py --version
-```
-
-### Bước 2 — Lấy source
-
-```powershell
-git clone https://github.com/monmon89hg/ql-detai-sinhvien.git
-cd ql-detai-sinhvien
-git switch develop
-```
-
-Nếu đã clone repo từ trước, hãy lưu an toàn các thay đổi chưa commit, rồi chạy trong thư mục repo:
-
-```powershell
+# Chạy trong thư mục repository; nhớ lưu thay đổi local trước khi cập nhật.
 git fetch origin
 git switch develop
 git pull --ff-only origin develop
-```
-
-Kiểm tra Maven Wrapper sau khi đã ở thư mục repository:
-
-```powershell
+java -version
 .\backend\mvnw.cmd -f backend/pom.xml -v
 ```
 
-### Bước 3 — Tạo database local
-
-Trong **MySQL Workbench**, kết nối MySQL trên máy và chạy:
+Tạo schema **mới, chưa có bảng** trong MySQL Workbench (hoặc chọn tên khác nếu đã tồn tại):
 
 ```sql
-CREATE DATABASE qldt_local_demo
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_0900_ai_ci;
+CREATE DATABASE qldt_local_demo CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ```
 
-Nếu tên database đã tồn tại, dùng một tên **mới, chưa có bảng**. Không chạy lại các file V1–V5 thủ công trên schema đã do Flyway quản lý.
-
-### Bước 4 — Chạy Spring Boot để Flyway tạo bảng
-
-Tạo file **`backend/src/main/resources/application-local.properties`** (file này đã được `.gitignore` loại khỏi Git), với nội dung:
+Tạo `backend/src/main/resources/application-local.properties` (được `.gitignore` loại trừ), ví dụ:
 
 ```properties
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/qldt_local_demo
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/qldt_local_demo?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
 spring.datasource.username=root
-spring.datasource.password=MAT_KHAU_MYSQL_LOCAL
+spring.datasource.password=${DB_PASSWORD:}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.flyway.enabled=true
 spring.jpa.hibernate.ddl-auto=validate
+server.port=8081
 ```
 
-Thay `MAT_KHAU_MYSQL_LOCAL` bằng mật khẩu MySQL trên **máy của bạn**; nếu dùng tên schema/user/port khác, sửa cho khớp. Không commit hoặc chia sẻ file này.
-
-Nếu đã có file cấu hình local trước khi tách thư mục, chuyển nguyên file vào vị trí mới;
-giữ nguyên URL, user, mật khẩu hoặc tham chiếu biến môi trường. Ví dụ MySQL 8.4 cài
-song song trên cổng `3307` thì URL vẫn dùng `127.0.0.1:3307/qldt_local_demo`.
-Nếu file dùng `${DB_USERNAME}` và `${DB_PASSWORD}`, đặt các biến trong chính phiên PowerShell chạy backend:
+Lưu ý: `application.properties` mặc định **tắt Flyway**. Chỉ bật trong **local schema mới** khi khởi tạo; không tùy tiện bật trên Railway đang có dữ liệu. Tránh commit mật khẩu, token R2, thông tin SMTP.
 
 ```powershell
-$env:DB_USERNAME = "root"
-$taskDbPassword = Read-Host "Mật khẩu MySQL local" -AsSecureString
-$env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $taskDbPassword).Password
-```
-
-Chạy trong PowerShell, từ thư mục gốc repo:
-
-```powershell
+$pw = Read-Host "Mật khẩu MySQL local" -AsSecureString
+$env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $pw).Password
 .\backend\mvnw.cmd -f backend/pom.xml spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
 
-Để dùng đăng nhập và phân quyền hội đồng local hiện tại, chạy với cả hai profile:
+Địa chỉ mặc định local: **http://localhost:8081/login**. Lần đầu chạy trên schema trống, Flyway tạo cấu trúc **V1–V8**; không tự có tài khoản để đăng nhập. Muốn thử đăng nhập cần dữ liệu/tài khoản thử nghiệm được cấp trên **local** (không dùng lại bí mật production).
 
-```powershell
-.\backend\mvnw.cmd -f backend/pom.xml spring-boot:run "-Dspring-boot.run.profiles=local,hoi-dong-local"
-```
-
-Cũng có thể `cd backend` rồi chạy `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local,hoi-dong-local"`.
-Trở về thư mục gốc repo trước khi chạy các lệnh Python ở bước 5.
-Việc tách thư mục không tự kích hoạt tài khoản demo và không thay đổi dữ liệu MySQL.
-
-Khi Spring Boot khởi động thành công, Flyway sẽ áp dụng V1–V5. Nhấn **Ctrl+C** để dừng ứng dụng trước khi nạp dữ liệu mẫu.
-
-Trong Workbench, schema do Flyway quản lý sẽ có **17 bảng nghiệp vụ + `flyway_schema_history`**. Có thể kiểm tra:
+### 5.2. Đối chiếu Flyway và số bảng (chỉ đọc)
 
 ```sql
 SELECT installed_rank, version, description, success
 FROM qldt_local_demo.flyway_schema_history
 ORDER BY installed_rank;
-```
 
-Kỳ vọng: **5 migration thành công**. Ở giai đoạn hiện tại, mở `http://localhost:8080/` có thể chưa có trang chủ; đây không phải dấu hiệu Flyway chạy lỗi.
-
-### Bước 5 — Nạp dữ liệu demo
-
-Bộ dữ liệu có **257 bản ghi demo + 5 vai trò V5 = 262 bản ghi**, gồm 6 PDF mẫu. Chỉ dùng trên **schema local mới** đã tạo ở bước 4.
-
-```powershell
-py -m venv database\seed\.venv
-.\database\seed\.venv\Scripts\python.exe -m pip install -r database\seed\requirements.txt
-$fixtureRoot = Join-Path $env:USERPROFILE "qldt-private-fixtures"
-.\database\seed\.venv\Scripts\python.exe database\seed\fixture_tools.py provision --fixture-root "$fixtureRoot"
-.\database\seed\.venv\Scripts\python.exe database\seed\demo_seed.py seed --host 127.0.0.1 --port 3306 --user root --database qldt_local_demo --fixture-root "$fixtureRoot"
-.\database\seed\.venv\Scripts\python.exe database\seed\demo_seed.py validate --host 127.0.0.1 --port 3306 --user root --database qldt_local_demo --fixture-root "$fixtureRoot"
-```
-
-Thư mục PDF mẫu được tạo trong hồ sơ người dùng Windows, **bên ngoài repository**. Script sẽ hỏi mật khẩu MySQL local khi kết nối. Kết quả kiểm tra mẫu đạt **89 checks, 0 FAIL** trên dữ liệu chưa bị chỉnh sửa. **Không chạy trực tiếp `demo_data.sql` bằng Execute All trong Workbench**: script cần kiểm tra PDF và điều kiện an toàn trước khi commit.
-
-### Bước 6 — Xem dữ liệu trong Workbench
-
-Refresh **SCHEMAS**, mở `qldt_local_demo` → **Tables**, hoặc chạy:
-
-```sql
 SELECT COUNT(*) AS so_bang_nghiep_vu
 FROM information_schema.tables
 WHERE table_schema = 'qldt_local_demo'
   AND table_type = 'BASE TABLE'
   AND table_name <> 'flyway_schema_history';
-
-SELECT COUNT(*) AS so_nguoi_dung_demo
-FROM qldt_local_demo.nguoi_dung
-WHERE ma_nguoi_dung LIKE 'DEMO_%';
 ```
 
-Kỳ vọng: **17 bảng nghiệp vụ** và **47 người dùng demo**. Các tài khoản demo đang **khóa**, không dùng để đăng nhập website. Sáu PDF trong repo là **file kiểm thử local**, chưa phải kho lưu trữ báo cáo của ứng dụng.
+Với schema mới, kỳ vọng **8 migration thành công, 19 bảng nghiệp vụ**. Nếu đang dùng schema cũ/đã migrate một phần, kiểm tra trạng thái thực tế và backup trước khi thay đổi; **không chạy lại** V1–V8 bằng `SOURCE` hoặc import lại toàn database.
 
-### Lưu ý
+### 5.3. Dữ liệu demo và cảnh báo tương thích
 
-- Chỉ nạp dữ liệu mẫu vào **MySQL local**, không nhập lên Railway hoặc database dùng chung.
-- Không sửa các migration V1–V5 đã áp dụng; khi cần thay đổi cấu trúc, tạo migration mới.
-- Nếu đã nạp seed phiên bản cũ hoặc database có dữ liệu quan trọng, **sao lưu và dùng schema QA mới**, không ghi đè tùy tiện.
-- Các chức năng đăng nhập, nhóm, upload báo cáo và chấm điểm phải được kiểm thử riêng khi các Controller/Service hoàn thiện.
-- Hướng dẫn chi tiết và báo cáo test: [`database/seed/README.md`](database/seed/README.md), [`database/seed/HANDOFF_VI.md`](database/seed/HANDOFF_VI.md).
+`database/seed/` lưu **bộ seed legacy được thiết kế/kiểm thử trên V1–V5** (257 dòng demo + 5 vai trò tham chiếu, 6 PDF mẫu, số liệu theo snapshot cũ). Trong đó có thông báo `pham_vi='SINH_VIEN'/'GIANG_VIEN'`; **V8 chỉ cho `TAT_CA`/`CA_NHAN`**, nên không coi lệnh seed legacy là đã tương thích V8. **Không chạy `demo_seed.py seed` trực tiếp trên schema V8 hoặc Railway** khi chưa có bản nâng cấp và thử nghiệm trên bản sao local.
+
+Dùng tài liệu [`database/seed/README.md`](database/seed/README.md) chỉ khi kiểm thử snapshot V1–V5 độc lập; sử dụng fixture MySQL trong CI cho mã nguồn hiện tại. Không xóa dữ liệu QA/phân trang, các tài khoản đã tạo, hay nhập lại dữ liệu production nhằm làm demo.
+
+### 5.4. Chạy kiểm thử và nghiệm thu các phân hệ
+
+```powershell
+# Test mặc định: Unit, MVC, Security; không kết nối Railway hoặc R2 thật.
+.\backend\mvnw.cmd -B -ntp -f backend/pom.xml clean verify
+```
+
+Workflow `.github/workflows/ci.yml` gồm hai nhóm kiểm thử chính: **Build, Unit, MVC and Security** và **Database & End-to-End Integration (MySQL 8.4)**, sau đó qua **CI Quality Gate**. Job MySQL chạy profile `-Pci-mysql` trên hai schema cô lập (`qldt_ci`, `nhom_test_ci`), kiểm tra Flyway, truy cập dữ liệu và luồng HTTP; **không kết nối hoặc ghi Railway production**. Không sử dụng profile test MySQL với URL của production.
+
+Khi nghiệm thu trên môi trường triển khai, kiểm tra theo vai trò và theo luồng nghiệp vụ toàn hệ thống: đăng nhập/đăng xuất và phân quyền; quản lý người dùng, bộ môn và thông báo; tạo và công bố đợt đăng ký; đề xuất/duyệt/công bố đề tài; nhóm sinh viên, đăng ký đề tài và báo cáo PDF; phân công hội đồng, chấm điểm, tổng hợp/công bố và tra cứu kết quả; xuất dữ liệu Excel và gửi email khi đã cấu hình SMTP. Kiểm tra các tình huống không được cấp quyền, đầu vào không hợp lệ và CSRF trên những thao tác thay đổi dữ liệu.
+
+PDF sử dụng Cloudflare R2: cần xác nhận tải lên, tải xuống và đối chiếu metadata/SHA-256; nếu R2 chưa cấu hình, nghiệp vụ lưu/tải PDF bị chặn có chủ đích. Kết quả **Maven BUILD SUCCESS** xác nhận test mặc định đã qua, không tự chứng minh mọi luồng production hoạt động đúng; đối chiếu thêm CI MySQL và smoke test trên Render.
 
 ## 6. Base UI chung và bản demo
 
@@ -323,7 +282,7 @@ Không phát triển chức năng trực tiếp trên `main`.
 
 ## 9. Tài liệu phân tích và thiết kế
 
-- [Đặc tả yêu cầu FR/NFR](docs/DAC_TA_YEU_CAU_FR_NFR_NHOM12_FINAL.md) — 30 FR, 19 NFR.
+- [Đặc tả yêu cầu FR/NFR](docs/Dac_Ta_FR_NFR_NHOM12.md) — 30 FR, 19 NFR.
 - [Đặc tả Use Case](docs/USE_CASE_NHOM12_FINAL.md).
 - [Quy ước tích hợp UI](docs/QUY_UOC_TICH_HOP_UI.md).
 

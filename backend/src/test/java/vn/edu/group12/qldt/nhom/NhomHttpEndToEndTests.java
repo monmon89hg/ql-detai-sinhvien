@@ -50,7 +50,8 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                 var sv2 = new Session(f.sv(2));
                 var sv3 = new Session(f.sv(3));
                 var outsider = new Session(f.sv(9));
-                var dean = new Session(f.dean)) {
+                var dean = new Session(f.dean);
+                var lecturer = new Session(f.lecturer)) {
             var created =
                     leader.post(
                             "/nhom/tao",
@@ -70,6 +71,12 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                             f.sv(1));
             assertThat(f.count("SELECT COUNT(*) FROM thanh_vien_nhom WHERE nhom_co_truong=?", ma))
                     .isEqualTo(1);
+            // Giảng viên chưa được phân công không thể truy cập nhóm theo mã đoán được.
+            assertThat(lecturer.get("/bao-cao?maNhom=" + ma).statusCode()).isEqualTo(403);
+            // Cho phép giảng viên hướng dẫn truy cập báo cáo của nhóm được phân công.
+            jdbc.update(
+                    "INSERT INTO de_tai_giang_vien(ma_de_tai,ma_giang_vien,loai_phan_cong,ma_nguoi_phan_cong,phan_cong_luc) VALUES(?,?,'HUONG_DAN',?,?)",
+                    f.topic, f.lecturer, f.dean, NOW);
             for (var item : List.of(Map.entry(sv2, 2), Map.entry(sv3, 3))) {
                 assertThat(
                                 item.getKey()
@@ -83,6 +90,11 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                                         ma,
                                         f.sv(item.getValue())))
                         .isEqualTo(1);
+                // Hồi quy: khi đang chờ, trạng thái phải hiện ở danh sách và chi tiết.
+                assertThat(item.getKey().get("/nhom").body())
+                        .contains("Đã gửi yêu cầu tham gia", "Chi tiết");
+                assertThat(item.getKey().get("/nhom/" + ma).body())
+                        .contains("Đã gửi yêu cầu tham gia.");
                 assertThat(
                                 leader.post(
                                                 "/nhom/"
@@ -127,6 +139,12 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                                     ma,
                                     f.sv(1)))
                     .isEqualTo(1);
+            // Hồi quy: modal từ chối có đúng action từng nhóm, CSRF và giới hạn nhập.
+            String trangDuyet = dean.get("/dang-ky-de-tai/duyet?tuKhoa=" + ma).body();
+            assertThat(trangDuyet)
+                    .contains("data-sv-reject-dialog", "data-sv-reject-open",
+                            "data-sv-reject-form", "name=\"lyDoTuChoi\"",
+                            "maxlength=\"1000\"", "name=\"_csrf\"");
             assertThat(
                             dean.post(
                                             "/dang-ky-de-tai/" + ma + "/duyet",
@@ -164,6 +182,14 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
             assertThat(download.headers().firstValue("Cache-Control"))
                     .contains("private, no-store");
             assertThat(outsider.download("/bao-cao/" + ma + "/1/tai").statusCode()).isEqualTo(403);
+            // GV chỉ thấy nhóm có liên quan và có thể xem/tải PDF qua đường dẫn thật.
+            assertThat(lecturer.get("/dashboard").body()).contains("Báo cáo nhóm");
+            assertThat(lecturer.get("/bao-cao").body())
+                    .contains("Chọn nhóm được phân công", "name=\"maNhom\"", ma);
+            assertThat(lecturer.get("/bao-cao?maNhom=" + ma).body())
+                    .contains("Tải PDF", "Lịch sử các phiên bản");
+            assertThat(lecturer.download("/bao-cao/" + ma + "/1/tai").statusCode())
+                    .isEqualTo(200);
             assertThat(sv2.upload(pdf("Không phải trưởng"), true, true).statusCode())
                     .isEqualTo(403);
             assertThat(leader.upload("Đổi tên TXT thành PDF".getBytes(), true, true).statusCode())
@@ -174,6 +200,14 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
             assertThat(oversized.body()).contains("20 MiB");
             assertThat(f.count("SELECT COUNT(*) FROM nop_bao_cao WHERE ma_nhom=?", ma))
                     .isEqualTo(1);
+            // Thu hồi chỉ đổi trạng thái trên schema kiểm thử: UI ẩn nút và backend trả 404.
+            jdbc.update("UPDATE nop_bao_cao SET trang_thai='THU_HOI' WHERE ma_nhom=? AND phien_ban=1", ma);
+            String danhSachThuHoi = leader.get("/bao-cao").body();
+            assertThat(danhSachThuHoi).contains("Không thể tải (đã thu hồi)")
+                    .doesNotContain("/bao-cao/" + ma + "/1/tai");
+            assertThat(leader.download("/bao-cao/" + ma + "/1/tai").statusCode())
+                    .isEqualTo(404);
+            jdbc.update("UPDATE nop_bao_cao SET trang_thai='HOP_LE' WHERE ma_nhom=? AND phien_ban=1", ma);
             storage.objects.remove(key);
             assertThat(leader.download("/bao-cao/" + ma + "/1/tai").statusCode()).isEqualTo(404);
             assertThat(f.count("SELECT COUNT(*) FROM nop_bao_cao WHERE ma_nhom=?", ma))

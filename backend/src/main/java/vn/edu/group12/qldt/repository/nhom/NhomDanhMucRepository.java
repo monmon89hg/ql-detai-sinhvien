@@ -106,6 +106,29 @@ public class NhomDanhMucRepository {
                 offset);
     }
 
+    /** Chỉ hiển thị nhóm có GVHD hoặc thành viên hội đồng là giảng viên hiện tại. */
+    public List<NhomBaoCaoGiangVien> nhomBaoCaoGiangVien(String maGiangVien) {
+        return jdbc.query(
+                """
+                SELECT n.ma_nhom, n.ten_nhom, t.ten_de_tai
+                FROM nhom_sinh_vien n
+                JOIN dang_ky_de_tai dk ON dk.ma_nhom = n.ma_nhom
+                JOIN de_tai t ON t.ma_de_tai = dk.ma_de_tai
+                WHERE EXISTS (
+                    SELECT 1 FROM de_tai_giang_vien pc
+                    WHERE pc.ma_de_tai = dk.ma_de_tai AND pc.ma_giang_vien = ?
+                ) OR EXISTS (
+                    SELECT 1 FROM hoi_dong_de_tai hd
+                    JOIN thanh_vien_hoi_dong tv ON tv.ma_hoi_dong = hd.ma_hoi_dong
+                    WHERE hd.ma_nhom = n.ma_nhom AND tv.ma_giang_vien = ?
+                )
+                ORDER BY n.created_at DESC, n.ma_nhom
+                """,
+                (r, i) -> new NhomBaoCaoGiangVien(
+                        r.getString("ma_nhom"), r.getString("ten_nhom"), r.getString("ten_de_tai")),
+                maGiangVien, maGiangVien);
+    }
+
     public boolean giangVienDuocDoc(String maNguoiDung, String maNhom) {
         return Boolean.TRUE.equals(
                 jdbc.queryForObject(
