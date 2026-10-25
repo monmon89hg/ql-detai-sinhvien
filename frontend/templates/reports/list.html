@@ -41,7 +41,7 @@
     <dl class="sv-facts" th:if="${nhomCuaToi != null}"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi.tenNhom}"></dd></div>
         <div><dt>Đề tài</dt><dd th:text="${tenDeTai ?: 'Chưa đăng ký'}"></dd></div>
         <div><dt>Hạn nộp</dt><dd th:text="${hanNopBaoCao != null ? #temporals.format(hanNopBaoCao,'dd/MM/yyyy HH:mm') : 'Chưa có'}"></dd></div>
-        <div><dt>Trạng thái đăng ký</dt><dd th:text="${trangThaiDangKy ?: 'Chưa đăng ký'}"></dd></div></dl>
+        <div><dt>Trạng thái đăng ký</dt><dd><span th:if="${trangThaiDangKy != null}" class="sv-state" th:attr="data-state=${trangThaiDangKy}" th:text="${trangThaiDangKy}"></span><span th:unless="${trangThaiDangKy != null}">Chưa đăng ký</span></dd></div></dl>
 </section>
 <section class="sv-panel"><div class="sv-panel-heading"><h2>Lịch sử các phiên bản</h2></div>
     <div class="sv-empty" th:if="${#lists.isEmpty(danhSachBaoCao)}">
@@ -59,7 +59,6 @@
         </tr></tbody></table></div>
 </section>
 <div class="sv-info sv-alert-warning" role="note"><strong>Quy định nộp báo cáo:</strong> Chỉ nhóm trưởng được nộp khi nhóm và đề tài đủ điều kiện, đồng thời chưa quá hạn. Tệp tải lên phải là PDF hợp lệ, dung lượng không vượt quá 20 MiB.</div>
-<div class="sv-info sv-info-soft"><strong>Lịch sử phiên bản:</strong> Mỗi lần nộp hợp lệ tạo một phiên bản mới; những phiên bản trước vẫn được giữ lại. Chỉ người có quyền mới có thể tải tệp qua hệ thống.</div>
 
 <nav class="sv-actions" aria-label="Phân trang">
     <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/bao-cao(trang=${trang - 1},maNhom=${nhomCuaToi != null ? nhomCuaToi.maNhom : null})}">Trang trước</a>
