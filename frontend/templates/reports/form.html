@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Nộp phiên bản báo cáo')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('report')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Nộp phiên bản báo cáo')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Nộp phiên bản báo cáo</h1><p>Chọn tệp PDF để nộp cho đề tài nhóm đang thực hiện.</p></div>
+            </div>
+            
+<section class="sv-panel sv-panel-form"><div class="sv-panel-heading"><h2>Thông tin lần nộp</h2></div>
+    <dl class="sv-facts"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi != null ? nhomCuaToi.tenNhom : '—'}"></dd></div>
+        <div><dt>Đề tài</dt><dd th:text="${tenDeTai ?: 'Chưa có'}"></dd></div>
+        <div><dt>Hạn nộp</dt><dd th:text="${hanNopBaoCao != null ? #temporals.format(hanNopBaoCao,'dd/MM/yyyy HH:mm') : 'Chưa có'}"></dd></div></dl>
+    <div class="sv-info sv-alert-warning" role="note" th:if="${coTheNopBaoCao}"><strong>Trước khi nộp:</strong> Chỉ nhóm trưởng được gửi báo cáo trong thời hạn cho phép. Mỗi lần nộp thành công tạo một phiên bản mới; bản cũ vẫn được giữ lại.</div>
+    <form th:if="${coTheNopBaoCao}" th:action="@{/bao-cao/nop}" method="post" enctype="multipart/form-data" data-sv-upload data-sv-form>
+        <div class="form-field"><label for="tepBaoCao">Tệp báo cáo (PDF) <span class="sv-required">*</span></label>
+            <input id="tepBaoCao" type="file" name="tepBaoCao" accept=".pdf,application/pdf" class="form-control" required data-sv-pdf>
+            <small>Chỉ chấp nhận PDF hợp lệ, dung lượng tối đa 20 MiB. Hệ thống kiểm tra nội dung tệp trước khi lưu.</small>
+            <p class="sv-field-error" role="alert" aria-live="polite" data-sv-file-error hidden></p>
+            <p class="sv-help" data-sv-file-details></p>
+        </div>
+        <div class="sv-actions"><button class="btn btn-primary" type="submit">Gửi báo cáo</button>
+            <a class="btn btn-outline" th:href="@{/bao-cao}">Hủy</a></div>
+    </form>
+    <div class="sv-info sv-alert-danger" role="note" th:unless="${coTheNopBaoCao}"><strong>Chưa thể nộp báo cáo.</strong> Tài khoản hoặc nhóm chưa đáp ứng điều kiện nộp. Hãy kiểm tra vai trò nhóm trưởng, trạng thái đăng ký đề tài và hạn nộp báo cáo.</div>
+</section>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>

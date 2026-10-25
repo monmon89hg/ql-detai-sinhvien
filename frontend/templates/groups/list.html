@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Tìm và tham gia nhóm')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('find-group')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Tìm và tham gia nhóm')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Tìm và tham gia nhóm</h1><p>Xem các nhóm theo đợt đăng ký và gửi yêu cầu tham gia.</p></div>
+            </div>
+            
+<div class="sv-toolbar sv-group-toolbar">
+    <form th:action="@{/nhom}" method="get" class="sv-filter-form sv-group-filter">
+        <div class="sv-field sv-grow"><label for="tuKhoa">Tìm nhóm</label>
+            <input class="form-control" id="tuKhoa" name="tuKhoa" th:value="${tuKhoa}" placeholder="Tên nhóm hoặc mã nhóm"></div>
+        <div class="sv-field"><label for="maDot">Đợt đăng ký</label>
+            <select class="form-control" id="maDot" name="maDot">
+                <option value="">Tất cả đợt</option>
+                <option th:each="dot : ${danhSachDot}" th:value="${dot.maDot}" th:text="${dot.tenDot}"
+                    th:selected="${maDot == dot.maDot}">Đợt đăng ký</option>
+            </select></div>
+        <div class="sv-field"><label for="trangThai">Trạng thái</label>
+            <select class="form-control" id="trangThai" name="trangThai">
+                <option value="">Tất cả</option>
+                <option value="DANG_LAP" th:selected="${trangThai == 'DANG_LAP'}">Đang lập</option>
+                <option value="DA_CHOT" th:selected="${trangThai == 'DA_CHOT'}">Đã chốt</option>
+                <option value="DANG_THUC_HIEN" th:selected="${trangThai == 'DANG_THUC_HIEN'}">Đang thực hiện</option>
+            </select></div>
+        <button class="btn btn-primary sv-filter-button" type="submit">Tìm kiếm</button>
+    </form>
+    <div class="sv-group-shortcuts" th:if="${coTheTaoNhom}">
+        <a class="btn btn-primary"
+        th:href="@{/nhom/tao}"
+        sec:authorize="hasRole('SINH_VIEN')">
+            + Tạo nhóm
+        </a>
+    </div>
+</div>
+<section class="sv-panel" aria-labelledby="groups-heading">
+    <div class="sv-panel-heading"><h2 id="groups-heading">Danh sách nhóm sinh viên</h2>
+        <span class="sv-help">Các nhóm đang có trên hệ thống</span></div>
+    <div class="sv-empty" th:if="${#lists.isEmpty(danhSachNhom)}">
+        <strong>Chưa tìm thấy nhóm phù hợp.</strong><p>Thử thay đổi từ khóa hoặc đợt đăng ký.</p>
+    </div>
+    <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachNhom)}"><table class="data-table sv-table">
+        <thead><tr><th scope="col">Mã nhóm</th><th scope="col">Tên nhóm</th><th scope="col">Đợt</th>
+            <th scope="col">Thành viên</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead>
+        <tbody><tr th:each="nhom : ${danhSachNhom}">
+            <td><code th:text="${nhom.maNhom}">N01</code></td><td><strong th:text="${nhom.tenNhom}">Tên nhóm</strong></td>
+            <td th:text="${nhom.tenDot}">Tên đợt</td>
+            <td th:text="|${nhom.soThanhVien}/5|">3/5</td>
+            <td><span class="sv-state" th:attr="data-state=${nhom.trangThai}" th:text="${nhom.trangThai}">ĐANG LẬP</span></td>
+            <td>
+                <div class="sv-group-actions">
+                    <a class="btn btn-outline sv-btn-small"
+                       th:href="@{/nhom/{maNhom}(maNhom=${nhom.maNhom})}">Chi tiết</a>
+                    <span class="sv-request-status"
+                          th:if="${nhomDaGuiYeuCau.contains(nhom.maNhom)}">Đã gửi yêu cầu tham gia</span>
+                </div>
+            </td>
+        </tr></tbody></table></div>
+</section>
+
+<nav class="sv-actions" aria-label="Phân trang">
+    <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/nhom(trang=${trang - 1},tuKhoa=${tuKhoa},maDot=${maDot},trangThai=${trangThai})}">Trang trước</a>
+    <span class="sv-help" th:text="|Trang ${trang + 1}|"></span>
+    <a class="btn btn-outline" th:if="${coTrangSau}" th:href="@{/nhom(trang=${trang + 1},tuKhoa=${tuKhoa},maDot=${maDot},trangThai=${trangThai})}">Trang sau</a>
+</nav>
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>

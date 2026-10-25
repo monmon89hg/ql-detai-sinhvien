@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Chỉnh sửa đề tài')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('topics')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Chỉnh sửa đề tài')}"></div>
+
+        <div class="container">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+
+            <div class="page-heading">
+                <h1>Chỉnh sửa Đề tài nghiên cứu</h1>
+                <p>Mã đề tài: <strong th:text="${deTai.maDeTai}">DT001</strong> | Trạng thái hiện tại: 
+                    <span style="font-weight: 600;"
+                          th:style="${deTai.trangThai == 'CONG_BO' ? 'color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'color:#b3261e;' : (deTai.trangThai == 'DA_DUYET' ? 'color:#0369a1;' : (deTai.trangThai == 'CHO_DUYET' ? 'color:#d97706;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'color:#4b5563;' : 'color:#475569;'))))}"
+                          th:text="${deTai.tenTrangThaiHienThi}">Chờ duyệt</span>
+                </p>
+            </div>
+
+            <div class="placeholder" style="max-width: 800px;">
+                <form th:action="@{/de-tai/sua/{maDeTai}(maDeTai=${deTai.maDeTai})}" th:object="${deTaiDto}" method="post">
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                        <div class="form-field">
+                            <label><strong>Mã đề tài</strong></label>
+                            <input type="text" class="form-control" th:field="*{maDeTai}" readonly style="background:#f4f7f9;">
+                        </div>
+                        <div class="form-field">
+                            <label><strong>Đợt đăng ký</strong></label>
+                            <input type="text" class="form-control" th:field="*{maDot}" readonly style="background:#f4f7f9;">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                        <div class="form-field">
+                            <label><strong>Mã Bộ môn quản lý *</strong></label>
+                            <select class="form-control" th:field="*{maBoMon}" required>
+                                <option value="">Chọn bộ môn quản lý</option>
+                                <option th:each="boMon : ${boMons}" th:value="${boMon.maBoMon}" th:text="${boMon.tenBoMon}"></option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label><strong>Trạng thái đề tài *</strong></label>
+                            <select class="form-control" th:field="*{trangThai}" required>
+                                <option value="CHO_DUYET">Chờ duyệt</option>
+                                <option value="DA_DUYET">Đã duyệt</option>
+                                <option value="CONG_BO">Đã công bố (SV xem)</option>
+                                <option value="NGUNG_NHAN">Ngừng nhận đăng ký</option>
+                                <option value="TU_CHOI">Bị từ chối</option>
+                                <option value="NHAP">Bản nháp</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label><strong>Tên đề tài *</strong></label>
+                        <input type="text" class="form-control" th:field="*{tenDeTai}" placeholder="Nhập tên đề tài..." required>
+                    </div>
+
+                    <div class="form-field">
+                        <label><strong>Nội dung tóm tắt &amp; Mục tiêu *</strong></label>
+                        <textarea class="form-control" th:field="*{noiDung}" rows="5" placeholder="Mô tả nội dung, quy mô và mục tiêu nghiên cứu..." required></textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Yêu cầu đối với sinh viên</label>
+                        <textarea class="form-control" th:field="*{yeuCau}" rows="3"></textarea>
+                    </div>
+
+                    <div class="btn-row" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">Lưu cập nhật</button>
+                        <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${deTai.maDeTai})}" class="btn btn-outline">Quay lại chi tiết</a>
+                        <a th:href="@{/de-tai}" class="btn btn-outline">Về danh sách</a>
+                    </div>
+                </form>
+            </div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

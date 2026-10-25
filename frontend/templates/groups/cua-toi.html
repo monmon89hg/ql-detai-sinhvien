@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Nhóm của tôi')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('my-group')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Nhóm của tôi')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Nhóm của tôi</h1><p>Theo dõi thành viên, yêu cầu tham gia và tình trạng nhóm.</p></div>
+            </div>
+            
+<div th:if="${nhomCuaToi == null}" class="sv-panel sv-empty">
+    <strong>Bạn chưa thuộc nhóm sinh viên nào.</strong>
+    <p>Bạn có thể tạo nhóm mới hoặc tìm nhóm phù hợp để tham gia.</p>
+    <div class="sv-actions sv-actions-center"><a class="btn btn-primary" th:href="@{/nhom/tao}">Tạo nhóm</a>
+        <a class="btn btn-outline" th:href="@{/nhom}">Tìm nhóm</a></div>
+</div>
+<div th:if="${nhomCuaToi != null}">
+    <section class="sv-panel"><div class="sv-panel-heading sv-heading-wrap">
+        <div><h2 th:text="${nhomCuaToi.tenNhom}">Nhóm của tôi</h2><p class="sv-help" th:text="${nhomCuaToi.maNhom}">NHOM01</p></div>
+        <span class="sv-state" th:attr="data-state=${nhomCuaToi.trangThai}" th:text="${nhomCuaToi.trangThai}">ĐANG LẬP</span></div>
+        <dl class="sv-facts"><div><dt>Đợt đăng ký</dt><dd th:text="${nhomCuaToi.tenDot}"></dd></div>
+            <div><dt>Thành viên chính thức</dt><dd th:text="|${nhomCuaToi.soThanhVien}/5|"></dd></div>
+            <div><dt>Nhóm trưởng</dt><dd th:text="${nhomCuaToi.tenNhomTruong}"></dd></div></dl>
+        <div class="sv-panel-heading"><h2>Thành viên hiện tại</h2></div>
+        <div class="sv-table-wrap"><table class="data-table sv-table">
+            <thead><tr><th>Mã sinh viên</th><th>Họ và tên</th><th>Vai trò</th><th>Thao tác</th></tr></thead>
+            <tbody><tr th:each="tv : ${danhSachThanhVien}"><td th:text="${tv.maSinhVien}"></td>
+                <td th:text="${tv.hoTen}"></td><td th:text="${tv.laNhomTruong ? 'Nhóm trưởng' : 'Thành viên'}"></td>
+                <td><form th:if="${laNhomTruong and !tv.laNhomTruong and nhomCuaToi.trangThai == 'DANG_LAP'}"
+                    th:action="@{/nhom/{maNhom}/thanh-vien/{maSinhVien}/xoa(maNhom=${nhomCuaToi.maNhom},maSinhVien=${tv.maSinhVien})}"
+                    method="post" data-sv-confirm="Xóa thành viên khỏi nhóm?"
+                    th:attr="data-sv-confirm-detail=|${tv.hoTen} (${tv.maSinhVien})|"
+                    data-sv-confirm-level="danger" data-sv-confirm-button="Xác nhận xóa"
+                    data-sv-confirm-note="Thành viên sẽ bị xóa khỏi nhóm sau khi xác nhận.">
+                    <button class="btn btn-outline sv-btn-small" type="submit">Xóa thành viên</button></form>
+                <span class="sv-help" th:unless="${laNhomTruong and !tv.laNhomTruong and nhomCuaToi.trangThai == 'DANG_LAP'}">—</span></td></tr>
+            <tr th:if="${#lists.isEmpty(danhSachThanhVien)}"><td colspan="4">Chưa có thành viên.</td></tr></tbody>
+        </table></div>
+    </section>
+    <section class="sv-panel" th:if="${laNhomTruong and nhomCuaToi.trangThai == 'DANG_LAP'}">
+        <div class="sv-panel-heading"><h2>Yêu cầu tham gia đang chờ</h2></div>
+        <div class="sv-empty" th:if="${#lists.isEmpty(danhSachYeuCau)}">Chưa có yêu cầu tham gia mới.</div>
+        <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachYeuCau)}"><table class="data-table sv-table">
+            <thead><tr><th>Mã sinh viên</th><th>Họ và tên</th><th>Ngày yêu cầu</th><th>Thao tác</th></tr></thead>
+            <tbody><tr th:each="yc : ${danhSachYeuCau}"><td th:text="${yc.maSinhVien}"></td>
+                <td th:text="${yc.hoTen}"></td>
+                <td th:text="${yc.yeuCauLuc != null ? #temporals.format(yc.yeuCauLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
+                <td><div class="sv-inline-actions">
+                    <form method="post" th:action="@{/nhom/{maNhom}/yeu-cau/{maSinhVien}/duyet(maNhom=${nhomCuaToi.maNhom},maSinhVien=${yc.maSinhVien})}" data-sv-form>
+                        <button class="btn btn-primary sv-btn-small" type="submit">Chấp nhận</button></form>
+                    <form method="post" th:action="@{/nhom/{maNhom}/yeu-cau/{maSinhVien}/tu-choi(maNhom=${nhomCuaToi.maNhom},maSinhVien=${yc.maSinhVien})}" data-sv-confirm="Từ chối yêu cầu tham gia nhóm?"
+                          th:attr="data-sv-confirm-detail=|${yc.hoTen} (${yc.maSinhVien})|"
+                          data-sv-confirm-level="danger" data-sv-confirm-button="Xác nhận từ chối"
+                          data-sv-confirm-note="Yêu cầu tham gia sẽ được đánh dấu từ chối.">
+                        <button class="btn btn-outline sv-btn-small" type="submit">Từ chối</button></form></div></td>
+            </tr></tbody></table></div>
+    </section>
+    <section class="sv-panel" th:if="${laNhomTruong}">
+        <div class="sv-panel-heading"><h2>Thao tác nhóm trưởng</h2></div>
+        <div class="sv-info sv-alert-danger" role="note" th:if="${nhomCuaToi.trangThai == 'DANG_LAP'}"><strong>Kiểm tra kỹ trước khi chốt nhóm:</strong> Nhóm cần có từ 3 đến 5 thành viên đã được chấp nhận tham gia, trong đó có đúng 1 nhóm trưởng. Chỉ sau khi chốt danh sách, nhóm mới có thể đăng ký đề tài. Danh sách đã chốt không thể thêm hoặc xóa thành viên qua chức năng quản lý nhóm thông thường.</div>
+        <div class="sv-actions"><form th:if="${nhomCuaToi.trangThai == 'DANG_LAP'}" method="post"
+            th:action="@{/nhom/{maNhom}/chot(maNhom=${nhomCuaToi.maNhom})}" data-sv-confirm="Chốt danh sách nhóm?"
+            th:attr="data-sv-confirm-detail=|${nhomCuaToi.tenNhom} (${nhomCuaToi.maNhom})|"
+            data-sv-confirm-level="warning" data-sv-confirm-button="Xác nhận chốt nhóm"
+            data-sv-confirm-note="Sau khi chốt, không thể thêm hoặc xóa thành viên thông thường.">
+            <button class="btn btn-primary" type="submit">Chốt danh sách nhóm</button></form>
+            <a class="btn btn-outline" th:href="@{/dang-ky-de-tai}">Đăng ký đề tài</a></div>
+    </section>
+</div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>

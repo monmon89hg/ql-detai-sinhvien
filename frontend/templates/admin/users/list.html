@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý tài khoản')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="app-grid">
+    <aside th:replace="~{fragments/sidebar :: sidebar('users')}"></aside>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý tài khoản')}"></div>
+        <section class="admin-list-heading">
+            <div>
+                <h1>Quản lý tài khoản</h1>
+                <p>Danh sách tài khoản giảng viên, sinh viên và cán bộ.</p>
+            </div>
+            <a class="btn btn-primary" th:href="@{/admin/users/new}">+ Thêm tài khoản</a>
+        </section>
+        <div th:replace="~{fragments/messages :: messages}"></div>
+        <section class="card admin-list-card">
+            <div class="table-responsive">
+                <table class="data-table admin-list-table">
+                    <thead>
+                    <tr>
+                        <th>Mã tài khoản</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>Loại người dùng</th>
+                        <th>Bộ môn</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${users.empty}">
+                        <td colspan="7" class="empty-state">Chưa có tài khoản nào.</td>
+                    </tr>
+                    <tr th:each="user : ${users.content}">
+                        <td><span class="admin-code" th:text="${user.maNguoiDung}"></span></td>
+                        <td class="admin-primary-cell" th:text="${user.hoTen}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td>
+                            <span class="admin-role"
+                                  th:text="${user.loaiNguoiDung == 'CAN_BO' ? 'Cán bộ' : (user.loaiNguoiDung == 'SV' ? 'Sinh viên' : (user.loaiNguoiDung == 'GV' ? 'Giảng viên' : user.loaiNguoiDung))}"></span>
+                        </td>
+                        <td th:text="${user.tenBoMon != null ? user.tenBoMon : '—'}"></td>
+                        <td>
+                            <span class="admin-status"
+                                  th:classappend="${user.trangThai == 'HOAT_DONG'} ? ' admin-status--active' : ' admin-status--locked'"
+                                  th:text="${user.trangThai == 'HOAT_DONG' ? 'Đang hoạt động' : 'Đang bị khóa'}"></span>
+                        </td>
+                        <td>
+                            <div class="admin-row-actions">
+                                <a class="btn btn-outline btn-sm"
+                                   th:href="@{/admin/users/{id}/edit(id=${user.maNguoiDung})}">Sửa</a>
+                                <form th:action="@{/admin/users/{id}/trang-thai(id=${user.maNguoiDung})}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="trangThai"
+                                           th:value="${user.trangThai == 'HOAT_DONG' ? 'KHOA' : 'HOAT_DONG'}">
+                                    <button type="submit" class="btn btn-sm admin-toggle-button"
+                                            th:classappend="${user.trangThai == 'HOAT_DONG'} ? ' admin-toggle-button--lock' : ' admin-toggle-button--unlock'"
+                                            th:text="${user.trangThai == 'HOAT_DONG' ? 'Khóa' : 'Mở khóa'}"></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav class="pagination" th:if="${users.totalPages > 1}" aria-label="Phân trang">
+                <a th:if="${users.hasPrevious()}" th:href="@{/admin/users(page=${users.number - 1})}">Trang trước</a>
+                <span th:text="|Trang ${users.number + 1} / ${users.totalPages}|"></span>
+                <a th:if="${users.hasNext()}" th:href="@{/admin/users(page=${users.number + 1})}">Trang sau</a>
+            </nav>
+        </section>
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+</body>
+</html>

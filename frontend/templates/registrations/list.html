@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Đăng ký đề tài')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('register')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Đăng ký đề tài')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-page-intro">
+                <div><h1>Đăng ký đề tài</h1><p>Nhóm trưởng chọn đề tài đã công bố và theo dõi đăng ký của nhóm.</p></div>
+            </div>
+            
+<section class="sv-panel" aria-labelledby="my-registration-heading">
+    <div class="sv-panel-heading"><h2 id="my-registration-heading">Đăng ký hiện tại của nhóm</h2></div>
+    <div th:if="${nhomCuaToi == null}" class="sv-info">Bạn chưa có nhóm. Hãy tạo hoặc tham gia nhóm trước khi đăng ký đề tài.</div>
+    <dl class="sv-facts" th:if="${nhomCuaToi != null}"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi.tenNhom}">Nhóm</dd></div>
+        <div><dt>Mã nhóm</dt><dd th:text="${nhomCuaToi.maNhom}"></dd></div>
+        <div><dt>Số thành viên</dt><dd th:text="|${nhomCuaToi.soThanhVien}/5|"></dd></div>
+        <div><dt>Trạng thái</dt><dd><span class="sv-state" th:attr="data-state=${nhomCuaToi.trangThai}" th:text="${nhomCuaToi.trangThai}"></span></dd></div></dl>
+    <div th:if="${dangKyHienTai != null}" class="sv-info sv-info-soft" th:classappend="${dangKyHienTai.trangThai == 'TU_CHOI' ? ' sv-alert-danger' : ''}">
+        <strong>Đã có đăng ký:</strong> <span th:text="${dangKyHienTai.tenDeTai}">Đề tài</span>
+        · <span class="sv-state" th:attr="data-state=${dangKyHienTai.trangThai}" th:text="${dangKyHienTai.trangThai}"></span>
+        <p th:if="${dangKyHienTai.lyDoTuChoi != null}" th:text="|Lý do từ chối: ${dangKyHienTai.lyDoTuChoi}|"></p>
+    </div>
+    <p class="sv-help" th:if="${nhomCuaToi != null and dangKyHienTai == null}">Nhóm chưa gửi đăng ký đề tài.</p>
+</section>
+<div class="sv-toolbar">
+    <form class="sv-filter-form" method="get" th:action="@{/dang-ky-de-tai}">
+        <div class="sv-field sv-grow"><label for="tuKhoa">Tìm đề tài đã công bố</label>
+            <input id="tuKhoa" class="form-control" name="tuKhoa" th:value="${tuKhoa}" placeholder="Tên đề tài hoặc mã đề tài"></div>
+        <div class="sv-field"><label for="maDot">Đợt đăng ký</label>
+            <select id="maDot" class="form-control" name="maDot"><option value="">Tất cả đợt</option>
+                <option th:each="dot : ${danhSachDot}" th:value="${dot.maDot}" th:text="${dot.tenDot}" th:selected="${maDot == dot.maDot}"></option></select></div>
+        <button class="btn btn-primary sv-filter-button" type="submit">Lọc đề tài</button>
+    </form>
+</div>
+<section class="sv-panel"><div class="sv-panel-heading"><h2>Đề tài có thể đăng ký</h2></div>
+    <!-- Gợi ý ngắn theo trạng thái thực của nhóm; không lặp thông báo nếu đã có đăng ký. -->
+    <p class="sv-registration-hint" th:if="${goiYChiXem != null}" role="note">
+        <span aria-hidden="true">ⓘ</span>
+        <span th:text="${goiYChiXem}"></span>
+        <a th:if="${nhomCuaToi != null}" th:href="@{/nhom/cua-toi}">Nhóm của tôi</a>
+    </p>
+    <div class="sv-empty" th:if="${#lists.isEmpty(danhSachDeTai)}">Chưa có đề tài phù hợp được công bố.</div>
+    <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachDeTai)}"><table class="data-table sv-table">
+        <thead><tr><th>Mã đề tài</th><th>Tên đề tài</th><th>Bộ môn</th><th>Đợt</th><th>Thao tác</th></tr></thead>
+        <tbody><tr th:each="dt : ${danhSachDeTai}"><td><code th:text="${dt.maDeTai}"></code></td>
+            <td><strong th:text="${dt.tenDeTai}"></strong></td><td th:text="${dt.tenBoMon}"></td>
+            <td th:text="${dt.tenDot}"></td><td>
+                <form method="post" th:if="${duDieuKienDangKy and laNhomTruong and dangKyHienTai == null}"
+                    th:action="@{/dang-ky-de-tai}" data-sv-register-confirm
+                    th:attr="data-sv-register-code=${dt.maDeTai},data-sv-register-title=${dt.tenDeTai}">
+                    <input type="hidden" name="maDeTai" th:value="${dt.maDeTai}">
+                    <button class="btn btn-primary sv-btn-small" type="submit">Đăng ký</button></form>
+                <span class="sv-help" th:unless="${duDieuKienDangKy and laNhomTruong and dangKyHienTai == null}">Chỉ xem</span>
+            </td></tr></tbody>
+        </table></div>
+</section>
+
+<!-- Xác nhận đăng ký trên giao diện thay cho window.confirm của trình duyệt. -->
+<div class="sv-reject-overlay" data-sv-register-dialog hidden>
+    <section class="sv-reject-modal" role="dialog" aria-modal="true" tabindex="-1"
+             aria-labelledby="sv-register-dialog-title" aria-describedby="sv-register-dialog-desc"
+             data-sv-register-panel>
+        <div class="sv-reject-heading">
+            <h2 id="sv-register-dialog-title">Xác nhận đăng ký đề tài</h2>
+            <button class="sv-reject-close" type="button" data-sv-register-close
+                    aria-label="Đóng hộp thoại">&times;</button>
+        </div>
+        <p id="sv-register-dialog-desc" class="sv-help">
+            Vui lòng kiểm tra đúng đề tài trước khi gửi đăng ký cho nhóm.
+        </p>
+        <dl class="sv-facts">
+            <div><dt>Mã đề tài</dt><dd data-sv-register-code>—</dd></div>
+            <div><dt>Tên đề tài</dt><dd data-sv-register-title>—</dd></div>
+        </dl>
+        <p class="sv-info sv-alert-warning">
+            Mỗi nhóm chỉ có thể đăng ký một đề tài. Nếu đăng ký bị từ chối,
+            hiện chưa thể gửi đăng ký khác cho cùng nhóm.
+        </p>
+        <div class="sv-reject-footer">
+            <button class="btn btn-outline" type="button" data-sv-register-close>Hủy</button>
+            <button class="btn btn-primary" type="button" data-sv-register-submit>
+                Xác nhận đăng ký
+            </button>
+        </div>
+    </section>
+</div>
+
+<nav class="sv-actions" aria-label="Phân trang">
+    <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/dang-ky-de-tai(trang=${trang - 1},tuKhoa=${tuKhoa},maDot=${maDot})}">Trang trước</a>
+    <span class="sv-help" th:text="|Trang ${trang + 1}|"></span>
+    <a class="btn btn-outline" th:if="${coTrangSau}" th:href="@{/dang-ky-de-tai(trang=${trang + 1},tuKhoa=${tuKhoa},maDot=${maDot})}">Trang sau</a>
+</nav>
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/nhom-dang-ky-bao-cao.js}"></script>
+</body>
+</html>

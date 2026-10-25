@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Quản lý hội đồng')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div th:replace="~{fragments/sidebar :: sidebar('council')}"></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý hội đồng')}"
+                ></div>
+
+                <div class="container sv-module">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading">
+                        <h1>Quản lý hội đồng</h1>
+                        <p>Quản lý thông tin, thành viên và phân công hội đồng chấm đề tài.</p>
+                    </div>
+
+                    <section class="section sv-panel">
+
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Danh sách hội đồng</h2>
+
+                            <a
+                                class="btn btn-primary"
+                                th:if="${coQuyenTaoHoiDong}"
+                                th:href="@{/hoi-dong/tao}"
+                            >
+                                Tạo hội đồng
+                            </a>
+                        </div>
+
+                        <form th:action="@{/hoi-dong}" method="get" class="btn-row"
+                              style="align-items: flex-end; margin-bottom: 20px;">
+                            <div class="form-field" style="margin: 0; flex: 1 1 260px; max-width: 520px;">
+                                <label for="maDot">Đợt đăng ký</label>
+                                <select id="maDot" name="maDot" class="form-control"
+                                        th:disabled="${#lists.isEmpty(danhSachDot)}">
+                                    <option value="" th:selected="${maDotDuocChon == ''}">Tất cả đợt</option>
+                                    <option th:each="dot : ${danhSachDot}"
+                                            th:value="${dot.maDot}"
+                                            th:text="${dot.tenDot + ' (' + dot.maDot + ')'}"
+                                            th:selected="${dot.maDot == maDotDuocChon}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary"
+                                    th:disabled="${#lists.isEmpty(danhSachDot)}">Lọc</button>
+                        </form>
+
+                        <p th:if="${#lists.isEmpty(danhSachHoiDong)}">
+                            <span th:if="${#lists.isEmpty(danhSachDot)}">Chưa có đợt đăng ký nào trong hệ thống.</span>
+                            <span th:unless="${#lists.isEmpty(danhSachDot)}"
+                                  th:text="${maDotDuocChon == '' ? 'Chưa có hội đồng nào trong hệ thống.' : 'Chưa có hội đồng nào trong đợt đăng ký này.'}"></span>
+                        </p>
+
+
+                        <div class="sv-table-wrap"
+                            th:unless="${#lists.isEmpty(danhSachHoiDong)}"
+                        >
+                            <table class="data-table sv-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">STT</th>
+                                        <th scope="col">Mã hội đồng</th>
+                                        <th scope="col">Tên hội đồng</th>
+                                        <th scope="col">Mã đợt</th>
+                                        <th scope="col">Địa điểm</th>
+                                        <th scope="col">Trạng thái</th>
+                                        <th scope="col" th:if="${coQuyenTaoHoiDong}">Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr th:each="hoiDong, viTri : ${danhSachHoiDong}">
+                                        <td th:text="${viTri.count}"></td>
+                                        <td>
+                                            <a
+                                                th:href="@{/hoi-dong/{maHoiDong}(maHoiDong=${hoiDong.maHoiDong})}"
+                                                th:text="${hoiDong.maHoiDong}"
+                                            ></a>
+                                        </td>
+                                        <td th:text="${hoiDong.tenHoiDong}"></td>
+                                        <td th:text="${hoiDong.maDot}"></td>
+                                        <td
+                                            th:text="${#strings.isEmpty(hoiDong.diaDiem)
+                                                ? 'Chưa cập nhật' : hoiDong.diaDiem}"
+                                        ></td>
+                                        <td>
+                                            <span class="workflow-status workflow-status--neutral"
+                                                  th:if="${hoiDong.trangThai.name() == 'NHAP'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--waiting"
+                                                  th:if="${hoiDong.trangThai.name() == 'SAN_SANG'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--active"
+                                                  th:if="${hoiDong.trangThai.name() == 'DANG_CHAM'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--completed"
+                                                  th:if="${hoiDong.trangThai.name() == 'DA_KHOA'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                        </td>
+                                        <td th:if="${coQuyenTaoHoiDong}">
+                                            <form th:if="${maHoiDongCoTheXoa.contains(hoiDong.maHoiDong)}"
+                                                  th:action="@{/hoi-dong/{maHoiDong}/xoa(maHoiDong=${hoiDong.maHoiDong})}"
+                                                  method="post"
+                                                  onsubmit="return confirm('Bạn có chắc muốn xóa hội đồng này?');">
+                                                <input type="hidden" name="version" th:value="${hoiDong.version}">
+                                                <input type="hidden" name="maDot" th:value="${maDotDuocChon}">
+                                                <button type="submit" class="btn btn-outline"
+                                                        th:attr="aria-label=${'Xóa hội đồng ' + hoiDong.maHoiDong}">Xóa</button>
+                                            </form>
+                                            <span th:unless="${maHoiDongCoTheXoa.contains(hoiDong.maHoiDong)}"
+                                                  title="Chỉ xóa hội đồng nháp chưa có thành viên và chưa được phân công nhóm.">—</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Thông báo')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="app-grid">
+    <aside th:replace="~{fragments/sidebar :: sidebar('announcements')}"></aside>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Thông báo')}"></div>
+
+        <section class="notice-heading">
+            <h1>Thông báo</h1>
+        </section>
+
+        <section class="notice-panel" id="noticeListView">
+            <div class="notice-tabs" role="tablist" aria-label="Loại thông báo">
+                <button type="button"
+                        class="notice-tab is-active"
+                        data-notice-tab="CHUNG"
+                        role="tab"
+                        aria-selected="true">
+                    THÔNG BÁO CHUNG
+                </button>
+                <button type="button"
+                        class="notice-tab"
+                        data-notice-tab="CA_NHAN"
+                        role="tab"
+                        aria-selected="false">
+                    THÔNG BÁO CÁ NHÂN
+                </button>
+            </div>
+
+            <label class="notice-search">
+                <span aria-hidden="true">⌕</span>
+                <input id="noticeSearch"
+                       type="search"
+                       placeholder="Tìm kiếm thông báo"
+                       aria-label="Tìm kiếm thông báo">
+            </label>
+
+            <div class="notice-table-wrap">
+                <table class="notice-table">
+                    <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Người gửi</th>
+                        <th>Thời gian gửi</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="noticeRows">
+                    <tr th:each="thongBao : ${thongBaos.content}"
+                        class="notice-row"
+                        th:attr="data-scope=${thongBao.phamVi},
+                                 data-search=${thongBao.tieuDe + ' ' + thongBao.tenNguoiDang + ' ' + thongBao.noiDung}">
+                        <td>
+                            <button type="button"
+                                    class="notice-title-link"
+                                    data-notice-open
+                                    th:text="${thongBao.tieuDe}">
+                            </button>
+                            <div class="notice-content-source"
+                                 hidden
+                                 th:text="${thongBao.noiDung}"></div>
+                        </td>
+                        <td th:text="${thongBao.tenNguoiDang}"></td>
+                        <td>
+                            <time th:if="${thongBao.congBoLuc != null}"
+                                  th:datetime="${thongBao.congBoLuc}"
+                                  th:text="${#temporals.format(thongBao.congBoLuc, 'dd/MM/yyyy HH:mm:ss')}">
+                            </time>
+                            <span th:unless="${thongBao.congBoLuc != null}">—</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <p id="noticeEmpty"
+                   class="notice-empty"
+                   th:if="${thongBaos.empty}">
+                    Hiện chưa có thông báo nào.
+                </p>
+                <p id="noticeNoMatch" class="notice-empty" hidden>
+                    Không tìm thấy thông báo phù hợp.
+                </p>
+            </div>
+
+            <nav class="pagination"
+                 th:if="${thongBaos.totalPages > 1}"
+                 aria-label="Phân trang thông báo">
+                <a th:if="${thongBaos.hasPrevious()}"
+                   th:href="@{/thong-bao(page=${thongBaos.number - 1})}">
+                    Trang trước
+                </a>
+                <span th:text="|Trang ${thongBaos.number + 1} / ${thongBaos.totalPages}|"></span>
+                <a th:if="${thongBaos.hasNext()}"
+                   th:href="@{/thong-bao(page=${thongBaos.number + 1})}">
+                    Trang sau
+                </a>
+            </nav>
+        </section>
+
+        <section class="notice-panel notice-detail-view" id="noticeDetailView" hidden>
+            <div class="notice-tabs" id="noticeDetailTabs" role="tablist" aria-label="Loại thông báo">
+                <span class="notice-tab is-active" data-detail-tab="CHUNG" role="tab" aria-selected="true">THÔNG BÁO CHUNG</span>
+                <span class="notice-tab" data-detail-tab="CA_NHAN" role="tab" aria-selected="false">THÔNG BÁO CÁ NHÂN</span>
+            </div>
+            <article class="notice-detail-panel" aria-live="polite">
+                <h2 class="notice-detail-title" id="noticeDetailTitle"></h2>
+                <p class="notice-detail-content" id="noticeDetailContent"></p>
+                <button class="btn btn-primary btn-sm notice-detail-back" id="noticeBackButton" type="button">Quay lại</button>
+            </article>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const tabs = document.querySelectorAll("[data-notice-tab]");
+        const rows = [...document.querySelectorAll(".notice-row")];
+        const searchInput = document.getElementById("noticeSearch");
+        const noMatch = document.getElementById("noticeNoMatch");
+        const listView = document.getElementById("noticeListView");
+        const detailView = document.getElementById("noticeDetailView");
+        const detailTitle = document.getElementById("noticeDetailTitle");
+        const detailContent = document.getElementById("noticeDetailContent");
+        const detailTabs = [...document.querySelectorAll("[data-detail-tab]")];
+        const backButton = document.getElementById("noticeBackButton");
+        let lastOpenedTitle = null;
+
+        let activeTab = "CHUNG";
+
+        const normalize = (text) => text
+            .toLocaleLowerCase("vi")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d");
+
+        const filterRows = () => {
+            const query = normalize(searchInput.value.trim());
+            let visibleCount = 0;
+
+            rows.forEach((row) => {
+                const scope = row.dataset.scope;
+                const isGeneral = scope === "TAT_CA";
+                const matchesTab = activeTab === "CHUNG"
+                    ? isGeneral
+                    : !isGeneral;
+                const matchesSearch = normalize(row.dataset.search || "").includes(query);
+                const visible = matchesTab && matchesSearch;
+
+                row.hidden = !visible;
+                if (visible) visibleCount++;
+            });
+
+            noMatch.hidden = visibleCount > 0 || rows.length === 0;
+        };
+
+        tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+                activeTab = tab.dataset.noticeTab;
+
+                tabs.forEach((item) => {
+                    const selected = item === tab;
+                    item.classList.toggle("is-active", selected);
+                    item.setAttribute("aria-selected", String(selected));
+                });
+
+                filterRows();
+            });
+        });
+
+        searchInput.addEventListener("input", filterRows);
+
+        document.querySelectorAll("[data-notice-open]").forEach((titleButton) => {
+            titleButton.addEventListener("click", () => {
+                const row = titleButton.closest(".notice-row");
+                const contentSource = row.querySelector(".notice-content-source");
+                const scope = row.dataset.scope === "TAT_CA" ? "CHUNG" : "CA_NHAN";
+
+                detailTitle.textContent = titleButton.textContent.trim();
+                detailContent.textContent = contentSource.textContent.trim() || "Thông báo này chưa có nội dung.";
+                detailTabs.forEach((tab) => {
+                    const selected = tab.dataset.detailTab === scope;
+                    tab.classList.toggle("is-active", selected);
+                    tab.setAttribute("aria-selected", String(selected));
+                });
+
+                lastOpenedTitle = titleButton;
+                listView.hidden = true;
+                detailView.hidden = false;
+                backButton.focus();
+            });
+        });
+
+        backButton.addEventListener("click", () => {
+            detailView.hidden = true;
+            listView.hidden = false;
+            if (lastOpenedTitle) lastOpenedTitle.focus();
+        });
+
+        filterRows();
+    });
+</script>
+</body>
+</html>

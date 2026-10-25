@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:fragment="head(pageTitle)">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Hệ thống quản lý đề tài sinh viên Khoa CNTT">
+        <title th:text="${pageTitle} + ' | QLĐT Khoa CNTT'">QLĐT Khoa CNTT</title>
+        <link rel="stylesheet" th:href="@{/css/base.css}">
+        <link rel="stylesheet" th:href="@{/css/layout.css}">
+        <link rel="stylesheet" th:href="@{/css/components.css}">
+        <link rel="stylesheet" th:href="@{/css/thong-bao.css}">
+        <link rel="stylesheet" th:href="@{/css/admin-management.css}">
+        <link rel="stylesheet" th:href="@{/css/login-page.css}">
+        <link rel="stylesheet" th:href="@{/css/nhom-dang-ky-bao-cao.css}">
+    </head>
+</html>

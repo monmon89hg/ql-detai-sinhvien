@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý bộ môn')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="app-grid">
+    <aside th:replace="~{fragments/sidebar :: sidebar('departments')}"></aside>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý bộ môn')}"></div>
+        <section class="admin-list-heading">
+            <div>
+                <h1>Quản lý bộ môn</h1>
+                <p>Danh sách và trạng thái hoạt động của các bộ môn.</p>
+            </div>
+            <a class="btn btn-primary" th:href="@{/admin/bo-mon/new}">+ Thêm bộ môn</a>
+        </section>
+        <div th:replace="~{fragments/messages :: messages}"></div>
+        <section class="card admin-list-card">
+            <div class="table-responsive">
+                <table class="data-table admin-list-table">
+                    <thead>
+                    <tr>
+                        <th>Mã bộ môn</th>
+                        <th>Tên bộ môn</th>
+                        <th>Mô tả</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${boMons.empty}">
+                        <td colspan="5" class="empty-state">Chưa có bộ môn nào.</td>
+                    </tr>
+                    <tr th:each="boMon : ${boMons.content}">
+                        <td><span class="admin-code" th:text="${boMon.maBoMon}"></span></td>
+                        <td class="admin-primary-cell" th:text="${boMon.tenBoMon}"></td>
+                        <td class="admin-description-cell"
+                            th:text="${boMon.moTa != null && !boMon.moTa.isBlank() ? boMon.moTa : '—'}"></td>
+                        <td>
+                            <span th:if="${boMon.hoatDong}" class="admin-status admin-status--active">Đang hoạt động</span>
+                            <span th:unless="${boMon.hoatDong}" class="admin-status admin-status--locked">Ngừng hoạt động</span>
+                        </td>
+                        <td>
+                            <div class="admin-row-actions">
+                                <a class="btn btn-outline btn-sm"
+                                   th:href="@{/admin/bo-mon/{maBoMon}/edit(maBoMon=${boMon.maBoMon})}">Sửa</a>
+                                <form th:action="@{/admin/bo-mon/{maBoMon}/trang-thai(maBoMon=${boMon.maBoMon})}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="hoatDong" th:value="${!boMon.hoatDong}">
+                                    <button type="submit" class="btn btn-sm admin-toggle-button"
+                                            th:classappend="${boMon.hoatDong} ? ' admin-toggle-button--lock' : ' admin-toggle-button--unlock'"
+                                            th:text="${boMon.hoatDong} ? 'Ngừng hoạt động' : 'Kích hoạt'"></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav class="pagination" th:if="${boMons.totalPages > 1}" aria-label="Phân trang">
+                <a th:if="${boMons.hasPrevious()}" th:href="@{/admin/bo-mon(page=${boMons.number - 1})}">Trang trước</a>
+                <span th:text="|Trang ${boMons.number + 1} / ${boMons.totalPages}|"></span>
+                <a th:if="${boMons.hasNext()}" th:href="@{/admin/bo-mon(page=${boMons.number + 1})}">Trang sau</a>
+            </nav>
+        </section>
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Xem phiếu chấm')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div th:replace="~{fragments/sidebar :: sidebar('grading')}"></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Xem phiếu chấm')}"
+                ></div>
+
+                <div class="container sv-module">
+                    <div class="page-heading">
+                        <h1>Phiếu chấm của nhóm</h1>
+                        <p>Trưởng khoa và ADMIN chỉ xem các phiếu đã lưu, gồm cả phiếu nháp.</p>
+                    </div>
+
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Thông tin nhóm</h2>
+                        </div>
+
+                        <table class="data-table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Nhóm</th>
+                                    <td th:text="${nhom.maNhom + ' - ' + nhom.tenNhom}"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Đề tài</th>
+                                    <td th:text="${nhom.maDeTai + ' - ' + nhom.tenDeTai}"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Hội đồng</th>
+                                    <td th:text="${nhom.maHoiDong != null ? nhom.maHoiDong + ' - ' + nhom.tenHoiDong : 'Không áp dụng'}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title">Các phiếu chấm đã lưu</h2>
+                        </div>
+
+                        <p th:if="${#lists.isEmpty(danhSachPhieu)}">
+                            Nhóm này chưa có phiếu chấm nào được lưu.
+                        </p>
+
+                        <table
+                            class="data-table"
+                            th:unless="${#lists.isEmpty(danhSachPhieu)}"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">Giảng viên</th>
+                                    <th scope="col">Loại phiếu</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Điểm</th>
+                                    <th scope="col">Nhận xét</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="phieu : ${danhSachPhieu}">
+                                    <td th:text="${phieu.id.maGiangVien}"></td>
+                                    <td th:text="${phieu.loaiPhieu}"></td>
+                                    <td
+                                        th:text="${phieu.trangThai.name() == 'NHAP'
+                                            ? 'Nháp' : 'Đã nộp'}"
+                                    ></td>
+                                    <td
+                                        th:text="${phieu.diem != null
+                                            ? phieu.diem : 'Chưa nhập'}"
+                                    ></td>
+                                    <td
+                                        style="white-space: pre-wrap"
+                                        th:text="${#strings.isEmpty(phieu.nhanXet)
+                                            ? 'Chưa có nhận xét' : phieu.nhanXet}"
+                                    ></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <a class="btn btn-outline" th:href="@{/cham-diem}">
+                            Về danh sách
+                        </a>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>

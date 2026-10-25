@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Chấm điểm')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div
+                th:replace="~{fragments/sidebar :: sidebar('grading')}"
+            ></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Chấm điểm')}"
+                ></div>
+
+                <div class="container sv-module">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading">
+                        <h1>Chấm điểm</h1>
+
+                        <p th:if="${chiXem}">
+                            Xem các nhóm đăng ký đề tài và phiếu chấm đã lưu.
+                        </p>
+                        <p th:unless="${chiXem}">
+                            Xem các nhóm được phân công và mở phiếu để
+                            nhập điểm, nhận xét.
+                        </p>
+                    </div>
+
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title" th:if="${chiXem}">
+                                Danh sách nhóm đánh giá
+                            </h2>
+                            <h2 class="section-title" th:unless="${chiXem}">
+                                Danh sách nhóm được chấm
+                            </h2>
+                        </div>
+
+                        <p th:if="${chiXem and #lists.isEmpty(danhSachNhom)}">
+                            Hiện chưa có đăng ký đề tài để hiển thị.
+                        </p>
+                        <p th:if="${!chiXem and #lists.isEmpty(danhSachNhom)}">
+                            Hiện chưa có nhóm nào đang ở giai đoạn chấm
+                            thuộc phạm vi chấm của bạn.
+                        </p>
+
+                        <table
+                            class="data-table"
+                            th:unless="${#lists.isEmpty(danhSachNhom)}"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">STT</th>
+                                    <th scope="col">Nhóm sinh viên</th>
+                                    <th scope="col">Đề tài</th>
+                                    <th scope="col">Hội đồng</th>
+                                    <th scope="col">Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="nhom, viTri : ${danhSachNhom}">
+                                    <td th:text="${viTri.count}"></td>
+
+                                    <td>
+                                        <strong th:text="${nhom.maNhom}"></strong>
+                                        <div th:text="${nhom.tenNhom}"></div>
+                                    </td>
+
+                                    <td>
+                                        <strong th:text="${nhom.maDeTai}"></strong>
+                                        <div th:text="${nhom.tenDeTai}"></div>
+                                    </td>
+
+                                    <td>
+                                        <strong th:text="${nhom.maHoiDong != null ? nhom.maHoiDong : '—'}"></strong>
+                                        <div th:text="${nhom.tenHoiDong}"></div>
+                                    </td>
+
+                                    <td>
+                                        <a
+                                            class="btn btn-primary"
+                                            th:href="@{/cham-diem/{maNhom}(maNhom=${nhom.maNhom})}"
+                                        >
+                                            <span th:if="${chiXem}">Xem phiếu</span>
+                                            <span th:unless="${chiXem}">Mở phiếu</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>

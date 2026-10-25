@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Tạo hội đồng')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div th:replace="~{fragments/sidebar :: sidebar('council')}"></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Tạo hội đồng')}"
+                ></div>
+
+                <div class="container sv-module">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading">
+                        <h1>Tạo hội đồng</h1>
+                        <p>Nhập thông tin để lập hội đồng ở trạng thái nháp.</p>
+                    </div>
+
+                    <section class="section sv-panel">
+                        <form
+                            th:action="@{/hoi-dong/tao}"
+                            th:object="${hoiDongForm}"
+                            method="post"
+                        >
+                            <div class="form-field">
+                                <label for="maHoiDong">Mã hội đồng *</label>
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    th:field="*{maHoiDong}"
+                                    maxlength="30"
+                                    required
+                                >
+                                <small
+                                    th:if="${#fields.hasErrors('maHoiDong')}"
+                                    th:errors="*{maHoiDong}"
+                                ></small>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tenHoiDong">Tên hội đồng *</label>
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    th:field="*{tenHoiDong}"
+                                    maxlength="150"
+                                    required
+                                >
+                                <small
+                                    th:if="${#fields.hasErrors('tenHoiDong')}"
+                                    th:errors="*{tenHoiDong}"
+                                ></small>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="maDot">Đợt đăng ký *</label>
+
+                                <select
+                                    class="form-control"
+                                    th:field="*{maDot}"
+                                    required
+                                >
+                                    <option value="">-- Chọn đợt đăng ký --</option>
+
+                                    <option
+                                        th:each="dot : ${danhSachDot}"
+                                        th:value="${dot.maDot}"
+                                        th:text="${dot.maDot + ' - ' + dot.tenDot}"
+                                    ></option>
+                                </select>
+
+                                <small
+                                    th:if="${#fields.hasErrors('maDot')}"
+                                    th:errors="*{maDot}"
+                                ></small>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="diaDiem">Địa điểm</label>
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    th:field="*{diaDiem}"
+                                    maxlength="200"
+                                >
+                                <small
+                                    th:if="${#fields.hasErrors('diaDiem')}"
+                                    th:errors="*{diaDiem}"
+                                ></small>
+                            </div>
+
+                            <div class="btn-row">
+                                <button
+                                    class="btn btn-primary"
+                                    type="submit"
+                                >
+                                    Lưu nháp
+                                </button>
+
+                                <a
+                                    class="btn btn-outline"
+                                    th:href="@{/hoi-dong}"
+                                >
+                                    Quay lại danh sách
+                                </a>
+                            </div>
+                        </form>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>

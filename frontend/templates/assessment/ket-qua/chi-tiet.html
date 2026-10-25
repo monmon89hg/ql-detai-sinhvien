@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Căn cứ đánh giá kết quả')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('publish-result')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Căn cứ đánh giá kết quả')}"></div>
+        <div class="container sv-module">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="page-heading"><h1>Căn cứ đánh giá kết quả</h1>
+                <p th:text="${chiTiet.nhom.maNhom + ' — ' + chiTiet.nhom.tenNhom}"></p></div>
+            <section class="section sv-panel">
+                <h2 class="section-title" th:text="${chiTiet.nhom.tenDeTai}"></h2>
+                <p th:text="${chiTiet.nhom.tenDot}"></p>
+                <a class="btn btn-outline" th:if="${coTheDocBaoCao and chiTiet.phienBanBaoCao != null}"
+                   th:href="@{/bao-cao/{ma}/{pb}/tai(ma=${chiTiet.nhom.maNhom},pb=${chiTiet.phienBanBaoCao})}">
+                    Tải báo cáo làm căn cứ chấm
+                </a>
+                <h3>Người chấm bắt buộc</h3>
+                <table class="data-table"><thead><tr><th>Giảng viên</th><th>Loại phiếu</th></tr></thead>
+                    <tbody><tr th:each="p : ${chiTiet.phieuBatBuoc}"><td th:text="${p.maGiangVien}"></td>
+                        <td th:text="${p.loaiPhieu == 'HOI_DONG' ? 'Hội đồng' : (p.loaiPhieu == 'PHAN_BIEN' ? 'Phản biện' : 'Chấm độc lập')}"></td>
+                    </tr></tbody></table>
+                <h3>Các phiếu hiện có</h3>
+                <table class="data-table"><thead><tr><th>Giảng viên</th><th>Loại phiếu</th><th>Trạng thái</th><th>Điểm</th><th>Nhận xét</th></tr></thead>
+                    <tbody><tr th:each="p : ${chiTiet.cacPhieu}">
+                        <td th:text="${p.id.maGiangVien}"></td>
+                        <td th:text="${p.loaiPhieu.name() == 'HOI_DONG' ? 'Hội đồng' : (p.loaiPhieu.name() == 'PHAN_BIEN' ? 'Phản biện' : 'Chấm độc lập')}"></td>
+                        <td th:text="${p.trangThai.name() == 'DA_NOP' ? 'Đã nộp' : 'Nháp'}"></td>
+                        <td th:text="${p.diem}"></td><td th:text="${p.nhanXet}"></td>
+                    </tr></tbody></table>
+                <p th:if="${chiTiet.lyDoChuaDu != null}" th:text="${chiTiet.lyDoChuaDu}"></p>
+                <p th:if="${chiTiet.diemDuKien != null}">
+                    Số phiếu: <strong th:text="${chiTiet.diemDuKien.soPhieu}"></strong>;
+                    Tổng điểm: <strong th:text="${chiTiet.diemDuKien.tongDiem}"></strong>;
+                    Điểm trung bình: <strong th:text="${chiTiet.diemDuKien.diemCuoi}"></strong>.
+                </p>
+                <form th:if="${chiTiet.coQuyenTongHop and chiTiet.diemDuKien != null}"
+                      th:action="@{/ket-qua/{ma}/tong-hop(ma=${chiTiet.nhom.maNhom})}" method="post">
+                    <label for="nhanXetTongHop">Nhận xét tổng hợp</label>
+                    <textarea class="form-control" id="nhanXetTongHop" name="nhanXetTongHop" maxlength="1000"></textarea>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn-primary" type="submit">Xác nhận tổng hợp</button>
+                </form>
+                <form th:if="${laTruongKhoa and chiTiet.nhom.trangThaiKetQua == 'DA_TONG_HOP' and chiTiet.diemDuKien != null}"
+                      th:action="@{/ket-qua/{ma}/cong-bo(ma=${chiTiet.nhom.maNhom})}" method="post"
+                      onsubmit="return confirm('Xác nhận công bố kết quả?');">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn-primary" type="submit">Công bố kết quả</button>
+                </form>
+                <a class="btn btn-outline" th:href="${laTruongKhoa ? '/ket-qua/quan-ly' : '/ket-qua/tong-hop'}">Quay lại danh sách</a>
+            </section>
+            <section class="section sv-panel" th:unless="${#lists.isEmpty(chiTiet.email)}">
+                <h2 class="section-title">Tình trạng email thông báo</h2>
+                <p>Đã gửi SMTP nghĩa là máy chủ gửi đã tiếp nhận thư. Việc đến hộp thư cần đối chiếu dịch vụ email.</p>
+                <table class="data-table"><thead><tr><th>Sinh viên</th><th>Email</th><th>Trạng thái</th><th>Số lần thử</th><th>Thao tác</th></tr></thead>
+                    <tbody><tr th:each="e : ${chiTiet.email}"><td th:text="${e.maSinhVien}"></td><td th:text="${e.diaChiEmail}"></td>
+                        <td th:text="${e.trangThai == 'DA_GUI' ? 'Đã gửi SMTP' : (e.trangThai == 'LOI' ? 'Gửi lỗi' : 'Chờ gửi')}"></td>
+                        <td><span th:text="${e.soLanThu}"></span><div th:if="${e.trangThai == 'LOI'}" th:text="${e.thongBaoLoi}"></div></td><td>
+                            <form th:if="${laTruongKhoa and e.trangThai == 'LOI'}" method="post"
+                                  th:action="@{/ket-qua/{ma}/email/{sv}/thu-lai(ma=${chiTiet.nhom.maNhom},sv=${e.maSinhVien})}">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-outline">Thử gửi lại</button>
+                            </form>
+                        </td></tr></tbody></table>
+                <p>Thư gửi lỗi sẽ được thử lại tự động tối đa 5 lần. Nếu vẫn lỗi, kiểm tra cấu hình gửi trước khi thử lại.</p>
+            </section>
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

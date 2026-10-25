@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Không thể thực hiện thao tác')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('my-group')}"></div>
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Không thể thực hiện thao tác')}"></div>
+        <div class="container sv-module">
+            <h1>Không thể thực hiện thao tác</h1>
+            <div th:replace="~{fragments/messages :: messages}"></div>
+            <div class="sv-actions"><a class="btn btn-outline" th:href="@{/nhom/cua-toi}">Nhóm của tôi</a>
+                <a class="btn btn-outline" th:href="@{/dang-ky-de-tai}">Đăng ký đề tài</a>
+                <a class="btn btn-outline" th:href="@{/bao-cao}">Báo cáo</a></div>
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

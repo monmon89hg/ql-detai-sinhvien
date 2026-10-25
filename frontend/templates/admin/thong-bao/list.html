@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý thông báo')}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="app-grid">
+    <aside th:replace="~{fragments/sidebar :: sidebar('announcement-management')}"></aside>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý thông báo')}"></div>
+
+        <section class="page-heading">
+            <div>
+                <h1>Quản lý thông báo</h1>
+                <p>Tạo bản nháp, công bố hoặc ẩn thông báo.</p>
+            </div>
+            <a class="btn btn-primary" th:href="@{/thong-bao/quan-ly/new}">
+                Tạo thông báo
+            </a>
+        </section>
+
+        <div th:replace="~{fragments/messages :: messages}"></div>
+
+        <section class="card admin-list-card">
+            <div class="table-responsive">
+                <table class="data-table admin-list-table admin-notice-table">
+                    <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Phạm vi</th>
+                        <th>Mã đợt</th>
+                        <th>Người đăng</th>
+                        <th>Trạng thái</th>
+                        <th>Thời gian công bố</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${thongBaos.empty}">
+                        <td colspan="7" class="empty-state">
+                            Chưa có thông báo nào.
+                        </td>
+                    </tr>
+
+                    <tr th:each="thongBao : ${thongBaos.content}">
+                        <td>
+                            <strong class="admin-notice-title" th:text="${thongBao.tieuDe}"></strong>
+                            <div class="admin-notice-content" th:text="${thongBao.noiDung}"></div>
+                        </td>
+                        <td><span class="notice-scope-pill" th:text="${thongBao.phamVi == 'TAT_CA' ? 'Tất cả' : (thongBao.phamVi == 'CA_NHAN' ? 'Cá nhân' : thongBao.phamVi)}"></span></td>
+                        <td th:text="${thongBao.maDot != null ? thongBao.maDot : '—'}"></td>
+                        <td th:text="${thongBao.tenNguoiDang}"></td>
+                        <td>
+                            <span class="notice-state"
+                                  th:classappend="${thongBao.trangThai == 'CONG_BO' ? ' notice-state--published' : (thongBao.trangThai == 'AN' ? ' notice-state--hidden' : ' notice-state--draft')}"
+                                  th:text="${thongBao.trangThai == 'CONG_BO' ? 'Đã công bố' : (thongBao.trangThai == 'AN' ? 'Đã ẩn' : (thongBao.trangThai == 'NHAP' ? 'Bản nháp' : thongBao.trangThai))}">
+                            </span>
+                        </td>
+                        <td th:text="${thongBao.congBoLuc != null
+                                      ? #temporals.format(thongBao.congBoLuc, 'dd/MM/yyyy HH:mm')
+                                      : '—'}">
+                        </td>
+                        <td>
+                            <div class="admin-notice-actions">
+                            <a th:if="${thongBao.trangThai == 'NHAP'}"
+                               class="btn btn-outline btn-sm"
+                               th:href="@{/thong-bao/quan-ly/{id}/edit(id=${thongBao.maThongBao})}">
+                                Sửa
+                            </a>
+
+                            <form th:if="${thongBao.trangThai == 'NHAP' or thongBao.trangThai == 'AN'}"
+                                  th:action="@{/thong-bao/quan-ly/{id}/cong-bo(id=${thongBao.maThongBao})}"
+                                  method="post">
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Công bố
+                                </button>
+                            </form>
+
+                            <form th:if="${thongBao.trangThai == 'CONG_BO'}"
+                                  th:action="@{/thong-bao/quan-ly/{id}/an(id=${thongBao.maThongBao})}"
+                                  method="post">
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    Ẩn
+                                </button>
+                            </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav class="pagination"
+                 th:if="${thongBaos.totalPages > 1}"
+                 aria-label="Phân trang">
+                <a th:if="${thongBaos.hasPrevious()}"
+                   th:href="@{/thong-bao/quan-ly(page=${thongBaos.number - 1})}">
+                    Trang trước
+                </a>
+
+                <span th:text="|Trang ${thongBaos.number + 1} / ${thongBaos.totalPages}|"></span>
+
+                <a th:if="${thongBaos.hasNext()}"
+                   th:href="@{/thong-bao/quan-ly(page=${thongBaos.number + 1})}">
+                    Trang sau
+                </a>
+            </nav>
+        </section>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+</div>
+</body>
+</html>
+
+
+

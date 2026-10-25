@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${maDot != null ? 'Chỉnh sửa Đợt đăng ký' : 'Tạo mới Đợt đăng ký'})}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('rounds')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Thiết lập đợt đăng ký')}"></div>
+
+        <div class="container">
+            <div th:replace="~{fragments/messages :: messages}"></div>
+
+            <div class="page-heading">
+                <h1 th:text="${maDot != null ? 'Chỉnh sửa Đợt đăng ký' : 'Tạo mới Đợt đăng ký'}">Thiết lập Đợt đăng ký</h1>
+                <p>Quy tắc: Thời gian GV đề xuất (Giai đoạn 1) phải kết thúc trước hoặc cùng lúc bắt đầu SV đăng ký (Giai đoạn 2).</p>
+            </div>
+
+            <div class="placeholder" style="max-width: 800px;">
+                <form th:action="${maDot != null} ? @{/dot-dang-ky/sua/{maDot}(maDot=${maDot})} : @{/dot-dang-ky/tao}"
+                      th:object="${dotDto}" method="post">
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px;">
+                        <div class="form-field">
+                            <label><strong>Mã đợt *</strong></label>
+                            <input type="text" class="form-control" th:field="*{maDot}" placeholder="VD: DOT_2026_HK1" th:readonly="${maDot != null}" required>
+                        </div>
+                        <div class="form-field">
+                            <label><strong>Tên đợt đăng ký *</strong></label>
+                            <input type="text" class="form-control" th:field="*{tenDot}" placeholder="VD: Khóa luận tốt nghiệp HK1 2026" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label><strong>Loại đề tài *</strong></label>
+                        <select class="form-control" th:field="*{loaiDeTai}" id="loaiDeTaiSelect" required>
+                            <option value="MON_HOC">Môn học chuyên ngành</option>
+                            <option value="NCKH">Nghiên cứu khoa học</option>
+                            <option value="TLCN">Tiểu luận chuyên ngành</option>
+                            <option value="KLTN">Khóa luận tốt nghiệp</option>
+                        </select>
+                    </div>
+
+                    <!-- GIAI ĐOẠN 1 -->
+                    <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin: 15px 0;">
+                        <legend style="padding: 0 8px; font-weight: bold; color: var(--primary);">Giai đoạn 1: Giảng viên đề xuất đề tài</legend>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div class="form-field">
+                                <label>Bắt đầu giảng viên *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{batDauGv}" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Kết thúc giảng viên *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{ketThucGv}" required>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- GIAI ĐOẠN 2 -->
+                    <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin: 15px 0;">
+                        <legend style="padding: 0 8px; font-weight: bold; color: var(--primary);">Giai đoạn 2: Sinh viên đăng ký đề tài đã công bố</legend>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div class="form-field">
+                                <label>Bắt đầu sinh viên *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{batDauSv}" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Kết thúc sinh viên *</label>
+                                <input type="datetime-local" class="form-control" th:field="*{ketThucSv}" required>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- CÁC HẠN BỔ SUNG -->
+                    <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin: 15px 0;">
+                        <legend style="padding: 0 8px; font-weight: bold; color: #555;">Hạn nộp và báo cáo hội đồng (theo loại đề tài)</legend>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div class="form-field" style="display:flex; flex-direction:column; justify-content:space-between; margin:0;">
+                                <label>Hạn nộp báo cáo</label>
+                                <input type="datetime-local" class="form-control" th:field="*{hanNopBaoCao}">
+                            </div>
+                            <div class="form-field" style="display:flex; flex-direction:column; justify-content:space-between; margin:0;">
+                                <label>Hạn nộp điểm phản biện (bắt buộc cho TLCN, KLTN)</label>
+                                <input type="datetime-local" class="form-control" th:field="*{hanNopDiemPb}">
+                            </div>
+                        </div>
+                        <div class="form-field" style="margin-top: 10px;">
+                            <label>Ngày báo cáo hội đồng (bắt buộc cho KLTN)</label>
+                            <input type="date" class="form-control" th:field="*{ngayBaoCaoHd}">
+                        </div>
+                    </fieldset>
+
+                    <div class="btn-row" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">Lưu đợt đăng ký</button>
+                        <a th:href="@{/dot-dang-ky}" class="btn btn-outline">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div th:fragment="messages" aria-live="polite">
+            <div class="notice" th:if="${successMessage}" th:text="${successMessage}">Thông báo</div>
+            <div class="alert" th:if="${errorMessage}" th:text="${errorMessage}">Có lỗi xảy ra</div>
+        </div>
+    </body>
+</html>

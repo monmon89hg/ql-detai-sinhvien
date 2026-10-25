@@ -1,0 +1,242 @@
+.notice-heading {
+    margin: 0 0 22px;
+    border: 0;
+}
+
+.notice-heading h1 {
+    display: block;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: #1d415e;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.notice-panel {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.notice-tabs {
+    display: flex;
+    gap: 22px;
+    margin: -2px 0 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.notice-tab {
+    padding: 10px 8px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: #5d7184;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.notice-tab.is-active {
+    border-bottom-color: #d63384;
+    color: #075b8f;
+    font-weight: 700;
+}
+
+.notice-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0 0 16px;
+    padding: 0 12px;
+    border: 1px solid #c8c8c8;
+    border-radius: 6px;
+    color: #61778c;
+}
+
+.notice-search input {
+    width: 100%;
+    min-height: 42px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font: inherit;
+}
+
+.notice-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.notice-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.notice-table th,
+.notice-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #d8d8d8;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.notice-table th {
+    background: #075b8f;
+    color: #fff;
+    font-weight: 700;
+}
+
+.notice-table tbody tr:nth-child(even) {
+    background: #f4f4f4;
+}
+
+.notice-table td:first-child {
+    min-width: 280px;
+    color: #075b8f;
+}
+
+.notice-table td:nth-child(2) {
+    min-width: 150px;
+}
+
+.notice-table td:last-child {
+    min-width: 135px;
+    white-space: nowrap;
+}
+
+.notice-title-link {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.notice-title-link:hover {
+    text-decoration: underline;
+}
+
+.notice-title-link:focus-visible {
+    border-radius: 3px;
+    outline: 3px solid rgb(7 91 143 / 24%);
+    outline-offset: 3px;
+}
+
+.notice-detail-panel {
+    min-height: 140px;
+    padding: 22px 20px;
+    background: #fff;
+}
+
+.notice-detail-view[hidden] {
+    display: none !important;
+}
+
+.notice-detail-title {
+    margin: 0 0 14px;
+    color: #075b8f;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.notice-detail-content {
+    margin: 0 0 18px;
+    color: #263f56;
+    line-height: 1.7;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.notice-detail-back {
+    display: inline-block;
+}
+
+.notice-empty {
+    padding: 20px 10px;
+    color: #65778a;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .notice-panel {
+        padding: 12px;
+    }
+
+    .notice-tabs {
+        gap: 8px;
+    }
+
+    .notice-tab {
+        padding-inline: 4px;
+        font-size: 11px;
+    }
+}
+
+/* Phân trang cho danh sách thông báo công khai */
+.notice-panel > .pagination {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #d8e2ec;
+}
+.notice-panel > .pagination > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 7px 13px;
+    border: 1px solid #cbdce9;
+    border-radius: 7px;
+    background: #fff;
+    color: #245d80;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .15s, border-color .15s;
+}
+.notice-panel > .pagination > a:hover {
+    border-color: #91b8d3;
+    background: #f1f7fb;
+}
+.notice-panel > .pagination > a:first-child {
+    grid-column: 1;
+    justify-self: start;
+}
+.notice-panel > .pagination > span {
+    grid-column: 2;
+    justify-self: center;
+    color: #536c81;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.notice-panel > .pagination > a:last-child {
+    grid-column: 3;
+    justify-self: end;
+}
+@media (max-width: 480px) {
+    .notice-panel > .pagination {
+        gap: 6px;
+    }
+    .notice-panel > .pagination > a {
+        min-height: 34px;
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+}

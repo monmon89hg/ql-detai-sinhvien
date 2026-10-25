@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý Đợt đăng ký')}"></head>
+<body>
+<a class="skip" href="#content">Bỏ qua điều hướng</a>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="backdrop"></div>
+
+<div class="app-grid">
+    <div th:replace="~{fragments/sidebar :: sidebar('rounds')}"></div>
+
+    <main class="page" id="content">
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Đợt đăng ký')}"></div>
+
+        <div class="container">
+            <!-- Thông báo thành công hoặc lỗi -->
+            <div th:replace="~{fragments/messages :: messages}"></div>
+
+            <div class="page-heading" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h1>Quản lý Đợt đăng ký</h1>
+                </div>
+                <div>
+                    <a th:href="@{/dot-dang-ky/tao}" class="btn btn-primary">
+                        + Tạo đợt đăng ký mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bảng danh sách đợt -->
+            <div class="placeholder" style="max-width: 100%;">
+                <div class="table-responsive">
+                    <table class="data-table" style="vertical-align: middle;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; white-space: nowrap;">Mã đợt</th>
+                                <th style="text-align: left;">Tên đợt</th>
+                                <th style="text-align: center; white-space: nowrap;">Loại</th>
+                                <th style="text-align: center; white-space: nowrap;">Hạn GV đề xuất</th>
+                                <th style="text-align: center; white-space: nowrap;">Hạn SV đăng ký</th>
+                                <th style="text-align: center; white-space: nowrap;">Tiến độ</th>
+                                <th style="text-align: center; white-space: nowrap;">Thao tác</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(dots)}">
+                            <td colspan="7" style="text-align:center; padding: 32px 20px; color: #557085; font-size: 13.5px;">
+                                Chưa có đợt đăng ký nào. Hãy tạo đợt đăng ký mới!
+                            </td>
+                        </tr>
+                        <tr th:each="dot : ${dots}" style="vertical-align: middle;">
+                            <td style="text-align: left; white-space: nowrap;">
+                                <strong th:text="${dot.maDot}">DOT-01</strong>
+                            </td>
+                            <td>
+                                <strong th:text="${dot.tenDot}">Khóa luận HK1 2026</strong>
+                            </td>
+                            <td style="text-align: left; white-space: nowrap;">
+                                <span th:text="${dot.loaiDeTai}">KLTN</span>
+                            </td>
+                            <td style="text-align: center; font-size: 12px; line-height: 1.5; white-space: nowrap;">
+                                <span th:text="${#temporals.format(dot.batDauGv, 'dd/MM/yyyy HH:mm')}"></span>
+                                <br>
+                                <span style="color: #888; font-size: 11px;">đến</span>
+                                <span th:text="${#temporals.format(dot.ketThucGv, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td style="text-align: center; font-size: 12px; line-height: 1.5; white-space: nowrap;">
+                                <span th:text="${#temporals.format(dot.batDauSv, 'dd/MM/yyyy HH:mm')}"></span>
+                                <br>
+                                <span style="color: #888; font-size: 11px;">đến</span>
+                                <span th:text="${#temporals.format(dot.ketThucSv, 'dd/MM/yyyy HH:mm')}"></span>
+                            </td>
+                            <td style="text-align: left; white-space: nowrap;">
+                                <span style="white-space: nowrap; font-weight: 600;"
+                                      th:style="${giaiDoanMap[dot.maDot] == 'Đang mở đăng ký' || giaiDoanMap[dot.maDot] == 'GV đề xuất' ? 'color:#18794e;' : ((giaiDoanMap[dot.maDot] == 'Sắp diễn ra' || giaiDoanMap[dot.maDot] == 'Chờ duyệt đề tài') ? 'color:#d97706;' : 'color:#b3261e;')}"
+                                      th:text="${giaiDoanMap[dot.maDot]}">Đang mở đăng ký</span>
+                            </td>
+                            <td style="text-align: left;">
+                                <div class="btn-row" style="justify-content: flex-start; gap: 6px; flex-wrap: nowrap;">
+                                    <a th:href="@{/dot-dang-ky/{maDot}/lich.ics(maDot=${dot.maDot})}" class="btn btn-outline" style="min-height:30px; padding:4px 8px; font-size:12px; white-space: nowrap;" title="Tải file .ics để thêm lịch vào Google Calendar">📅 Lịch .ics</a>
+                                    <a th:href="@{/dot-dang-ky/sua/{maDot}(maDot=${dot.maDot})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;">Sửa</a>
+                                    
+                                    <form th:if="${dot.trangThai == 'NHAP'}" th:action="@{/dot-dang-ky/{maDot}/cong-bo(maDot=${dot.maDot})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;" onclick="return confirm('Bạn có chắc muốn công bố đợt này?');">Công bố</button>
+                                    </form>
+
+                                    <form th:if="${dot.trangThai == 'CONG_BO'}" th:action="@{/dot-dang-ky/{maDot}/dong(maDot=${dot.maDot})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap; color: #c0392b;" onclick="return confirm('Bạn có chắc muốn đóng đợt này?');">Đóng đợt</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

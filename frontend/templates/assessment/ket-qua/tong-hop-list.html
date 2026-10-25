@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/head :: head('Tổng hợp kết quả')}"></head>
+
+    <body>
+        <a class="skip" href="#content">Bỏ qua điều hướng</a>
+        <div th:replace="~{fragments/header :: header}"></div>
+        <div class="backdrop"></div>
+
+        <div class="app-grid">
+            <div th:replace="~{fragments/sidebar :: sidebar('aggregate-result')}"></div>
+
+            <main class="page" id="content">
+                <div
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Tổng hợp kết quả')}"
+                ></div>
+
+                <div class="container sv-module">
+                    <div th:replace="~{fragments/messages :: messages}"></div>
+
+                    <div class="page-heading result-export-heading">
+                        <div>
+                            <h1>Tổng hợp kết quả</h1>
+                            <p th:if="${chiXem}">
+                                Xem trạng thái tổng hợp và điểm cuối của các nhóm.
+                            </p>
+                            <p th:unless="${chiXem}">
+                                Chủ tịch hội đồng tổng hợp sau khi tất cả
+                                giảng viên đã nộp phiếu chấm.
+                            </p>
+                        </div>
+                        <a class="btn btn-excel"
+                           th:href="@{/ket-qua/tong-hop/xuat-excel(maDot=${maDot},loai=${loai})}">
+                            <img class="excel-logo" th:src="@{/images/excel-logo.png}"
+                                 alt="" aria-hidden="true">
+                            Xuất kết quả
+                        </a>
+                    </div>
+
+                    <form method="get" class="section sv-panel">
+                        <label for="maDot">Đợt đăng ký</label>
+                        <select id="maDot" name="maDot" class="form-control"><option value="">Tất cả đợt</option>
+                            <option th:each="d : ${danhSachDot}" th:value="${d.maDot}" th:text="${d.tenDot}" th:selected="${d.maDot == maDot}"></option>
+                        </select>
+                        <label for="loai">Loại đề tài</label>
+                        <select id="loai" name="loai" class="form-control">
+                            <option value="">Tất cả loại</option><option value="MON_HOC" th:selected="${loai == 'MON_HOC'}">Môn học</option>
+                            <option value="NCKH" th:selected="${loai == 'NCKH'}">NCKH</option><option value="TLCN" th:selected="${loai == 'TLCN'}">TLCN</option>
+                            <option value="KLTN" th:selected="${loai == 'KLTN'}">KLTN</option>
+                        </select>
+                        <button class="btn btn-primary result-filter-button" type="submit">Lọc kết quả</button>
+                    </form>
+                    <section class="section sv-panel">
+                        <div class="section-top sv-panel-heading">
+                            <h2 class="section-title" th:if="${chiXem}">
+                                Danh sách nhóm đánh giá
+                            </h2>
+                            <h2 class="section-title" th:unless="${chiXem}">
+                                Nhóm thuộc phạm vi tổng hợp của bạn
+                            </h2>
+                        </div>
+
+                        <p th:if="${#lists.isEmpty(danhSachNhom)}">
+                            Hiện chưa có nhóm nào để hiển thị.
+                        </p>
+
+                        <table
+                            class="data-table"
+                            th:unless="${#lists.isEmpty(danhSachNhom)}"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nhóm</th>
+                                    <th scope="col">Đề tài</th>
+                                    <th scope="col">Loại / Đợt</th>
+                                    <th scope="col">Hội đồng</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Điểm cuối</th>
+                                    <th scope="col" th:if="${chiXem}">Quyền</th>
+                                    <th scope="col" th:unless="${chiXem}">Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="nhom, viTri : ${danhSachNhom}">
+                                    <td>
+                                        <strong th:text="${nhom.maNhom}"></strong>
+                                        <div th:text="${nhom.tenNhom}"></div>
+                                    </td>
+                                    <td>
+                                        <strong th:text="${nhom.maDeTai}"></strong>
+                                        <div th:text="${nhom.tenDeTai}"></div>
+                                    </td>
+                                    <td><span th:text="${nhom.loaiDeTai == 'MON_HOC' ? 'Môn học' : (nhom.loaiDeTai == 'NCKH' ? 'NCKH' : (nhom.loaiDeTai == 'TLCN' ? 'TLCN' : 'KLTN'))}"></span>
+                                        <div th:text="${nhom.tenDot}"></div></td>
+                                    <td><strong th:text="${nhom.maHoiDong != null ? nhom.maHoiDong : '—'}"></strong>
+                                        <div th:text="${nhom.tenHoiDong}"></div></td>
+                                    <td>
+                                        <span class="workflow-status workflow-status--neutral"
+                                              th:if="${nhom.trangThaiKetQua == null}">
+                                            Chưa tổng hợp
+                                        </span>
+                                        <span class="workflow-status workflow-status--waiting"
+                                              th:if="${nhom.trangThaiKetQua == 'DA_TONG_HOP'}">
+                                            Đã tổng hợp
+                                        </span>
+                                        <span class="workflow-status workflow-status--completed"
+                                              th:if="${nhom.trangThaiKetQua == 'CONG_BO'}">
+                                            Đã công bố
+                                        </span>
+                                    </td>
+                                    <td
+                                        th:text="${nhom.diemCuoi != null
+                                            ? nhom.diemCuoi : '—'}"
+                                    ></td>
+                                    <td class="result-actions">
+                                        <a class="btn btn-primary" th:if="${!chiXem and nhom.trangThaiKetQua == null}"
+                                           th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem và tổng hợp</a>
+                                        <a class="btn btn-outline" th:if="${!chiXem}"
+                                           th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem chi tiết</a>
+
+
+                                        <span th:if="${chiXem}">Chỉ xem</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <div th:replace="~{fragments/footer :: footer}"></div>
+                </div>
+            </main>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+    </body>
+</html>
