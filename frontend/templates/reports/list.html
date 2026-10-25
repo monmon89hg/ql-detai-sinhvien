@@ -59,7 +59,7 @@
                           th:text="|Đã nộp (${nhomDoc.soBaoCaoHopLe})|"></span>
                     <span class="sv-help" th:unless="${nhomDoc.soBaoCaoHopLe > 0}">Chưa có PDF hợp lệ</span></td>
                 <td><a class="btn btn-outline sv-btn-small"
-                       th:href="@{/bao-cao(maNhom=${nhomDoc.maNhom},tuKhoa=${tuKhoaBaoCao},maDot=${maDotBaoCao},trangThaiNop=${trangThaiNopBaoCao},trangNhom=${trangNhomBaoCao})} + '#chi-tiet-bao-cao'">Xem báo cáo</a></td>
+                       th:href="@{/bao-cao(maNhom=${nhomDoc.maNhom},tuKhoa=${tuKhoaBaoCao},maDot=${maDotBaoCao},trangThaiNop=${trangThaiNopBaoCao},trangNhom=${trangNhomBaoCao})} + '#chi-tiet-bao-cao'">Xem</a></td>
             </tr></tbody>
         </table>
     </div>
@@ -94,7 +94,7 @@
     <a class="btn btn-primary" th:if="${coTheNopBaoCao}" th:href="@{/bao-cao/nop}">+ Nộp báo cáo mới</a></div>
     <div class="sv-info" th:if="${nhomCuaToi == null and danhSachNhomBaoCaoGiangVien == null and danhSachNhomBaoCaoTruongKhoa == null}">Chưa có nhóm để nộp báo cáo.</div>
     <div class="sv-info" th:if="${nhomCuaToi == null and danhSachNhomBaoCaoGiangVien != null}">Chọn nhóm được phân công ở trên để xem lịch sử báo cáo.</div>
-    <div class="sv-info" th:if="${nhomCuaToi == null and danhSachNhomBaoCaoTruongKhoa != null}">Chọn <strong>Xem báo cáo</strong> ở danh sách nhóm phía trên để xem lịch sử và tải PDF.</div>
+    <div class="sv-info" th:if="${nhomCuaToi == null and danhSachNhomBaoCaoTruongKhoa != null}">Chọn <strong>Xem</strong> ở danh sách nhóm phía trên để xem lịch sử và tải PDF.</div>
     <dl class="sv-facts" th:if="${nhomCuaToi != null}"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi.tenNhom}"></dd></div>
         <div><dt>Đề tài</dt><dd th:text="${tenDeTai ?: 'Chưa đăng ký'}"></dd></div>
         <div><dt>Hạn nộp</dt><dd th:text="${hanNopBaoCao != null ? #temporals.format(hanNopBaoCao,'dd/MM/yyyy HH:mm') : 'Chưa có'}"></dd></div>

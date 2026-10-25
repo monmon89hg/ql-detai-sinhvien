@@ -47,12 +47,13 @@
                 <a class="btn btn-outline sv-btn-small"
                    th:if="${dk.trangThai != 'CHO_DUYET' and dk.trangThai != 'TU_CHOI'}"
                    th:href="@{/bao-cao(maNhom=${dk.maNhom})} + '#chi-tiet-bao-cao'">Xem báo cáo</a>
-                <!-- Chỉ xem lại lý do đã lưu, không thay đổi quyết định hoặc gửi yêu cầu POST. -->
-                <details th:if="${dk.trangThai == 'TU_CHOI'}" class="sv-rejection-history">
-                    <summary class="btn btn-outline sv-btn-small" style="cursor:pointer;white-space:nowrap;">Xem lý do</summary>
-                    <p class="sv-help" style="max-width:320px;margin-top:8px;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;"
-                       th:text="${dk.lyDoTuChoi != null and !dk.lyDoTuChoi.isBlank() ? dk.lyDoTuChoi : 'Chưa có lý do từ chối được lưu.'}"></p>
-                </details></td>
+                <!-- Hiển thị lý do từ chối trong modal chỉ đọc, không thay đổi quyết định. -->
+                <button th:if="${dk.trangThai == 'TU_CHOI'}"
+                        type="button" class="btn btn-outline sv-btn-small"
+                        data-sv-rejection-history-open
+                        th:attr="data-sv-rejection-group=${dk.maNhom},data-sv-rejection-reason=${dk.lyDoTuChoi != null and !dk.lyDoTuChoi.isBlank() ? dk.lyDoTuChoi : 'Chưa có lý do từ chối được lưu.'}">
+                    Xem lý do
+                </button></td>
         </tr></tbody></table></div>
 </section>
 
@@ -91,6 +92,25 @@
                 </button>
             </div>
         </form>
+    </section>
+</div>
+
+<!-- Hộp thoại CHỈ ĐỌC lý do đã từ chối; không có biểu mẫu hoặc hành động ghi dữ liệu. -->
+<div class="sv-reject-overlay sv-reason-history-overlay" data-sv-rejection-history-dialog hidden>
+    <section class="sv-reject-modal" role="dialog" aria-modal="true"
+             aria-labelledby="sv-reason-history-title" aria-describedby="sv-reason-history-text"
+             tabindex="-1" data-sv-rejection-history-panel>
+        <div class="sv-reject-heading">
+            <h2 id="sv-reason-history-title">Lý do từ chối đăng ký</h2>
+            <button type="button" class="sv-reject-close" data-sv-rejection-history-close
+                    aria-label="Đóng hộp thoại">&times;</button>
+        </div>
+        <p class="sv-help">Nhóm: <strong data-sv-rejection-history-group></strong></p>
+        <p id="sv-reason-history-text" class="sv-reason-history-content"
+           data-sv-rejection-history-text></p>
+        <div class="sv-reject-footer">
+            <button type="button" class="btn btn-outline" data-sv-rejection-history-close>Đóng</button>
+        </div>
     </section>
 </div>
 

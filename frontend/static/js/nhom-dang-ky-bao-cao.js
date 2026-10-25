@@ -300,6 +300,63 @@
         });
     }
 
+    // Hiển thị lý do từ chối ĐÃ LƯU trên hộp thoại riêng, không kéo giãn hàng bảng.
+    // Không gọi API, không gửi POST. Text được gán an toàn qua textContent.
+    const reasonHistoryOverlay = document.querySelector('[data-sv-rejection-history-dialog]');
+    if (reasonHistoryOverlay) {
+        const panel = reasonHistoryOverlay.querySelector('[data-sv-rejection-history-panel]');
+        const groupLabel = reasonHistoryOverlay.querySelector('[data-sv-rejection-history-group]');
+        const historyText = reasonHistoryOverlay.querySelector('[data-sv-rejection-history-text]');
+        let previousTrigger = null;
+
+        function closeReasonHistory() {
+            reasonHistoryOverlay.hidden = true;
+            document.body.classList.remove('sv-reject-modal-open');
+            if (previousTrigger && previousTrigger.isConnected) previousTrigger.focus();
+            previousTrigger = null;
+        }
+
+        document.querySelectorAll('[data-sv-rejection-history-open]').forEach(button => {
+            button.addEventListener('click', () => {
+                previousTrigger = button;
+                groupLabel.textContent = button.dataset.svRejectionGroup || '—';
+                historyText.textContent = button.dataset.svRejectionReason || 'Chưa có lý do từ chối được lưu.';
+                reasonHistoryOverlay.hidden = false;
+                document.body.classList.add('sv-reject-modal-open');
+                panel.focus();
+            });
+        });
+
+        reasonHistoryOverlay.querySelectorAll('[data-sv-rejection-history-close]').forEach(button => {
+            button.addEventListener('click', closeReasonHistory);
+        });
+        reasonHistoryOverlay.addEventListener('click', event => {
+            if (event.target === reasonHistoryOverlay) closeReasonHistory();
+        });
+        reasonHistoryOverlay.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeReasonHistory();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const buttons = [...panel.querySelectorAll('button:not([disabled])')];
+            if (!buttons.length) return;
+            const first = buttons[0];
+            const last = buttons[buttons.length - 1];
+            if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            } else if (!event.shiftKey && document.activeElement === panel) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+    }
+
     document.querySelectorAll('[data-sv-upload]').forEach(form => {
         const fileInput = form.querySelector('[data-sv-pdf]');
         const errorEl = form.querySelector('[data-sv-file-error]');
