@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Đăng nhập')}"></head>
-
 <body class="login-page">
 <main class="login-shell">
     <header class="login-brand">
@@ -9,17 +8,17 @@
              th:src="@{/images/ute_logo.png}"
              alt="Logo HCM-UTE"
              class="login-logo">
-
         <h2>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP.HCM</h2>
     </header>
 
     <section class="login-card">
-        <h1>Đăng nhập</h1>
+        <header class="login-card-heading">
+            <h1>ĐĂNG NHẬP</h1>
+        </header>
 
         <p th:if="${param.error}" class="message message-error">
             Email hoặc mật khẩu không đúng, hoặc tài khoản đã bị khóa.
         </p>
-
         <p th:if="${param.logout}" class="message message-success">
             Bạn đã đăng xuất.
         </p>
@@ -29,29 +28,44 @@
                    th:name="${_csrf.parameterName}"
                    th:value="${_csrf.token}">
 
-            <div class="form-field">
-                <label for="email" class="visually-hidden">Tên đăng nhập</label>
+            <div class="form-field login-field">
+                <label for="email">Email</label>
                 <input id="email"
                        name="email"
                        type="email"
-                       placeholder="Tên đăng nhập"
+                       placeholder="Nhập email"
                        autocomplete="username"
                        required>
             </div>
 
-            <div class="form-field">
-                <label for="matKhau" class="visually-hidden">Mật khẩu</label>
-                <input id="matKhau"
-                       name="matKhau"
-                       type="password"
-                       placeholder="Mật khẩu"
-                       autocomplete="current-password"
-                       required>
+            <div class="form-field login-field">
+                <label for="matKhau">Mật khẩu</label>
+                <div class="login-password-wrap">
+                    <input id="matKhau"
+                           name="matKhau"
+                           type="password"
+                           placeholder="Nhập mật khẩu"
+                           autocomplete="current-password"
+                           required>
+                    <button class="password-toggle" type="button"
+                            aria-controls="matKhau" aria-pressed="false"
+                            onclick="togglePasswordVisibility(this)">Hiện</button>
+                </div>
             </div>
 
-            <button type="submit">Đăng nhập</button>
+            <button class="login-submit" type="submit">Đăng nhập</button>
         </form>
     </section>
 </main>
+<script>
+    function togglePasswordVisibility(button) {
+        const input = document.getElementById(button.getAttribute('aria-controls'));
+        const showPassword = input.type === 'password';
+        input.type = showPassword ? 'text' : 'password';
+        button.textContent = showPassword ? 'Ẩn' : 'Hiện';
+        button.setAttribute('aria-pressed', String(showPassword));
+    }
+</script>
 </body>
 </html>
+
