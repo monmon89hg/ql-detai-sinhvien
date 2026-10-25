@@ -79,11 +79,11 @@
                     <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin: 15px 0;">
                         <legend style="padding: 0 8px; font-weight: bold; color: #555;">Hạn nộp và báo cáo hội đồng (theo loại đề tài)</legend>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                            <div class="form-field">
+                            <div class="form-field" style="display:flex; flex-direction:column; justify-content:space-between; margin:0;">
                                 <label>Hạn nộp báo cáo</label>
                                 <input type="datetime-local" class="form-control" th:field="*{hanNopBaoCao}">
                             </div>
-                            <div class="form-field">
+                            <div class="form-field" style="display:flex; flex-direction:column; justify-content:space-between; margin:0;">
                                 <label>Hạn nộp điểm phản biện (bắt buộc cho TLCN, KLTN)</label>
                                 <input type="datetime-local" class="form-control" th:field="*{hanNopDiemPb}">
                             </div>

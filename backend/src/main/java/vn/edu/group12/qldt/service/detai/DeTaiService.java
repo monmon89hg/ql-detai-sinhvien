@@ -282,6 +282,10 @@ public class DeTaiService {
             throw new AccessDeniedException("Bạn không có quyền xóa hoặc hủy đề tài này!");
         }
 
+        if ("NGUNG_NHAN".equals(deTai.getTrangThai())) {
+            throw new IllegalStateException("Đề tài đã ở trạng thái Ngừng nhận nên không thể xóa!");
+        }
+
         // Kiểm tra xem đề tài đã có dữ liệu liên quan chưa (đăng ký của sinh viên)
         long soDangKy = deTaiRepository.countDangKyByMaDeTai(maDeTai);
         if (soDangKy > 0 || "CONG_BO".equals(deTai.getTrangThai())) {
