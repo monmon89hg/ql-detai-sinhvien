@@ -117,7 +117,7 @@ public class HoiDongService {
     @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<DotDangKyLuaChon> layDanhSachDot() {
-        return hoiDongRepository.layDanhSachDot();
+        return hoiDongRepository.layDotKhoaLuan();
     }
 
     @PreAuthorize("hasRole('TRUONG_KHOA')")
@@ -146,6 +146,9 @@ public class HoiDongService {
                 "Đợt đăng ký không tồn tại."
             );
         }
+
+        if (hoiDongRepository.demDotKhoaLuan(maDot) == 0)
+            throw new IllegalArgumentException("Chỉ tạo hội đồng cho đợt khóa luận tốt nghiệp.");
 
         String diaDiem = form.getDiaDiem();
 

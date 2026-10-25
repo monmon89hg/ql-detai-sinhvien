@@ -19,44 +19,46 @@ public interface PhieuChamDiemRepository
     List<PhieuChamDiem>
         findById_MaNhomOrderById_MaGiangVienAsc(String maNhom);
 
-    // Chỉ liệt kê nhóm đang chấm thuộc hội đồng của giảng viên.
+    // Liệt kê nhóm đang chấm theo phân công hội đồng, phản biện hoặc chấm độc lập.
     // Loại các đề tài mà chính giảng viên đó đang hướng dẫn.
     @Query(
         value = """
-            SELECT
-                nh.ma_nhom AS maNhom,
-                nh.ten_nhom AS tenNhom,
-                dt.ma_de_tai AS maDeTai,
-                dt.ten_de_tai AS tenDeTai,
-                hd.ma_hoi_dong AS maHoiDong,
-                hd.ten_hoi_dong AS tenHoiDong
+            SELECT nh.ma_nhom AS maNhom, nh.ten_nhom AS tenNhom,
+                dt.ma_de_tai AS maDeTai, dt.ten_de_tai AS tenDeTai,
+                hd.ma_hoi_dong AS maHoiDong, hd.ten_hoi_dong AS tenHoiDong,
+                'HOI_DONG' AS loaiPhieu, dot.loai_de_tai AS loaiDeTai
             FROM hoi_dong_de_tai pc
-            JOIN hoi_dong hd
-                ON hd.ma_hoi_dong = pc.ma_hoi_dong
-            JOIN thanh_vien_hoi_dong tv
-                ON tv.ma_hoi_dong = hd.ma_hoi_dong
-            JOIN dang_ky_de_tai dk
-                ON dk.ma_nhom = pc.ma_nhom
-            JOIN nhom_sinh_vien nh
-                ON nh.ma_nhom = dk.ma_nhom
-            JOIN de_tai dt
-                ON dt.ma_de_tai = dk.ma_de_tai
-            JOIN dot_dang_ky dot
-                ON dot.ma_dot = hd.ma_dot
-            WHERE tv.ma_giang_vien = :maGiangVien
-                AND hd.trang_thai = 'DANG_CHAM'
-                AND dk.trang_thai = 'DANG_CHAM'
-                AND nh.ma_dot = hd.ma_dot
-                AND dt.ma_dot = hd.ma_dot
-                AND dot.loai_de_tai = 'KLTN'
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM de_tai_giang_vien gv
-                    WHERE gv.ma_de_tai = dk.ma_de_tai
-                        AND gv.ma_giang_vien = :maGiangVien
-                        AND gv.loai_phan_cong = 'HUONG_DAN'
-                )
-            ORDER BY hd.ma_hoi_dong, nh.ma_nhom
+            JOIN hoi_dong hd ON hd.ma_hoi_dong=pc.ma_hoi_dong
+            JOIN thanh_vien_hoi_dong tv ON tv.ma_hoi_dong=hd.ma_hoi_dong
+            JOIN dang_ky_de_tai dk ON dk.ma_nhom=pc.ma_nhom
+            JOIN nhom_sinh_vien nh ON nh.ma_nhom=dk.ma_nhom
+            JOIN de_tai dt ON dt.ma_de_tai=dk.ma_de_tai
+            JOIN dot_dang_ky dot ON dot.ma_dot=hd.ma_dot
+            WHERE tv.ma_giang_vien=:maGiangVien AND hd.trang_thai='DANG_CHAM'
+                AND dk.trang_thai='DANG_CHAM' AND nh.ma_dot=hd.ma_dot AND dt.ma_dot=hd.ma_dot
+                AND dot.loai_de_tai='KLTN'
+                AND NOT EXISTS(SELECT 1 FROM de_tai_giang_vien gv
+                    WHERE gv.ma_de_tai=dt.ma_de_tai AND gv.ma_giang_vien=:maGiangVien
+                    AND gv.loai_phan_cong='HUONG_DAN')
+            UNION ALL
+            SELECT nh.ma_nhom AS maNhom, nh.ten_nhom AS tenNhom,
+                dt.ma_de_tai AS maDeTai, dt.ten_de_tai AS tenDeTai,
+                hd.ma_hoi_dong AS maHoiDong, hd.ten_hoi_dong AS tenHoiDong,
+                gv.loai_phan_cong AS loaiPhieu, dot.loai_de_tai AS loaiDeTai
+            FROM dang_ky_de_tai dk
+            JOIN nhom_sinh_vien nh ON nh.ma_nhom=dk.ma_nhom
+            JOIN de_tai dt ON dt.ma_de_tai=dk.ma_de_tai AND dt.ma_dot=nh.ma_dot
+            JOIN dot_dang_ky dot ON dot.ma_dot=nh.ma_dot
+            JOIN de_tai_giang_vien gv ON gv.ma_de_tai=dt.ma_de_tai
+            LEFT JOIN hoi_dong_de_tai pc ON pc.ma_nhom=nh.ma_nhom
+            LEFT JOIN hoi_dong hd ON hd.ma_hoi_dong=pc.ma_hoi_dong
+            WHERE gv.ma_giang_vien=:maGiangVien AND dk.trang_thai='DANG_CHAM'
+                AND ((dot.loai_de_tai IN ('MON_HOC','NCKH') AND gv.loai_phan_cong='CHAM_DOC_LAP')
+                    OR (dot.loai_de_tai IN ('TLCN','KLTN') AND gv.loai_phan_cong='PHAN_BIEN'))
+                AND NOT EXISTS(SELECT 1 FROM de_tai_giang_vien x
+                    WHERE x.ma_de_tai=dt.ma_de_tai AND x.ma_giang_vien=:maGiangVien
+                    AND x.loai_phan_cong='HUONG_DAN')
+            ORDER BY maHoiDong, maNhom
             """,
         nativeQuery = true
     )

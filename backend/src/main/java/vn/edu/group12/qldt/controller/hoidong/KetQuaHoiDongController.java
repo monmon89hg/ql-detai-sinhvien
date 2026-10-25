@@ -33,12 +33,15 @@ public class KetQuaHoiDongController {
     private final TongHopKetQuaService tongHopKetQuaService;
     private final NguoiDungHienThiService nguoiDungHienThiService;
     private final XuatExcelKetQuaService xuatExcelKetQuaService;
+    private final vn.edu.group12.qldt.service.hoidong.MoChamService moChamService;
 
     public KetQuaHoiDongController(
             TongHopKetQuaService tongHopKetQuaService,
             NguoiDungHienThiService nguoiDungHienThiService,
-            XuatExcelKetQuaService xuatExcelKetQuaService) {
+            XuatExcelKetQuaService xuatExcelKetQuaService,
+            vn.edu.group12.qldt.service.hoidong.MoChamService moChamService) {
         this.tongHopKetQuaService = tongHopKetQuaService;
+        this.moChamService = moChamService;
         this.nguoiDungHienThiService = nguoiDungHienThiService;
         this.xuatExcelKetQuaService = xuatExcelKetQuaService;
     }
@@ -56,6 +59,9 @@ public class KetQuaHoiDongController {
         boolean chiXem = laAdmin || laTruongKhoa;
         model.addAttribute("chiXem", chiXem);
 
+        model.addAttribute("maDot", request.getParameter("maDot") == null ? "" : request.getParameter("maDot"));
+        model.addAttribute("loai", request.getParameter("loai") == null ? "" : request.getParameter("loai"));
+        model.addAttribute("danhSachDot", moChamService.danhSachDot());
         model.addAttribute("danhSachNhom", layDanhSachTongHop(request));
 
         model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
@@ -83,6 +89,9 @@ public class KetQuaHoiDongController {
         boolean laAdmin = request.isUserInRole("ADMIN");
         model.addAttribute("laAdmin", laAdmin);
 
+        model.addAttribute("maDot", request.getParameter("maDot") == null ? "" : request.getParameter("maDot"));
+        model.addAttribute("loai", request.getParameter("loai") == null ? "" : request.getParameter("loai"));
+        model.addAttribute("danhSachDot", moChamService.danhSachDot());
         model.addAttribute("danhSachNhom", layDanhSachQuanLy(request));
 
         model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
@@ -100,6 +109,8 @@ public class KetQuaHoiDongController {
     }
 
     private List<NhomKetQuaHienThi> layDanhSachTongHop(HttpServletRequest request) {
+        if (request.getParameter("maDot")!=null || request.getParameter("loai")!=null)
+            return tongHopKetQuaService.locDanhSach(request.getParameter("maDot"),request.getParameter("loai"));
         if (request.isUserInRole("ADMIN")) {
             return tongHopKetQuaService.layDanhSachNhomChoAdmin();
         }
@@ -110,6 +121,8 @@ public class KetQuaHoiDongController {
     }
 
     private List<NhomKetQuaHienThi> layDanhSachQuanLy(HttpServletRequest request) {
+        if (request.getParameter("maDot")!=null || request.getParameter("loai")!=null)
+            return tongHopKetQuaService.locDanhSach(request.getParameter("maDot"),request.getParameter("loai"));
         return request.isUserInRole("ADMIN")
             ? tongHopKetQuaService.layDanhSachNhomChoAdmin()
             : tongHopKetQuaService.layDanhSachNhomChoTruongKhoa();
@@ -125,7 +138,7 @@ public class KetQuaHoiDongController {
             .body(noiDung);
     }
 
-    // Chủ tịch hội đồng gửi yêu cầu tổng hợp kết quả của một nhóm.
+    // Người được phân công tổng hợp gửi yêu cầu xác nhận kết quả của nhóm.
     @PostMapping("/{maNhom}/tong-hop")
     @PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
     public String tongHop(
@@ -179,4 +192,32 @@ public class KetQuaHoiDongController {
 
         return "redirect:/ket-qua/quan-ly";
     }
+    @GetMapping("/{maNhom}/chi-tiet")
+    @PreAuthorize("hasAnyRole('GIANG_VIEN','TRUONG_KHOA','ADMIN')")
+    public String chiTiet(@PathVariable String maNhom, Model model, HttpServletRequest request) {
+        model.addAttribute("coTheDocBaoCao", !request.isUserInRole("ADMIN"));
+        model.addAttribute("chiTiet", moChamService.chiTiet(maNhom));
+        model.addAttribute("laTruongKhoa", request.isUserInRole("TRUONG_KHOA") && !request.isUserInRole("ADMIN"));
+        model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
+        return "assessment/ket-qua/chi-tiet";
+    }
+
+    @PostMapping("/{maNhom}/mo-cham")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String moCham(@PathVariable String maNhom, RedirectAttributes flash) {
+        try { moChamService.moCham(maNhom); flash.addFlashAttribute("successMessage", "Đã mở chấm và khóa dữ liệu đầu vào của nhóm."); }
+        catch (IllegalArgumentException | org.springframework.dao.DataAccessException ex) {
+            flash.addFlashAttribute("errorMessage", ex instanceof IllegalArgumentException ? ex.getMessage() : "Dữ liệu vừa thay đổi. Vui lòng tải lại trang.");
+        }
+        return "redirect:/ket-qua/quan-ly";
+    }
+
+    @PostMapping("/{maNhom}/email/{maSinhVien}/thu-lai")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String thuLaiEmail(@PathVariable String maNhom, @PathVariable String maSinhVien, RedirectAttributes flash) {
+        try { moChamService.thuLaiEmail(maNhom,maSinhVien); flash.addFlashAttribute("successMessage", "Đã đưa thư gửi lỗi vào hàng đợi thử lại."); }
+        catch (IllegalArgumentException ex) { flash.addFlashAttribute("errorMessage",ex.getMessage()); }
+        return "redirect:/ket-qua/"+maNhom+"/chi-tiet";
+    }
+
 }

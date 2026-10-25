@@ -16,6 +16,9 @@ import java.util.List;
 public class DotDangKyService {
 
     @Autowired
+    private vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
+
+    @Autowired
     private DotDangKyRepository dotDangKyRepository;
 
     public List<DotDangKy> getAllDotDangKy() {
@@ -45,7 +48,7 @@ public class DotDangKyService {
     }
 
     @PreAuthorize("hasRole('TRUONG_KHOA')")
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public DotDangKy updateDotDangKy(String maDot, DotDangKyDto dto) {
         validateBusinessRules(dto);
 
@@ -54,6 +57,8 @@ public class DotDangKyService {
             throw new IllegalStateException("Không thể chỉnh sửa đợt đăng ký đã đóng!");
         }
 
+        if (danhGiaRepository.khoaDotDanhGia(maDot))
+            throw new IllegalArgumentException("Không sửa loại đợt hoặc lịch khi đợt đã có nhóm mở chấm.");
         mapDtoToEntity(dto, dot);
         if (dto.getTrangThai() != null && !dto.getTrangThai().isBlank()) {
             dot.setTrangThai(dto.getTrangThai());

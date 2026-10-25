@@ -239,12 +239,12 @@ Main Flow mô tả luồng chính; AF là luồng thay thế hợp lệ; EF là 
 | **1. Use Case ID** | UC20 |
 | **2. Tên Use Case** | Tổng hợp kết quả |
 | **3. Mô tả ngắn** | Tổng hợp đúng tập phiếu chấm hợp lệ, tính trung bình cộng và lưu kết quả để Trưởng khoa xem xét công bố. |
-| **4. Actor chính** | Chủ tịch hội đồng được giao; với loại không có hội đồng, người được giao quyền tổng hợp theo chính sách đã xác nhận. |
+| **4. Actor chính** | Chủ tịch hội đồng KLTN được giao; giảng viên phản biện TLCN hoặc chấm độc lập môn học/NCKH được phân công. |
 | **5. Actor phụ** | Không có. |
 | **6. Pre-condition** | Người tổng hợp đã đăng nhập và có quyền trên đăng ký đang chấm. Quyền tổng hợp và tập phiếu bắt buộc theo loại đề tài đã được xác nhận; kết quả chưa công bố. |
 | **7. Trigger** | Người có quyền chọn chức năng Tổng hợp kết quả. |
 | **8. Main Flow** | 1. Chủ tịch mở danh sách đăng ký thuộc hội đồng mình được giao và chọn nhóm cần tổng hợp.<br>2. Hệ thống xác định những người chấm, loại phiếu bắt buộc theo loại đề tài và phân công của đăng ký.<br>3. Hệ thống đối chiếu đủ từng người chấm, đúng loại phiếu, trạng thái đã nộp và dữ liệu điểm hợp lệ.<br>4. Hệ thống tính trung bình cộng của tập điểm hợp lệ và làm tròn kết quả đến hai chữ số thập phân.<br>5. Hệ thống hiển thị các phiếu làm căn cứ, số phiếu và điểm trung bình để Chủ tịch kiểm tra.<br>6. Chủ tịch xác nhận tổng hợp và nhập nhận xét tổng hợp nếu có.<br>7. Hệ thống kiểm tra lại căn cứ, lưu kết quả đã tổng hợp cùng người, thời điểm và hiển thị trạng thái chờ công bố. |
-| **9. Alternative Flow** | **AF-1  Tổng hợp loại không có hội đồng**<br>Tại bước 1, chỉ khi quyền tổng hợp và tập phiếu của loại đề tài này đã được xác nhận, người có quyền chọn đăng ký trong phạm vi được giao. Hệ thống tiếp tục từ bước 2 theo tập phiếu đó; không tự cấp quyền này cho một vai trò khác. |
+| **9. Alternative Flow** | **AF-1  Tổng hợp loại không có hội đồng**<br>Tại bước 1, giảng viên phản biện được giao tổng hợp TLCN; giảng viên chấm độc lập được giao tổng hợp môn học/NCKH. Người đó chọn nhóm thuộc phân công của mình và hệ thống tiếp tục từ bước 2. Trưởng khoa công bố kết quả sau tổng hợp. |
 | **10. Exception Flow** | **EF-1  Chưa đủ phiếu hợp lệ**<br>Tại bước 3, hệ thống phát hiện thiếu phiếu, còn phiếu nháp, sai người chấm hoặc sai loại phiếu. Hệ thống hiển thị phần cần hoàn thiện cho người có quyền và không tính kết quả từ tập phiếu thiếu.<br>**EF-2  Không được tổng hợp**<br>Tại bước 1 hoặc 7, người thao tác không đúng quyền, chính sách áp dụng chưa được xác nhận, kết quả đã tổng hợp hoặc đã công bố. Hệ thống từ chối tạo kết quả mới và giữ nguyên kết quả hiện có. |
 | **11. Post-condition** | Kết quả trung bình được lưu từ đủ phiếu hợp lệ, sẵn sàng xét công bố; sinh viên chưa được xem kết quả chưa công bố. |
 | **12. NFR liên quan** | NFR-02; NFR-04; NFR-05; NFR-12; NFR-18. |

@@ -40,13 +40,16 @@ public class PhanCongHoiDongService {
     private final HoiDongRepository hoiDongRepository;
     private final HoiDongDeTaiRepository hoiDongDeTaiRepository;
     private final ThanhVienHoiDongRepository thanhVienHoiDongRepository;
+    private final vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
 
     public PhanCongHoiDongService(
             HoiDongRepository hoiDongRepository,
             HoiDongDeTaiRepository hoiDongDeTaiRepository,
-            ThanhVienHoiDongRepository thanhVienHoiDongRepository) {
+            ThanhVienHoiDongRepository thanhVienHoiDongRepository,
+            vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository) {
 
         this.hoiDongRepository = hoiDongRepository;
+        this.danhGiaRepository = danhGiaRepository;
         this.hoiDongDeTaiRepository = hoiDongDeTaiRepository;
         this.thanhVienHoiDongRepository = thanhVienHoiDongRepository;
     }
@@ -103,6 +106,7 @@ public class PhanCongHoiDongService {
         }
 
         String maNhom = form.getMaNhom().trim();
+        danhGiaRepository.khoaDauVao(maNhom);
 
         // Khóa đăng ký: hai hội đồng không thể cùng phân công một nhóm.
         hoiDongDeTaiRepository.khoaDangKyTheoMaNhom(maNhom)

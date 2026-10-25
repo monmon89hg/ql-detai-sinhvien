@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{fragments/head :: head('Phiếu chấm hội đồng')}"></head>
+    <head th:replace="~{fragments/head :: head('Phiếu chấm điểm')}"></head>
 
     <body>
         <a class="skip" href="#content">Bỏ qua điều hướng</a>
@@ -15,14 +15,16 @@
 
             <main class="page" id="content">
                 <div
-                    th:replace="~{fragments/breadcrumb :: breadcrumb('Phiếu chấm hội đồng')}"
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Phiếu chấm điểm')}"
                 ></div>
 
                 <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
                     <div class="page-heading">
-                        <h1>Phiếu chấm hội đồng</h1>
+                        <h1>Phiếu chấm điểm</h1>
+                        <p th:text="${nhom.loaiPhieu == 'HOI_DONG' ? 'Phiếu hội đồng' : (nhom.loaiPhieu == 'PHAN_BIEN' ? 'Phiếu phản biện' : 'Phiếu chấm độc lập')}"></p>
+                        <a class="btn btn-outline" th:href="@{/bao-cao(maNhom=${nhom.maNhom})}">Xem báo cáo của nhóm</a>
                         <p>Nhập điểm và nhận xét cho nhóm được phân công.</p>
                     </div>
 
@@ -53,7 +55,7 @@
                                 <tr>
                                     <th scope="row">Hội đồng</th>
                                     <td
-                                        th:text="${nhom.maHoiDong + ' - ' + nhom.tenHoiDong}"
+                                        th:text="${nhom.maHoiDong != null ? nhom.maHoiDong + ' - ' + nhom.tenHoiDong : 'Không áp dụng'}"
                                     ></td>
                                 </tr>
                                 <tr>

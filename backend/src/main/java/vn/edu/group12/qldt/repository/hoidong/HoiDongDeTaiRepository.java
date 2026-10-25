@@ -55,7 +55,7 @@ public interface HoiDongDeTaiRepository
                         ON gv.ma_giang_vien = tv.ma_giang_vien
                     WHERE tv.ma_hoi_dong = hd.ma_hoi_dong
                         AND gv.ma_de_tai = dk.ma_de_tai
-                        AND gv.loai_phan_cong = 'HUONG_DAN'
+                        AND gv.loai_phan_cong IN ('HUONG_DAN','PHAN_BIEN')
                 )
             ORDER BY nh.ma_nhom
             """,
@@ -163,80 +163,48 @@ public interface HoiDongDeTaiRepository
         @Param("maNhom") String maNhom
     );
 
-    // Chỉ lấy các nhóm thuộc hội đồng mà giảng viên là chủ tịch.
-    @Query(
-        value = """
-            SELECT
-                nh.ma_nhom AS maNhom,
-                nh.ten_nhom AS tenNhom,
-                dt.ma_de_tai AS maDeTai,
-                dt.ten_de_tai AS tenDeTai,
-                hd.ma_hoi_dong AS maHoiDong,
-                hd.ten_hoi_dong AS tenHoiDong,
-                kq.trang_thai AS trangThaiKetQua,
-                kq.diem_cuoi AS diemCuoi
-            FROM hoi_dong_de_tai pc
-            JOIN hoi_dong hd
-                ON hd.ma_hoi_dong = pc.ma_hoi_dong
-            JOIN thanh_vien_hoi_dong tv
-                ON tv.ma_hoi_dong = hd.ma_hoi_dong
-            JOIN dang_ky_de_tai dk
-                ON dk.ma_nhom = pc.ma_nhom
-            JOIN nhom_sinh_vien nh
-                ON nh.ma_nhom = dk.ma_nhom
-            JOIN de_tai dt
-                ON dt.ma_de_tai = dk.ma_de_tai
-            JOIN dot_dang_ky dot
-                ON dot.ma_dot = hd.ma_dot
-            LEFT JOIN ket_qua kq
-                ON kq.ma_nhom = pc.ma_nhom
-            WHERE tv.ma_giang_vien = :maGiangVien
-                AND tv.chuc_danh = 'CHU_TICH'
-                AND dk.trang_thai IN ('DANG_CHAM', 'HOAN_THANH')
-                AND nh.ma_dot = hd.ma_dot
-                AND dt.ma_dot = hd.ma_dot
-                AND dot.loai_de_tai = 'KLTN'
-            ORDER BY hd.ma_hoi_dong, nh.ma_nhom
-            """,
-        nativeQuery = true
-    )
-    List<NhomKetQuaHienThi> layDanhSachNhomChoChuTich(
-        @Param("maGiangVien") String maGiangVien
-    );
+    String DANH_SACH_DANH_GIA = """
+        SELECT nh.ma_nhom AS maNhom, nh.ten_nhom AS tenNhom,
+            dt.ma_de_tai AS maDeTai, dt.ten_de_tai AS tenDeTai,
+            hd.ma_hoi_dong AS maHoiDong, hd.ten_hoi_dong AS tenHoiDong,
+            dot.loai_de_tai AS loaiDeTai, dot.ma_dot AS maDot, dot.ten_dot AS tenDot,
+            dk.trang_thai AS trangThaiDangKy, kq.trang_thai AS trangThaiKetQua, kq.diem_cuoi AS diemCuoi
+        FROM dang_ky_de_tai dk
+        JOIN nhom_sinh_vien nh ON nh.ma_nhom=dk.ma_nhom
+        JOIN de_tai dt ON dt.ma_de_tai=dk.ma_de_tai AND dt.ma_dot=nh.ma_dot
+        JOIN dot_dang_ky dot ON dot.ma_dot=nh.ma_dot
+        LEFT JOIN hoi_dong_de_tai pc ON pc.ma_nhom=dk.ma_nhom
+        LEFT JOIN hoi_dong hd ON hd.ma_hoi_dong=pc.ma_hoi_dong AND hd.ma_dot=nh.ma_dot
+        LEFT JOIN ket_qua kq ON kq.ma_nhom=dk.ma_nhom
+        WHERE dk.trang_thai IN ('DA_DUYET','DANG_THUC_HIEN','DANG_CHAM','HOAN_THANH')
+        """;
 
-    // Trưởng khoa xem các nhóm đã phân công hội đồng và trạng thái kết quả.
-    @Query(
-        value = """
-            SELECT
-                nh.ma_nhom AS maNhom,
-                nh.ten_nhom AS tenNhom,
-                dt.ma_de_tai AS maDeTai,
-                dt.ten_de_tai AS tenDeTai,
-                hd.ma_hoi_dong AS maHoiDong,
-                hd.ten_hoi_dong AS tenHoiDong,
-                kq.trang_thai AS trangThaiKetQua,
-                kq.diem_cuoi AS diemCuoi
-            FROM hoi_dong_de_tai pc
-            JOIN hoi_dong hd
-                ON hd.ma_hoi_dong = pc.ma_hoi_dong
-            JOIN dang_ky_de_tai dk
-                ON dk.ma_nhom = pc.ma_nhom
-            JOIN nhom_sinh_vien nh
-                ON nh.ma_nhom = dk.ma_nhom
-            JOIN de_tai dt
-                ON dt.ma_de_tai = dk.ma_de_tai
-            JOIN dot_dang_ky dot
-                ON dot.ma_dot = hd.ma_dot
-            LEFT JOIN ket_qua kq
-                ON kq.ma_nhom = pc.ma_nhom
-            WHERE dk.trang_thai IN ('DANG_CHAM', 'HOAN_THANH')
-                AND nh.ma_dot = hd.ma_dot
-                AND dt.ma_dot = hd.ma_dot
-                AND dot.loai_de_tai = 'KLTN'
-            ORDER BY hd.ma_hoi_dong, nh.ma_nhom
-            """,
-        nativeQuery = true
-    )
+    @Query(value = DANH_SACH_DANH_GIA + """
+        AND dk.trang_thai IN ('DANG_CHAM','HOAN_THANH')
+        AND ((dot.loai_de_tai='KLTN' AND EXISTS(SELECT 1 FROM thanh_vien_hoi_dong tv
+                WHERE tv.ma_hoi_dong=hd.ma_hoi_dong AND tv.ma_giang_vien=:maGiangVien AND tv.chuc_danh='CHU_TICH'))
+            OR (dot.loai_de_tai<>'KLTN' AND EXISTS(SELECT 1 FROM de_tai_giang_vien gv
+                WHERE gv.ma_de_tai=dt.ma_de_tai AND gv.ma_giang_vien=:maGiangVien
+                AND ((dot.loai_de_tai IN ('MON_HOC','NCKH') AND gv.loai_phan_cong='CHAM_DOC_LAP')
+                    OR (dot.loai_de_tai='TLCN' AND gv.loai_phan_cong='PHAN_BIEN')))))
+        ORDER BY dot.created_at DESC, nh.ma_nhom
+        """, nativeQuery = true)
+    List<NhomKetQuaHienThi> layDanhSachNhomChoChuTich(@Param("maGiangVien") String maGiangVien);
+
+    @Query(value = DANH_SACH_DANH_GIA + " ORDER BY dot.created_at DESC, nh.ma_nhom", nativeQuery = true)
     List<NhomKetQuaHienThi> layDanhSachNhomChoTruongKhoa();
+    @Query(value = DANH_SACH_DANH_GIA + """
+        AND (:maDot='' OR dot.ma_dot=:maDot) AND (:loai='' OR dot.loai_de_tai=:loai)
+        AND (:maGiangVien='' OR (dk.trang_thai IN ('DANG_CHAM','HOAN_THANH') AND
+((dot.loai_de_tai='KLTN' AND EXISTS(SELECT 1 FROM thanh_vien_hoi_dong tv
+                WHERE tv.ma_hoi_dong=hd.ma_hoi_dong AND tv.ma_giang_vien=:maGiangVien AND tv.chuc_danh='CHU_TICH'))
+            OR (dot.loai_de_tai<>'KLTN' AND EXISTS(SELECT 1 FROM de_tai_giang_vien gv
+                WHERE gv.ma_de_tai=dt.ma_de_tai AND gv.ma_giang_vien=:maGiangVien
+                AND ((dot.loai_de_tai IN ('MON_HOC','NCKH') AND gv.loai_phan_cong='CHAM_DOC_LAP')
+                    OR (dot.loai_de_tai='TLCN' AND gv.loai_phan_cong='PHAN_BIEN')))))))
+        ORDER BY dot.created_at DESC, nh.ma_nhom
+        """, nativeQuery = true)
+    List<NhomKetQuaHienThi> locDanhSach(@Param("maDot") String maDot, @Param("loai") String loai,
+        @Param("maGiangVien") String maGiangVien);
 
 }

@@ -30,20 +30,32 @@
                             </p>
                         </div>
                         <a class="btn btn-excel"
-                           th:href="@{/ket-qua/tong-hop/xuat-excel}">
+                           th:href="@{/ket-qua/tong-hop/xuat-excel(maDot=${maDot},loai=${loai})}">
                             <img class="excel-logo" th:src="@{/images/excel-logo.png}"
                                  alt="" aria-hidden="true">
                             Xuất kết quả
                         </a>
                     </div>
 
+                    <form method="get" class="section sv-panel">
+                        <label for="maDot">Đợt đăng ký</label>
+                        <select id="maDot" name="maDot" class="form-control"><option value="">Tất cả đợt</option>
+                            <option th:each="d : ${danhSachDot}" th:value="${d.maDot}" th:text="${d.tenDot}" th:selected="${d.maDot == maDot}"></option>
+                        </select>
+                        <label for="loai">Loại đề tài</label>
+                        <select id="loai" name="loai" class="form-control">
+                            <option value="">Tất cả loại</option><option value="MON_HOC" th:selected="${loai == 'MON_HOC'}">Môn học</option>
+                            <option value="NCKH" th:selected="${loai == 'NCKH'}">NCKH</option><option value="TLCN" th:selected="${loai == 'TLCN'}">TLCN</option>
+                            <option value="KLTN" th:selected="${loai == 'KLTN'}">KLTN</option>
+                        </select><button class="btn btn-primary" type="submit">Lọc kết quả</button>
+                    </form>
                     <section class="section sv-panel">
                         <div class="section-top sv-panel-heading">
                             <h2 class="section-title" th:if="${chiXem}">
-                                Danh sách nhóm đã phân công hội đồng
+                                Danh sách nhóm đánh giá
                             </h2>
                             <h2 class="section-title" th:unless="${chiXem}">
-                                Nhóm thuộc hội đồng của bạn
+                                Nhóm thuộc phạm vi tổng hợp của bạn
                             </h2>
                         </div>
 
@@ -59,6 +71,7 @@
                                 <tr>
                                     <th scope="col">Nhóm</th>
                                     <th scope="col">Đề tài</th>
+                                    <th scope="col">Loại / Đợt</th>
                                     <th scope="col">Hội đồng</th>
                                     <th scope="col">Trạng thái</th>
                                     <th scope="col">Điểm cuối</th>
@@ -77,10 +90,10 @@
                                         <strong th:text="${nhom.maDeTai}"></strong>
                                         <div th:text="${nhom.tenDeTai}"></div>
                                     </td>
-                                    <td>
-                                        <strong th:text="${nhom.maHoiDong}"></strong>
-                                        <div th:text="${nhom.tenHoiDong}"></div>
-                                    </td>
+                                    <td><span th:text="${nhom.loaiDeTai == 'MON_HOC' ? 'Môn học' : (nhom.loaiDeTai == 'NCKH' ? 'NCKH' : (nhom.loaiDeTai == 'TLCN' ? 'TLCN' : 'KLTN'))}"></span>
+                                        <div th:text="${nhom.tenDot}"></div></td>
+                                    <td><strong th:text="${nhom.maHoiDong != null ? nhom.maHoiDong : '—'}"></strong>
+                                        <div th:text="${nhom.tenHoiDong}"></div></td>
                                     <td>
                                         <span class="workflow-status workflow-status--neutral"
                                               th:if="${nhom.trangThaiKetQua == null}">
@@ -100,33 +113,10 @@
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
                                     <td>
-                                        <form
-                                            th:if="${!chiXem and nhom.trangThaiKetQua == null}"
-                                            th:action="@{/ket-qua/{maNhom}/tong-hop(
-                                                maNhom=${nhom.maNhom})}"
-                                            method="post"
-                                        >
-                                            <label
-                                                th:for="${'nhanXet-' + viTri.index}"
-                                            >
-                                                Nhận xét tổng hợp
-                                            </label>
-                                            <input
-                                                class="form-control"
-                                                type="text"
-                                                name="nhanXetTongHop"
-                                                th:id="${'nhanXet-' + viTri.index}"
-                                                maxlength="1000"
-                                            >
-                                            <input
-                                                type="hidden"
-                                                th:name="${_csrf.parameterName}"
-                                                th:value="${_csrf.token}"
-                                            >
-                                            <button class="btn btn-primary" type="submit">
-                                                Tổng hợp
-                                            </button>
-                                        </form>
+                                        <a class="btn btn-primary" th:if="${!chiXem and nhom.trangThaiKetQua == null}"
+                                           th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem và tổng hợp</a>
+                                        <a class="btn btn-outline" th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem căn cứ</a>
+
 
                                         <span th:if="${chiXem}">Chỉ xem</span>
                                         <span

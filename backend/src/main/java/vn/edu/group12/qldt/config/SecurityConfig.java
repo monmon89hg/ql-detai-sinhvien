@@ -87,18 +87,20 @@ public class SecurityConfig {
                     .hasAnyRole("TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/hoi-dong/tao", "/hoi-dong/{id}/thanh-vien",
                         "/hoi-dong/{id}/thanh-vien/{lecturer}/xoa",
-                        "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong", "/hoi-dong/{id}/sua", "/hoi-dong/{id}/xoa")
+                        "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong", "/hoi-dong/{id}/sua", "/hoi-dong/{id}/xoa",
+                        "/hoi-dong/{id}/ve-nhap", "/hoi-dong/{id}/khoa", "/hoi-dong/{id}/doi-phan-cong")
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/tong-hop",
-                        "/ket-qua/tong-hop/xuat-excel")
+                        "/ket-qua/tong-hop/xuat-excel", "/ket-qua/{id}/chi-tiet")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem/{id}/luu-nhap",
                         "/cham-diem/{id}/nop", "/ket-qua/{id}/tong-hop").hasRole("GIANG_VIEN")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly",
                         "/ket-qua/quan-ly/xuat-excel").hasAnyRole("TRUONG_KHOA", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
+                .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo", "/ket-qua/{id}/mo-cham",
+                        "/ket-qua/{id}/email/{student}/thu-lai").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi")
                     .hasAnyRole("SINH_VIEN", "GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
 

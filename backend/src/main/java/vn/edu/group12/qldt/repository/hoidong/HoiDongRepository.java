@@ -93,6 +93,15 @@ public interface HoiDongRepository
         )
         List<DotDangKyLuaChon> layDanhSachDot();
 
+        @Query(value = """
+            SELECT ma_dot AS maDot, ten_dot AS tenDot FROM dot_dang_ky
+            WHERE loai_de_tai='KLTN' ORDER BY created_at DESC,ma_dot
+            """, nativeQuery = true)
+        List<DotDangKyLuaChon> layDotKhoaLuan();
+
+        @Query(value = "SELECT COUNT(*) FROM dot_dang_ky WHERE ma_dot=:maDot AND loai_de_tai='KLTN'", nativeQuery = true)
+        long demDotKhoaLuan(@Param("maDot") String maDot);
+
         @Lock(LockModeType.PESSIMISTIC_WRITE)
         @Query("""
                 SELECT hd
