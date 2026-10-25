@@ -34,6 +34,7 @@ public class TongHopKetQuaService {
 
     private final HoiDongDeTaiRepository hoiDongDeTaiRepository;
     private final HoiDongRepository hoiDongRepository;
+    private final vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
     private final ThanhVienHoiDongRepository thanhVienHoiDongRepository;
     private final KetQuaRepository ketQuaRepository;
     private final TinhDiemTrungBinhService tinhDiemTrungBinhService;
@@ -45,16 +46,18 @@ public class TongHopKetQuaService {
             ThanhVienHoiDongRepository thanhVienHoiDongRepository,
             KetQuaRepository ketQuaRepository,
             TinhDiemTrungBinhService tinhDiemTrungBinhService,
-            TaoEmailThongBaoKetQuaService taoEmailThongBaoKetQuaService) {
+            TaoEmailThongBaoKetQuaService taoEmailThongBaoKetQuaService,
+            vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository) {
         this.hoiDongDeTaiRepository = hoiDongDeTaiRepository;
         this.hoiDongRepository = hoiDongRepository;
+        this.danhGiaRepository = danhGiaRepository;
         this.thanhVienHoiDongRepository = thanhVienHoiDongRepository;
         this.ketQuaRepository = ketQuaRepository;
         this.tinhDiemTrungBinhService = tinhDiemTrungBinhService;
         this.taoEmailThongBaoKetQuaService = taoEmailThongBaoKetQuaService;
     }
 
-    // Chủ tịch chỉ thấy các nhóm thuộc hội đồng mình phụ trách.
+    // Người tổng hợp chỉ thấy nhóm thuộc hội đồng hoặc phân công ngoài hội đồng của mình.
     @PreAuthorize("hasRole('GIANG_VIEN')")
     @Transactional(readOnly = true)
     public List<NhomKetQuaHienThi> layDanhSachNhomChoChuTich() {
@@ -70,7 +73,7 @@ public class TongHopKetQuaService {
             .layDanhSachNhomChoChuTich(maGiangVien);
     }
 
-    // Trưởng khoa xem các nhóm đã được phân công hội đồng.
+    // Trưởng khoa xem đăng ký đánh giá của cả bốn loại đề tài.
     @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<NhomKetQuaHienThi> layDanhSachNhomChoTruongKhoa() {
@@ -93,7 +96,23 @@ public class TongHopKetQuaService {
         return hoiDongDeTaiRepository.layDanhSachNhomChoTruongKhoa();
     }
 
-    // Chỉ chủ tịch hội đồng được tổng hợp; toàn bộ kiểm tra và lưu cùng transaction.
+    @PreAuthorize("hasAnyRole('GIANG_VIEN','TRUONG_KHOA','ADMIN')")
+    @Transactional(readOnly = true)
+    public List<NhomKetQuaHienThi> locDanhSach(String maDot, String loai) {
+        maDot=maDot==null ? "" : maDot.strip(); loai=loai==null ? "" : loai.strip();
+        if (maDot.length()>30 || (!loai.isEmpty() && !java.util.Set.of("MON_HOC","NCKH","TLCN","KLTN").contains(loai)))
+            throw new IllegalArgumentException("Bộ lọc kết quả không hợp lệ.");
+        var auth=SecurityContextHolder.getContext().getAuthentication();
+        boolean admin=auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean dean=auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_TRUONG_KHOA"));
+        String ma=layMaNguoiDungDangNhap();
+        if (!admin && ((dean && hoiDongRepository.demTruongKhoaHoatDong(ma)==0)
+                || (!dean && thanhVienHoiDongRepository.demGiangVienHopLe(ma)==0)))
+            throw new AccessDeniedException("Tài khoản không còn quyền xem kết quả.");
+        return hoiDongDeTaiRepository.locDanhSach(maDot,loai,admin || dean ? "" : ma);
+    }
+
+    // Tổng hợp theo chức trách: chủ tịch KLTN, phản biện TLCN, chấm độc lập môn học/NCKH.
     @PreAuthorize("hasRole('GIANG_VIEN') and !hasRole('TRUONG_KHOA')")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public KetQua tongHop(String maNhom, String nhanXetTongHop) {
@@ -109,59 +128,67 @@ public class TongHopKetQuaService {
             );
         }
 
-        HoiDongDeTai phanCong = hoiDongDeTaiRepository.findById(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Nhóm chưa được phân công hội đồng."
-            ));
+        var phanCongTimThay = hoiDongDeTaiRepository.findById(maNhom);
+        if (phanCongTimThay.isPresent()) {
+            HoiDongDeTai phanCong = phanCongTimThay.get();
 
-        String maHoiDong = phanCong.getMaHoiDong();
+            String maHoiDong = phanCong.getMaHoiDong();
 
-        // Cùng thứ tự khóa với chức năng chấm: hội đồng trước, đăng ký sau.
-        HoiDong hoiDong = hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Hội đồng không còn tồn tại."
-            ));
+            // Cùng thứ tự khóa với chức năng chấm: hội đồng trước, đăng ký sau.
+            HoiDong hoiDong = hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Hội đồng không còn tồn tại."
+                ));
 
-        hoiDongDeTaiRepository.khoaDangKyTheoMaNhom(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Đăng ký đề tài không còn tồn tại."
-            ));
+            danhGiaRepository.khoaDauVao(maNhom);
+            hoiDongDeTaiRepository.khoaDangKyTheoMaNhom(maNhom)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Đăng ký đề tài không còn tồn tại."
+                ));
 
-        // Đọc lại trực tiếp từ database sau khi giữ khóa đăng ký.
-        String maHoiDongHienTai = hoiDongDeTaiRepository
-            .timMaHoiDongHienTai(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Phân công hội đồng đã thay đổi."
-            ));
+            // Đọc lại trực tiếp từ database sau khi giữ khóa đăng ký.
+            String maHoiDongHienTai = hoiDongDeTaiRepository
+                .timMaHoiDongHienTai(maNhom)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Phân công hội đồng đã thay đổi."
+                ));
 
-        if (!maHoiDong.equals(maHoiDongHienTai)) {
-            throw new IllegalArgumentException(
-                "Hội đồng của nhóm đã thay đổi. Vui lòng tải lại trang."
-            );
-        }
+            if (!maHoiDong.equals(maHoiDongHienTai)) {
+                throw new IllegalArgumentException(
+                    "Hội đồng của nhóm đã thay đổi. Vui lòng tải lại trang."
+                );
+            }
 
-        String trangThaiDangKy = hoiDongDeTaiRepository
-            .timTrangThaiDangKyTheoMaNhom(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Đăng ký đề tài không còn tồn tại."
-            ));
+            String trangThaiDangKy = hoiDongDeTaiRepository
+                .timTrangThaiDangKyTheoMaNhom(maNhom)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Đăng ký đề tài không còn tồn tại."
+                ));
 
-        if (hoiDong.getTrangThai() != TrangThaiHoiDong.DANG_CHAM
-                || !"DANG_CHAM".equals(trangThaiDangKy)) {
-            throw new IllegalArgumentException(
-                "Chỉ tổng hợp khi hội đồng và đăng ký đang ở trạng thái chấm."
-            );
-        }
+            if (hoiDong.getTrangThai() != TrangThaiHoiDong.DANG_CHAM
+                    || !"DANG_CHAM".equals(trangThaiDangKy)) {
+                throw new IllegalArgumentException(
+                    "Chỉ tổng hợp khi hội đồng và đăng ký đang ở trạng thái chấm."
+                );
+            }
 
-        if (!thanhVienHoiDongRepository
-                .existsById_MaHoiDongAndId_MaGiangVienAndChucDanh(
-                    maHoiDong,
-                    maGiangVien,
-                    ChucDanhHoiDong.CHU_TICH
-                )) {
-            throw new AccessDeniedException(
-                "Chỉ chủ tịch hội đồng được tổng hợp kết quả."
-            );
+            if (!thanhVienHoiDongRepository
+                    .existsById_MaHoiDongAndId_MaGiangVienAndChucDanh(
+                        maHoiDong,
+                        maGiangVien,
+                        ChucDanhHoiDong.CHU_TICH
+                    )) {
+                throw new AccessDeniedException(
+                    "Chỉ chủ tịch hội đồng được tổng hợp kết quả."
+                );
+            }
+
+        } else {
+            danhGiaRepository.khoaDauVao(maNhom);
+            if (!danhGiaRepository.duocTongHopNgoaiHoiDong(maNhom, maGiangVien))
+                throw new AccessDeniedException("Bạn không được phân công tổng hợp kết quả của nhóm này.");
+            if (!"DANG_CHAM".equals(danhGiaRepository.dauVao(maNhom).orElseThrow(() -> new IllegalArgumentException("Nhóm chưa có đăng ký hợp lệ.")).trangThaiDangKy()))
+                throw new IllegalArgumentException("Chỉ tổng hợp khi đăng ký đang chấm.");
         }
 
         if (ketQuaRepository.existsById(maNhom)) {
@@ -211,34 +238,40 @@ public class TongHopKetQuaService {
             );
         }
 
-        HoiDongDeTai phanCong = hoiDongDeTaiRepository.findById(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Nhóm chưa được phân công hội đồng."
-            ));
+        var phanCongTimThay = hoiDongDeTaiRepository.findById(maNhom);
+        if (phanCongTimThay.isPresent()) {
+            HoiDongDeTai phanCong = phanCongTimThay.get();
 
-        String maHoiDong = phanCong.getMaHoiDong();
+            String maHoiDong = phanCong.getMaHoiDong();
 
-        // Giữ cùng thứ tự khóa với thao tác chấm và tổng hợp.
-        hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Hội đồng không còn tồn tại."
-            ));
+            // Giữ cùng thứ tự khóa với thao tác chấm và tổng hợp.
+            hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Hội đồng không còn tồn tại."
+                ));
 
-        hoiDongDeTaiRepository.khoaDangKyTheoMaNhom(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Đăng ký đề tài không còn tồn tại."
-            ));
+            danhGiaRepository.khoaDauVao(maNhom);
+            hoiDongDeTaiRepository.khoaDangKyTheoMaNhom(maNhom)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Đăng ký đề tài không còn tồn tại."
+                ));
 
-        String maHoiDongHienTai = hoiDongDeTaiRepository
-            .timMaHoiDongHienTai(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Phân công hội đồng đã thay đổi."
-            ));
+            String maHoiDongHienTai = hoiDongDeTaiRepository
+                .timMaHoiDongHienTai(maNhom)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Phân công hội đồng đã thay đổi."
+                ));
 
-        if (!maHoiDong.equals(maHoiDongHienTai)) {
-            throw new IllegalArgumentException(
-                "Hội đồng của nhóm đã thay đổi. Vui lòng tải lại trang."
-            );
+            if (!maHoiDong.equals(maHoiDongHienTai)) {
+                throw new IllegalArgumentException(
+                    "Hội đồng của nhóm đã thay đổi. Vui lòng tải lại trang."
+                );
+            }
+
+        } else {
+            danhGiaRepository.khoaDauVao(maNhom);
+            if (danhGiaRepository.laKhoaLuan(maNhom))
+                throw new IllegalArgumentException("Khóa luận chưa được phân công hội đồng.");
         }
 
         String trangThaiDangKy = hoiDongDeTaiRepository
@@ -303,6 +336,8 @@ public class TongHopKetQuaService {
                 "Không thể hoàn thành nhóm sinh viên."
             );
         }
+
+        danhGiaRepository.ketThucThanhVien(maNhom, congBoLuc);
 
         ketQua.setTrangThai(TrangThaiKetQua.CONG_BO);
         ketQua.setMaNguoiCongBo(maNguoiCongBo);

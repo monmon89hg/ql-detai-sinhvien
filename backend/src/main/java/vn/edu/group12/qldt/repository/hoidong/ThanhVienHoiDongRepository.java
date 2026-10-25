@@ -102,7 +102,7 @@ public interface ThanhVienHoiDongRepository
                 ON dtgv.ma_de_tai = dk.ma_de_tai
             WHERE hddt.ma_hoi_dong = :maHoiDong
             AND dtgv.ma_giang_vien = :maGiangVien
-            AND dtgv.loai_phan_cong = 'HUONG_DAN'
+            AND dtgv.loai_phan_cong IN ('HUONG_DAN','PHAN_BIEN')
             """,
         nativeQuery = true
     )

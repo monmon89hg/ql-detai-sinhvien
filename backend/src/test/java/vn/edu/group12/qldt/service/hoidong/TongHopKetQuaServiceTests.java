@@ -54,6 +54,8 @@ class TongHopKetQuaServiceTests {
     @Mock
     private TinhDiemTrungBinhService tinhDiemTrungBinhService;
 
+    @Mock private vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
+
     @InjectMocks
     private TongHopKetQuaService tongHopKetQuaService;
 

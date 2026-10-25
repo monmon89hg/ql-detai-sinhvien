@@ -50,6 +50,7 @@ class SecurityMethodAuthorizationTests {
     @Autowired TraCuuKetQuaService studentResults;
     @Autowired AdminTraCuuKetQuaService publishedResults;
     @Autowired TongHopKetQuaService results;
+    @MockitoBean vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepo;
     @MockitoBean NguoiDungRepository users;
     @MockitoBean NguoiDungVaiTroRepository roles;
     @MockitoBean BoMonRepository departmentRepo;
@@ -186,6 +187,7 @@ class SecurityMethodAuthorizationTests {
         boMon.setMaBoMon("CNPM");
         when(departmentRepo.findById("CNPM")).thenReturn(Optional.of(boMon));
         dto.setTenDeTai("Security regression fixture");
+        when(danhGiaRepo.giangVienHuongDanHopLe("DB_GV")).thenReturn(true);
         topics.deXuatDeTai(dto, "DB_GV");
         verify(assignmentRepo).save(argThat(assignment ->
                 "DB_GV".equals(assignment.getId().getMaGiangVien())

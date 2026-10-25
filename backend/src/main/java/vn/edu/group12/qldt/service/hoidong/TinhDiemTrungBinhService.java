@@ -26,6 +26,25 @@ public class TinhDiemTrungBinhService {
         List<PhieuChamDiem> phieuDaNop =
             kiemTraDuPhieuChamService.layPhieuDaNopKhiDayDu(maNhom);
 
+        return tinhTuPhieu(phieuDaNop);
+    }
+
+    public record DiemXemTruoc(KetQuaTinhDiem diem, String lyDoChuaDu) {}
+
+    @Transactional(readOnly = true)
+    public DiemXemTruoc xemTruoc(String maNhom) {
+        var trangThai = kiemTraDuPhieuChamService.xemTrangThai(maNhom);
+        if (trangThai.lyDoChuaDu() != null) {
+            return new DiemXemTruoc(null, trangThai.lyDoChuaDu());
+        }
+        try {
+            return new DiemXemTruoc(tinhTuPhieu(trangThai.phieuDaNop()), null);
+        } catch (IllegalArgumentException ex) {
+            return new DiemXemTruoc(null, ex.getMessage());
+        }
+    }
+
+    private KetQuaTinhDiem tinhTuPhieu(List<PhieuChamDiem> phieuDaNop) {
         if (phieuDaNop.isEmpty()) {
             throw new IllegalArgumentException(
                 "Không có phiếu chấm để tính điểm."

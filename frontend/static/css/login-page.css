@@ -35,36 +35,49 @@
 .login-card .login-password-wrap input {
     box-sizing: border-box;
     width: 100%;
-    padding-right: 70px;
+    padding-right: 44px;
 }
 .login-card .password-toggle {
     position: absolute;
     z-index: 1;
     top: 50%;
-    right: 12px;
+    right: 8px;
     transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px;
-    padding: 4px 2px;
+    width: 32px;
+    height: 32px;
+    padding: 5px;
     border: 0;
+    border-radius: 6px;
     background: transparent;
-    color: #193e59;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1;
+    color: #5a738e;
     cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+.login-card .password-toggle svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+.login-card .password-toggle .icon-eye-slash {
+    display: none;
+}
+.login-card .password-toggle[aria-pressed="true"] .icon-eye {
+    display: none;
+}
+.login-card .password-toggle[aria-pressed="true"] .icon-eye-slash {
+    display: block;
 }
 .login-card .password-toggle:hover {
     color: #102f46;
-    text-decoration: underline;
+    background-color: rgba(25, 62, 89, 0.08);
 }
 .login-card .password-toggle:focus-visible {
     outline: 2px solid #2b789f;
     outline-offset: 2px;
-    border-radius: 3px;
+    border-radius: 6px;
 }
 .login-card .login-submit {
     width: 100%;

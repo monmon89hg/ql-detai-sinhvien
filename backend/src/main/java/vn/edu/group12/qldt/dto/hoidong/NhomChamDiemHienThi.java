@@ -17,4 +17,6 @@ public interface NhomChamDiemHienThi {
     String getMaHoiDong();
 
     String getTenHoiDong();
+    String getLoaiPhieu();
+    String getLoaiDeTai();
 }

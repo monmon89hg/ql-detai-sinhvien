@@ -68,8 +68,8 @@ public class HoiDongService {
             return new DanhSachHoiDong(danhSachDot, "", List.of(), Set.of());
         }
 
-        // Không truyền tham số: chọn đợt được tạo mới nhất. Chuỗi rỗng: xem tất cả đợt.
-        String maDuocChon = maDot == null ? danhSachDot.getFirst().getMaDot() : maDot.trim();
+        // Không truyền tham số hoặc chuỗi rỗng: hiển thị hội đồng của tất cả đợt.
+        String maDuocChon = maDot == null ? "" : maDot.trim();
         if (!maDuocChon.isEmpty() && hoiDongRepository.demDotTheoMa(maDuocChon) == 0) {
             throw new EntityNotFoundException("Đợt đăng ký không tồn tại.");
         }
@@ -117,7 +117,7 @@ public class HoiDongService {
     @PreAuthorize("hasRole('TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<DotDangKyLuaChon> layDanhSachDot() {
-        return hoiDongRepository.layDanhSachDot();
+        return hoiDongRepository.layDotKhoaLuan();
     }
 
     @PreAuthorize("hasRole('TRUONG_KHOA')")
@@ -146,6 +146,9 @@ public class HoiDongService {
                 "Đợt đăng ký không tồn tại."
             );
         }
+
+        if (hoiDongRepository.demDotKhoaLuan(maDot) == 0)
+            throw new IllegalArgumentException("Chỉ tạo hội đồng cho đợt khóa luận tốt nghiệp.");
 
         String diaDiem = form.getDiaDiem();
 

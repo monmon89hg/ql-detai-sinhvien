@@ -50,6 +50,14 @@ public class DeTaiController {
                             Principal principal,
                             Model model) {
         
+        // Nếu là Sinh viên thì chỉ hiển thị đề tài đã công bố
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean laSinhVien = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SINH_VIEN".equals(a.getAuthority()));
+        if (laSinhVien) {
+            trangThai = "CONG_BO";
+        }
+
         List<DeTai> deTais = deTaiService.filterDeTai(maDot, maBoMon, trangThai, keyword);
         List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
 
@@ -197,10 +205,12 @@ public class DeTaiController {
         return "redirect:/de-tai";
     }
 
-    // 5. Giao diện Trưởng khoa xét duyệt, phân công & công bố đề tài
+    // 5. Giao diện Trưởng khoa xét duyệt đề tài (chỉ duyệt / từ chối đề tài chờ duyệt)
     @GetMapping("/duyet")
     public String showApprovalList(Principal principal, Model model) {
-        List<DeTai> deTais = deTaiService.getAllDeTai();
+        List<DeTai> deTais = deTaiService.getAllDeTai().stream()
+                .filter(dt -> "CHO_DUYET".equals(dt.getTrangThai()))
+                .toList();
         List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
 
         model.addAttribute("deTais", deTais);
@@ -208,6 +218,21 @@ public class DeTaiController {
         model.addAttribute("activeMenu", "approve-topic");
         model.addAttribute("currentUserName", principal != null ? principal.getName() : "PGS.TS Nguyễn Văn C (Trưởng khoa)");
         return "topics/review";
+    }
+
+    // 5.1 Giao diện Trưởng khoa công bố đề tài
+    @GetMapping("/cong-bo")
+    public String showPublishList(Principal principal, Model model) {
+        List<DeTai> deTais = deTaiService.getAllDeTai().stream()
+                .filter(dt -> !"CHO_DUYET".equals(dt.getTrangThai()) && !"NHAP".equals(dt.getTrangThai()))
+                .toList();
+        List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
+
+        model.addAttribute("deTais", deTais);
+        model.addAttribute("dots", dots);
+        model.addAttribute("activeMenu", "publish-topic");
+        model.addAttribute("currentUserName", principal != null ? principal.getName() : "PGS.TS Nguyễn Văn C (Trưởng khoa)");
+        return "topics/publish";
     }
 
     // 6. Trưởng khoa duyệt đề tài
@@ -250,7 +275,7 @@ public class DeTaiController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
-        return "redirect:/de-tai/duyet";
+        return "redirect:/de-tai/cong-bo";
     }
 
     // 9. Phân công giảng viên (GVHD, Phản biện, Chấm độc lập)

@@ -66,10 +66,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/de-tai/de-xuat")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON")
                 .requestMatchers(HttpMethod.GET, "/de-tai/sua/{id}")
-                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA", "ADMIN")
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA")
                 .requestMatchers(HttpMethod.POST, "/de-tai/sua/{id}", "/de-tai/{id}/ngung-nhan", "/de-tai/{id}/xoa")
-                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/de-tai/duyet", "/dot-dang-ky/tao",
+                    .hasAnyRole("GIANG_VIEN", "TRUONG_BO_MON", "TRUONG_KHOA")
+                .requestMatchers(HttpMethod.GET, "/de-tai/duyet", "/de-tai/cong-bo", "/dot-dang-ky/tao",
                         "/dot-dang-ky/sua/{id}").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.POST, "/de-tai/{id}/duyet",
                         "/de-tai/{id}/tu-choi", "/de-tai/{id}/cong-bo",
@@ -87,18 +87,20 @@ public class SecurityConfig {
                     .hasAnyRole("TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/hoi-dong/tao", "/hoi-dong/{id}/thanh-vien",
                         "/hoi-dong/{id}/thanh-vien/{lecturer}/xoa",
-                        "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong", "/hoi-dong/{id}/sua", "/hoi-dong/{id}/xoa")
+                        "/hoi-dong/{id}/san-sang", "/hoi-dong/{id}/phan-cong", "/hoi-dong/{id}/sua", "/hoi-dong/{id}/xoa",
+                        "/hoi-dong/{id}/ve-nhap", "/hoi-dong/{id}/khoa", "/hoi-dong/{id}/doi-phan-cong")
                     .hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/cham-diem", "/cham-diem/{id}")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/tong-hop",
-                        "/ket-qua/tong-hop/xuat-excel")
+                        "/ket-qua/tong-hop/xuat-excel", "/ket-qua/{id}/chi-tiet")
                     .hasAnyRole("GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/cham-diem/{id}/luu-nhap",
                         "/cham-diem/{id}/nop", "/ket-qua/{id}/tong-hop").hasRole("GIANG_VIEN")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/quan-ly",
                         "/ket-qua/quan-ly/xuat-excel").hasAnyRole("TRUONG_KHOA", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo").hasRole("TRUONG_KHOA")
+                .requestMatchers(HttpMethod.POST, "/ket-qua/{id}/cong-bo", "/ket-qua/{id}/mo-cham",
+                        "/ket-qua/{id}/email/{student}/thu-lai").hasRole("TRUONG_KHOA")
                 .requestMatchers(HttpMethod.GET, "/ket-qua/cua-toi")
                     .hasAnyRole("SINH_VIEN", "GIANG_VIEN", "TRUONG_KHOA", "ADMIN")
 

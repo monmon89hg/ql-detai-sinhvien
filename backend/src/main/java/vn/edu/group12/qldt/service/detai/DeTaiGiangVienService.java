@@ -25,9 +25,15 @@ public class DeTaiGiangVienService {
     @Autowired
     private DeTaiRepository deTaiRepository;
 
+    @Autowired
+    private vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
+
+    @Autowired
+    private vn.edu.group12.qldt.repository.hoidong.ThanhVienHoiDongRepository thanhVienHoiDongRepository;
+
     /** Preserve automatic supervision of one's own new proposal without granting dean powers. */
     @PreAuthorize("hasAnyRole('GIANG_VIEN', 'TRUONG_BO_MON')")
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public DeTaiGiangVien phanCongNguoiDeXuat(String maDeTai) {
         String maNguoiDung = CurrentUser.maNguoiDung();
         DeTai deTai = deTaiRepository.findById(maDeTai)
@@ -47,12 +53,30 @@ public class DeTaiGiangVienService {
     }
 
     @PreAuthorize("hasRole('TRUONG_KHOA')")
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public DeTaiGiangVien phanCong(String maDeTai, String maGiangVien, String loaiPhanCong, String maNguoiPhanCong) {
         return luuPhanCong(maDeTai, maGiangVien, loaiPhanCong, maNguoiPhanCong);
     }
 
     private DeTaiGiangVien luuPhanCong(String maDeTai, String maGiangVien, String loaiPhanCong, String maNguoiPhanCong) {
+        deTaiRepository.flush();
+        kiemTraChuaKhoa(maDeTai);
+        if ("HUONG_DAN".equals(loaiPhanCong)
+                ? !danhGiaRepository.giangVienHuongDanHopLe(maGiangVien)
+                : thanhVienHoiDongRepository.demGiangVienHopLe(maGiangVien) == 0)
+            throw new IllegalArgumentException("Giảng viên không còn hoạt động hoặc không có quyền giảng viên.");
+        if (deTaiGiangVienRepository.existsById_MaDeTaiAndId_MaGiangVien(maDeTai, maGiangVien))
+            throw new IllegalArgumentException("Giảng viên đã có chức trách trên đề tài; hãy bỏ phân công cũ trước khi đổi.");
+        String loaiDot = danhGiaRepository.loaiDeTai(maDeTai);
+        String loaiCham = ("MON_HOC".equals(loaiDot) || "NCKH".equals(loaiDot)) ? "CHAM_DOC_LAP" : "PHAN_BIEN";
+        if (!"HUONG_DAN".equals(loaiPhanCong) && !loaiCham.equals(loaiPhanCong))
+            throw new IllegalArgumentException("Loại phân công chấm không phù hợp loại đề tài.");
+        if (loaiCham.equals(loaiPhanCong)
+                && deTaiGiangVienRepository.countById_MaDeTaiAndLoaiPhanCong(maDeTai, loaiCham) >= 1)
+            throw new IllegalArgumentException("Đề tài chỉ có một giảng viên phản biện hoặc chấm độc lập.");
+        if (java.util.Set.of("HUONG_DAN","PHAN_BIEN").contains(loaiPhanCong)
+                && danhGiaRepository.xungDotHoiDong(maDeTai,maGiangVien))
+            throw new IllegalArgumentException("Giảng viên đã thuộc hội đồng chấm đề tài này.");
         // 1. Kiểm tra nếu đã được phân công chính vai trò này rồi
         if (deTaiGiangVienRepository.existsById_MaDeTaiAndId_MaGiangVienAndLoaiPhanCong(maDeTai, maGiangVien, loaiPhanCong)) {
             throw new IllegalArgumentException("Giảng viên đã được phân công vai trò " + loaiPhanCong + " cho đề tài này rồi!");
@@ -82,17 +106,24 @@ public class DeTaiGiangVienService {
     }
 
     @PreAuthorize("hasRole('TRUONG_KHOA')")
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void xoaPhanCong(String maDeTai, String maGiangVien) {
+        kiemTraChuaKhoa(maDeTai);
         deTaiGiangVienRepository.deleteById_MaDeTaiAndId_MaGiangVien(maDeTai, maGiangVien);
     }
 
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void xoaTatCaPhanCongCuaDeTai(String maDeTai) {
+        kiemTraChuaKhoa(maDeTai);
         deTaiGiangVienRepository.deleteById_MaDeTai(maDeTai);
     }
 
     public long countPhanCongByDeTai(String maDeTai) {
         return deTaiGiangVienRepository.countById_MaDeTai(maDeTai);
     }
+    private void kiemTraChuaKhoa(String maDeTai) {
+        if (danhGiaRepository.khoaPhanCongDeTai(maDeTai))
+            throw new IllegalArgumentException("Phân công đã khóa vì đề tài có nhóm đang chấm hoặc đã có kết quả.");
+    }
+
 }

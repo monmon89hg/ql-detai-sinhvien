@@ -15,8 +15,8 @@
                 <div><h1>Tìm và tham gia nhóm</h1><p>Xem các nhóm theo đợt đăng ký và gửi yêu cầu tham gia.</p></div>
             </div>
             
-<div class="sv-toolbar">
-    <form th:action="@{/nhom}" method="get" class="sv-filter-form">
+<div class="sv-toolbar sv-group-toolbar">
+    <form th:action="@{/nhom}" method="get" class="sv-filter-form sv-group-filter">
         <div class="sv-field sv-grow"><label for="tuKhoa">Tìm nhóm</label>
             <input class="form-control" id="tuKhoa" name="tuKhoa" th:value="${tuKhoa}" placeholder="Tên nhóm hoặc mã nhóm"></div>
         <div class="sv-field"><label for="maDot">Đợt đăng ký</label>
@@ -34,8 +34,10 @@
             </select></div>
         <button class="btn btn-primary sv-filter-button" type="submit">Tìm kiếm</button>
     </form>
-    <a class="btn btn-outline" th:href="@{/nhom/cua-toi}" sec:authorize="hasRole('SINH_VIEN')">Nhóm của tôi</a>
-    <a class="btn btn-primary" th:href="@{/nhom/tao}" sec:authorize="hasRole('SINH_VIEN')">+ Tạo nhóm</a>
+    <div class="sv-group-shortcuts">
+        <a class="btn btn-outline" th:href="@{/nhom/cua-toi}" sec:authorize="hasRole('SINH_VIEN')">Nhóm của tôi</a>
+        <a class="btn btn-primary" th:href="@{/nhom/tao}" sec:authorize="hasRole('SINH_VIEN')">+ Tạo nhóm</a>
+    </div>
 </div>
 <section class="sv-panel" aria-labelledby="groups-heading">
     <div class="sv-panel-heading"><h2 id="groups-heading">Danh sách nhóm sinh viên</h2>
@@ -51,7 +53,14 @@
             <td th:text="${nhom.tenDot}">Tên đợt</td>
             <td th:text="|${nhom.soThanhVien}/5|">3/5</td>
             <td><span class="sv-state" th:attr="data-state=${nhom.trangThai}" th:text="${nhom.trangThai}">ĐANG LẬP</span></td>
-            <td><a class="btn btn-outline sv-btn-small" th:href="@{/nhom/{maNhom}(maNhom=${nhom.maNhom})}">Xem chi tiết</a></td>
+            <td>
+                <div class="sv-group-actions">
+                    <a class="btn btn-outline sv-btn-small"
+                       th:href="@{/nhom/{maNhom}(maNhom=${nhom.maNhom})}">Chi tiết</a>
+                    <span class="sv-request-status"
+                          th:if="${nhomDaGuiYeuCau.contains(nhom.maNhom)}">Đã gửi yêu cầu tham gia</span>
+                </div>
+            </td>
         </tr></tbody></table></div>
 </section>
 

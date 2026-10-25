@@ -126,7 +126,7 @@ public class ThanhVienHoiDongService {
         if (thanhVienHoiDongRepository
                 .demXungDotHuongDan(maHoiDong, maGiangVien) > 0) {
             throw new IllegalArgumentException(
-                "Giảng viên đang hướng dẫn đề tài được giao cho hội đồng."
+                "Giảng viên đang hướng dẫn hoặc phản biện đề tài được giao cho hội đồng."
             );
         }
 

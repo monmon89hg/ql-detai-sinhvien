@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{fragments/head :: head('Chấm điểm hội đồng')}"></head>
+    <head th:replace="~{fragments/head :: head('Chấm điểm')}"></head>
 
     <body>
         <a class="skip" href="#content">Bỏ qua điều hướng</a>
@@ -15,17 +15,17 @@
 
             <main class="page" id="content">
                 <div
-                    th:replace="~{fragments/breadcrumb :: breadcrumb('Chấm điểm hội đồng')}"
+                    th:replace="~{fragments/breadcrumb :: breadcrumb('Chấm điểm')}"
                 ></div>
 
                 <div class="container sv-module">
                     <div th:replace="~{fragments/messages :: messages}"></div>
 
                     <div class="page-heading">
-                        <h1>Chấm điểm hội đồng</h1>
+                        <h1>Chấm điểm</h1>
 
                         <p th:if="${chiXem}">
-                            Xem các nhóm đã phân công hội đồng và phiếu chấm đã lưu.
+                            Xem các nhóm đăng ký đề tài và phiếu chấm đã lưu.
                         </p>
                         <p th:unless="${chiXem}">
                             Xem các nhóm được phân công và mở phiếu để
@@ -36,7 +36,7 @@
                     <section class="section sv-panel">
                         <div class="section-top sv-panel-heading">
                             <h2 class="section-title" th:if="${chiXem}">
-                                Danh sách nhóm đã phân công hội đồng
+                                Danh sách nhóm đánh giá
                             </h2>
                             <h2 class="section-title" th:unless="${chiXem}">
                                 Danh sách nhóm được chấm
@@ -44,7 +44,7 @@
                         </div>
 
                         <p th:if="${chiXem and #lists.isEmpty(danhSachNhom)}">
-                            Hiện chưa có nhóm nào đã được phân công hội đồng.
+                            Hiện chưa có đăng ký đề tài để hiển thị.
                         </p>
                         <p th:if="${!chiXem and #lists.isEmpty(danhSachNhom)}">
                             Hiện chưa có nhóm nào đang ở giai đoạn chấm
@@ -80,7 +80,7 @@
                                     </td>
 
                                     <td>
-                                        <strong th:text="${nhom.maHoiDong}"></strong>
+                                        <strong th:text="${nhom.maHoiDong != null ? nhom.maHoiDong : '—'}"></strong>
                                         <div th:text="${nhom.tenHoiDong}"></div>
                                     </td>
 

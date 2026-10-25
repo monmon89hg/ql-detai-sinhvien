@@ -29,20 +29,90 @@
     <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachDangKy)}"><table class="data-table sv-table">
         <thead><tr><th>Mã nhóm</th><th>Đề tài</th><th>Ngày đăng ký</th><th>Trạng thái</th><th>Quyết định</th></tr></thead>
         <tbody><tr th:each="dk : ${danhSachDangKy}"><td><code th:text="${dk.maNhom}"></code></td>
-            <td><strong th:text="${dk.tenDeTai}"></strong>
-                <a class="sv-help" th:if="${dk.trangThai != 'CHO_DUYET' and dk.trangThai != 'TU_CHOI'}" th:href="@{/bao-cao(maNhom=${dk.maNhom})}">Xem báo cáo</a></td>
+            <td><strong th:text="${dk.tenDeTai}"></strong></td>
             <td th:text="${dk.dangKyLuc != null ? #temporals.format(dk.dangKyLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
             <td><span class="sv-state" th:attr="data-state=${dk.trangThai}" th:text="${dk.trangThai}"></span></td>
             <td><div class="sv-review-actions" th:if="${dk.trangThai == 'CHO_DUYET'}">
-                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/duyet(maNhom=${dk.maNhom})}" data-sv-confirm="Duyệt đăng ký của nhóm này?">
+                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/duyet(maNhom=${dk.maNhom})}" data-sv-confirm="Duyệt đăng ký đề tài?"
+                      th:attr="data-sv-confirm-detail=|${dk.tenDeTai} - nhóm ${dk.maNhom}|"
+                      data-sv-confirm-level="warning" data-sv-confirm-button="Xác nhận duyệt"
+                      data-sv-confirm-note="Đăng ký được duyệt sẽ chuyển sang bước thực hiện đề tài.">
                     <button class="btn btn-primary sv-btn-small" type="submit">Duyệt</button></form>
-                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/tu-choi(maNhom=${dk.maNhom})}" data-sv-form>
-                    <label th:for="|lyDo-${dk.maNhom}|" class="sr-only">Lý do từ chối</label>
-                    <input class="form-control sv-reason-input" th:id="|lyDo-${dk.maNhom}|" name="lyDoTuChoi" maxlength="1000" required placeholder="Lý do từ chối">
-                    <button class="btn btn-outline sv-btn-small" type="submit">Từ chối</button></form>
-                </div><span class="sv-help" th:unless="${dk.trangThai == 'CHO_DUYET'}">Đã xử lý</span></td>
+                <button class="btn btn-outline sv-btn-small" type="button"
+                        data-sv-reject-open
+                        th:attr="data-sv-reject-url=@{/dang-ky-de-tai/{maNhom}/tu-choi(maNhom=${dk.maNhom})},data-sv-reject-group=${dk.maNhom}">
+                    Từ chối
+                </button>
+                </div>
+                <a class="btn btn-outline sv-btn-small"
+                   th:if="${dk.trangThai != 'CHO_DUYET' and dk.trangThai != 'TU_CHOI'}"
+                   th:href="@{/bao-cao(maNhom=${dk.maNhom})} + '#chi-tiet-bao-cao'">Xem báo cáo</a>
+                <!-- Hiển thị lý do từ chối trong modal chỉ đọc, không thay đổi quyết định. -->
+                <button th:if="${dk.trangThai == 'TU_CHOI'}"
+                        type="button" class="btn btn-outline sv-btn-small"
+                        data-sv-rejection-history-open
+                        th:attr="data-sv-rejection-group=${dk.maNhom},data-sv-rejection-reason=${dk.lyDoTuChoi != null and !dk.lyDoTuChoi.isBlank() ? dk.lyDoTuChoi : 'Chưa có lý do từ chối được lưu.'}">
+                    Xem lý do
+                </button></td>
         </tr></tbody></table></div>
 </section>
+
+<!-- Một hộp thoại dùng chung cho tất cả đăng ký; không thay đổi POST hay backend. -->
+<div class="sv-reject-overlay" data-sv-reject-dialog hidden>
+    <section class="sv-reject-modal" role="dialog" aria-modal="true"
+             aria-labelledby="sv-reject-title" aria-describedby="sv-reject-description"
+             tabindex="-1" data-sv-reject-panel>
+        <div class="sv-reject-heading">
+            <h2 id="sv-reject-title">Xác nhận từ chối đăng ký</h2>
+            <button type="button" class="sv-reject-close" data-sv-reject-close
+                    aria-label="Đóng hộp thoại">&times;</button>
+        </div>
+        <p id="sv-reject-description" class="sv-help">
+            Nhóm <strong data-sv-reject-group></strong> sẽ nhận quyết định từ chối.
+            Vui lòng nêu rõ lý do trước khi xác nhận.
+        </p>
+        <form method="post" data-sv-reject-form>
+            <input type="hidden" th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="sv-field">
+                <label for="sv-reject-reason">Lý do từ chối <span class="sv-required">*</span></label>
+                <textarea id="sv-reject-reason" class="form-control sv-reject-reason"
+                          name="lyDoTuChoi" rows="4" minlength="1" maxlength="1000"
+                          required data-sv-reject-reason
+                          aria-describedby="sv-reject-hint sv-reject-error"
+                          placeholder="Nhập lý do từ chối đăng ký..."></textarea>
+                <small id="sv-reject-hint">Bắt buộc nhập từ 1 đến 1.000 ký tự.</small>
+                <span id="sv-reject-error" class="sv-field-error" role="alert"
+                      data-sv-reject-error hidden></span>
+            </div>
+            <div class="sv-reject-footer">
+                <button type="button" class="btn btn-outline" data-sv-reject-close>Hủy</button>
+                <button type="submit" class="btn btn-primary" data-sv-reject-submit>
+                    Xác nhận từ chối
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<!-- Hộp thoại CHỈ ĐỌC lý do đã từ chối; không có biểu mẫu hoặc hành động ghi dữ liệu. -->
+<div class="sv-reject-overlay sv-reason-history-overlay" data-sv-rejection-history-dialog hidden>
+    <section class="sv-reject-modal" role="dialog" aria-modal="true"
+             aria-labelledby="sv-reason-history-title" aria-describedby="sv-reason-history-text"
+             tabindex="-1" data-sv-rejection-history-panel>
+        <div class="sv-reject-heading">
+            <h2 id="sv-reason-history-title">Lý do từ chối đăng ký</h2>
+            <button type="button" class="sv-reject-close" data-sv-rejection-history-close
+                    aria-label="Đóng hộp thoại">&times;</button>
+        </div>
+        <p class="sv-help">Nhóm: <strong data-sv-rejection-history-group></strong></p>
+        <p id="sv-reason-history-text" class="sv-reason-history-content"
+           data-sv-rejection-history-text></p>
+        <div class="sv-reject-footer">
+            <button type="button" class="btn btn-outline" data-sv-rejection-history-close>Đóng</button>
+        </div>
+    </section>
+</div>
 
 <nav class="sv-actions" aria-label="Phân trang">
     <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/dang-ky-de-tai/duyet(trang=${trang - 1},tuKhoa=${tuKhoa},trangThai=${trangThai})}">Trang trước</a>

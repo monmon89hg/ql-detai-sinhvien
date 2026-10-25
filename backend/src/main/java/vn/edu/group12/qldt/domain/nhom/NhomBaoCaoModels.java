@@ -72,6 +72,14 @@ public final class NhomBaoCaoModels {
             String lyDoTuChoi,
             LocalDateTime dangKyLuc) {}
 
+    /** Nhóm có báo cáo mà giảng viên được quyền truy cập theo phân công thực tế. */
+    public record NhomBaoCaoGiangVien(String maNhom, String tenNhom, String tenDeTai) {}
+
+    /** Một nhóm trong danh sách báo cáo của Trưởng khoa. Không chứa nội dung PDF. */
+    public record NhomBaoCaoTruongKhoa(
+            String maNhom, String tenNhom, String tenDot, String tenDeTai,
+            long soBaoCaoHopLe) {}
+
     public record BaoCao(
             String maNhom,
             int phienBan,

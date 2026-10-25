@@ -39,15 +39,16 @@ public class AdminXemChamDiemService {
             .filter(nhom -> nhom.getMaNhom().equals(maNhom))
             .findFirst()
             .orElseThrow(() -> new EntityNotFoundException(
-                "Không tìm thấy nhóm đã phân công hội đồng."
+                "Không tìm thấy đăng ký đề tài hợp lệ."
             ));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TRUONG_KHOA')")
     @Transactional(readOnly = true)
     public List<PhieuChamDiem> layPhieuChamTheoNhom(String maNhom) {
-        if (!hoiDongDeTaiRepository.existsById(maNhom)) {
-            throw new EntityNotFoundException("Nhóm chưa được phân công hội đồng.");
+        if (hoiDongDeTaiRepository.layDanhSachNhomChoTruongKhoa().stream()
+                .noneMatch(n -> maNhom.equals(n.getMaNhom()))) {
+            throw new EntityNotFoundException("Không tìm thấy đăng ký đề tài hợp lệ.");
         }
 
         return phieuChamDiemRepository

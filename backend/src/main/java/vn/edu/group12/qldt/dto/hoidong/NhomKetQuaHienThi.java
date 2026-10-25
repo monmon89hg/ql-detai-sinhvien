@@ -13,6 +13,10 @@ public interface NhomKetQuaHienThi {
 
     String getMaHoiDong();
     String getTenHoiDong();
+    String getLoaiDeTai();
+    String getMaDot();
+    String getTenDot();
+    String getTrangThaiDangKy();
 
     // Chưa tổng hợp thì hai giá trị này có thể là null.
     String getTrangThaiKetQua();

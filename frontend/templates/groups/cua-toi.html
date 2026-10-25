@@ -35,7 +35,10 @@
                 <td th:text="${tv.hoTen}"></td><td th:text="${tv.laNhomTruong ? 'Nhóm trưởng' : 'Thành viên'}"></td>
                 <td><form th:if="${laNhomTruong and !tv.laNhomTruong and nhomCuaToi.trangThai == 'DANG_LAP'}"
                     th:action="@{/nhom/{maNhom}/thanh-vien/{maSinhVien}/xoa(maNhom=${nhomCuaToi.maNhom},maSinhVien=${tv.maSinhVien})}"
-                    method="post" data-sv-confirm="Xóa thành viên khỏi nhóm?">
+                    method="post" data-sv-confirm="Xóa thành viên khỏi nhóm?"
+                    th:attr="data-sv-confirm-detail=|${tv.hoTen} (${tv.maSinhVien})|"
+                    data-sv-confirm-level="danger" data-sv-confirm-button="Xác nhận xóa"
+                    data-sv-confirm-note="Thành viên sẽ bị xóa khỏi nhóm sau khi xác nhận.">
                     <button class="btn btn-outline sv-btn-small" type="submit">Xóa thành viên</button></form>
                 <span class="sv-help" th:unless="${laNhomTruong and !tv.laNhomTruong and nhomCuaToi.trangThai == 'DANG_LAP'}">—</span></td></tr>
             <tr th:if="${#lists.isEmpty(danhSachThanhVien)}"><td colspan="4">Chưa có thành viên.</td></tr></tbody>
@@ -52,7 +55,10 @@
                 <td><div class="sv-inline-actions">
                     <form method="post" th:action="@{/nhom/{maNhom}/yeu-cau/{maSinhVien}/duyet(maNhom=${nhomCuaToi.maNhom},maSinhVien=${yc.maSinhVien})}" data-sv-form>
                         <button class="btn btn-primary sv-btn-small" type="submit">Chấp nhận</button></form>
-                    <form method="post" th:action="@{/nhom/{maNhom}/yeu-cau/{maSinhVien}/tu-choi(maNhom=${nhomCuaToi.maNhom},maSinhVien=${yc.maSinhVien})}" data-sv-confirm="Từ chối yêu cầu này?">
+                    <form method="post" th:action="@{/nhom/{maNhom}/yeu-cau/{maSinhVien}/tu-choi(maNhom=${nhomCuaToi.maNhom},maSinhVien=${yc.maSinhVien})}" data-sv-confirm="Từ chối yêu cầu tham gia nhóm?"
+                          th:attr="data-sv-confirm-detail=|${yc.hoTen} (${yc.maSinhVien})|"
+                          data-sv-confirm-level="danger" data-sv-confirm-button="Xác nhận từ chối"
+                          data-sv-confirm-note="Yêu cầu tham gia sẽ được đánh dấu từ chối.">
                         <button class="btn btn-outline sv-btn-small" type="submit">Từ chối</button></form></div></td>
             </tr></tbody></table></div>
     </section>
@@ -60,7 +66,10 @@
         <div class="sv-panel-heading"><h2>Thao tác nhóm trưởng</h2></div>
         <div class="sv-info sv-alert-danger" role="note"><strong>Kiểm tra kỹ trước khi chốt nhóm:</strong> Nhóm cần có từ 3 đến 5 thành viên đã được chấp nhận tham gia, trong đó có đúng 1 nhóm trưởng. Chỉ sau khi chốt danh sách, nhóm mới có thể đăng ký đề tài. Danh sách đã chốt không thể thêm hoặc xóa thành viên qua chức năng quản lý nhóm thông thường.</div>
         <div class="sv-actions"><form th:if="${nhomCuaToi.trangThai == 'DANG_LAP'}" method="post"
-            th:action="@{/nhom/{maNhom}/chot(maNhom=${nhomCuaToi.maNhom})}" data-sv-confirm="Xác nhận chốt danh sách thành viên?">
+            th:action="@{/nhom/{maNhom}/chot(maNhom=${nhomCuaToi.maNhom})}" data-sv-confirm="Chốt danh sách nhóm?"
+            th:attr="data-sv-confirm-detail=|${nhomCuaToi.tenNhom} (${nhomCuaToi.maNhom})|"
+            data-sv-confirm-level="warning" data-sv-confirm-button="Xác nhận chốt nhóm"
+            data-sv-confirm-note="Sau khi chốt, không thể thêm hoặc xóa thành viên thông thường.">
             <button class="btn btn-primary" type="submit">Chốt danh sách nhóm</button></form>
             <a class="btn btn-outline" th:href="@{/dang-ky-de-tai}">Đăng ký đề tài</a></div>
     </section>

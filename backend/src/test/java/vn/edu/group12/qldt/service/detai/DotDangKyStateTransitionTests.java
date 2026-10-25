@@ -23,6 +23,8 @@ class DotDangKyStateTransitionTests {
     @Mock
     private DotDangKyRepository dotDangKyRepository;
 
+    @Mock private vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
+
     @InjectMocks
     private DotDangKyService dotDangKyService;
 
