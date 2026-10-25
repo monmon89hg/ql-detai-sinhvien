@@ -133,6 +133,11 @@ public class NhomBaoCaoViewService {
     public Map<String, Object> baoCao(String maNhom, int page) {
         var u = quyen.hienTai();
         var m = model(u);
+        // Không suy diễn quyền từ giao diện: chỉ cấp danh sách nhóm liên quan cho GV hợp lệ.
+        boolean laGiangVien = "GV".equals(u.loaiNguoiDung()) && u.vaiTro().contains("GIANG_VIEN");
+        if (laGiangVien) {
+            m.put("danhSachNhomBaoCaoGiangVien", danhMuc.nhomBaoCaoGiangVien(u.maNguoiDung()));
+        }
         Nhom n;
         if (maNhom == null || maNhom.isBlank()) {
             n = nhomHienTai(u);

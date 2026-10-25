@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/head :: head('Nộp báo cáo')}"></head>
+<head th:replace="~{fragments/head :: head('Báo cáo nhóm')}"></head>
 <body>
 <a class="skip" href="#content">Bỏ qua điều hướng</a>
 <div th:replace="~{fragments/header :: header}"></div>
@@ -8,16 +8,36 @@
 <div class="app-grid">
     <div th:replace="~{fragments/sidebar :: sidebar('report')}"></div>
     <main class="page" id="content">
-        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Nộp báo cáo')}"></div>
+        <div th:replace="~{fragments/breadcrumb :: breadcrumb('Báo cáo nhóm')}"></div>
         <div class="container sv-module">
             <div th:replace="~{fragments/messages :: messages}"></div>
             <div class="sv-page-intro">
-                <div><h1>Nộp báo cáo</h1><p>Theo dõi phiên bản PDF đã nộp và hạn nộp báo cáo.</p></div>
+                <div><h1>Báo cáo nhóm</h1><p>Theo dõi các phiên bản PDF và hạn nộp theo quyền tài khoản.</p></div>
             </div>
             
+<section class="sv-panel" th:if="${danhSachNhomBaoCaoGiangVien != null}">
+    <div class="sv-panel-heading"><h2>Chọn nhóm được phân công</h2></div>
+    <div class="sv-empty" th:if="${#lists.isEmpty(danhSachNhomBaoCaoGiangVien)}">
+        Bạn chưa được phân công hướng dẫn hoặc tham gia hội đồng của nhóm nào.
+    </div>
+    <form class="sv-filter-form" th:unless="${#lists.isEmpty(danhSachNhomBaoCaoGiangVien)}"
+          th:action="@{/bao-cao}" method="get">
+        <div class="sv-field sv-grow"><label for="maNhomBaoCao">Nhóm sinh viên</label>
+            <select id="maNhomBaoCao" class="form-control" name="maNhom" required>
+                <option value="">-- Chọn nhóm --</option>
+                <option th:each="nhomDoc : ${danhSachNhomBaoCaoGiangVien}"
+                        th:value="${nhomDoc.maNhom}"
+                        th:text="|${nhomDoc.tenNhom} (${nhomDoc.maNhom}) – ${nhomDoc.tenDeTai}|"
+                        th:selected="${nhomCuaToi != null and nhomCuaToi.maNhom == nhomDoc.maNhom}"></option>
+            </select>
+        </div>
+        <button class="btn btn-primary sv-filter-button" type="submit">Xem lịch sử báo cáo</button>
+    </form>
+</section>
 <section class="sv-panel"><div class="sv-panel-heading sv-heading-wrap"><h2>Thông tin nộp báo cáo</h2>
     <a class="btn btn-primary" th:if="${coTheNopBaoCao}" th:href="@{/bao-cao/nop}">+ Nộp báo cáo mới</a></div>
-    <div class="sv-info" th:if="${nhomCuaToi == null}">Chưa có nhóm để nộp báo cáo.</div>
+    <div class="sv-info" th:if="${nhomCuaToi == null and danhSachNhomBaoCaoGiangVien == null}">Chưa có nhóm để nộp báo cáo.</div>
+    <div class="sv-info" th:if="${nhomCuaToi == null and danhSachNhomBaoCaoGiangVien != null}">Chọn nhóm được phân công ở trên để xem lịch sử báo cáo.</div>
     <dl class="sv-facts" th:if="${nhomCuaToi != null}"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi.tenNhom}"></dd></div>
         <div><dt>Đề tài</dt><dd th:text="${tenDeTai ?: 'Chưa đăng ký'}"></dd></div>
         <div><dt>Hạn nộp</dt><dd th:text="${hanNopBaoCao != null ? #temporals.format(hanNopBaoCao,'dd/MM/yyyy HH:mm') : 'Chưa có'}"></dd></div>
@@ -33,7 +53,9 @@
             <td th:text="|${#numbers.formatDecimal(bc.kichThuocByte / 1024.0 / 1024.0, 1, 2)} MB|"></td>
             <td th:text="${bc.nopLuc != null ? #temporals.format(bc.nopLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
             <td><span class="sv-state" th:attr="data-state=${bc.trangThai}" th:text="${bc.trangThai}"></span></td>
-            <td><a class="btn btn-outline sv-btn-small" th:href="@{/bao-cao/{maNhom}/{phienBan}/tai(maNhom=${bc.maNhom},phienBan=${bc.phienBan})}">Tải PDF</a></td>
+            <td><a class="btn btn-outline sv-btn-small" th:if="${bc.trangThai == 'HOP_LE'}"
+                   th:href="@{/bao-cao/{maNhom}/{phienBan}/tai(maNhom=${bc.maNhom},phienBan=${bc.phienBan})}">Tải PDF</a>
+                <span class="sv-help" th:unless="${bc.trangThai == 'HOP_LE'}">Không thể tải (đã thu hồi)</span></td>
         </tr></tbody></table></div>
 </section>
 <div class="sv-info sv-alert-warning" role="note"><strong>Quy định nộp báo cáo:</strong> Chỉ nhóm trưởng được nộp khi nhóm và đề tài đủ điều kiện, đồng thời chưa quá hạn. Tệp tải lên phải là PDF hợp lệ, dung lượng không vượt quá 20 MiB.</div>
