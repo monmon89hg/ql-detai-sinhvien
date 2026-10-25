@@ -143,3 +143,14 @@ body.sv-reject-modal-open { overflow:hidden; }
     .sv-module .sv-reject-modal { padding:20px 16px; }
     .sv-module .sv-reject-footer > button { flex:1 1 140px; }
 }
+
+/* Chỉ căn lại form lọc trên trang /nhom, không ảnh hưởng trang khác. */
+.sv-module .sv-group-toolbar { flex-direction:column; align-items:stretch; }
+.sv-module .sv-group-shortcuts { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
+@media (min-width:801px) {
+    .sv-module .sv-group-toolbar .sv-group-filter { display:grid; grid-template-columns:minmax(170px,1.1fr) minmax(220px,1.7fr) minmax(140px,.9fr) max-content; align-items:end; gap:10px; flex:0 1 auto; width:100%; }
+    .sv-module .sv-group-toolbar .sv-group-filter .sv-field { min-width:0; }
+}
+@media (max-width:800px) {
+    .sv-module .sv-group-toolbar .sv-group-filter { flex:1 1 auto; width:100%; }
+}

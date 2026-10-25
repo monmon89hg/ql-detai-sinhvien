@@ -41,7 +41,14 @@
                         th:attr="data-sv-reject-url=@{/dang-ky-de-tai/{maNhom}/tu-choi(maNhom=${dk.maNhom})},data-sv-reject-group=${dk.maNhom}">
                     Từ chối
                 </button>
-                </div><span class="sv-help" th:unless="${dk.trangThai == 'CHO_DUYET'}">Đã xử lý</span></td>
+                </div>
+                <span class="sv-help" th:if="${dk.trangThai != 'CHO_DUYET' and dk.trangThai != 'TU_CHOI'}">Đã xử lý</span>
+                <!-- Chỉ xem lại lý do đã lưu, không thay đổi quyết định hoặc gửi yêu cầu POST. -->
+                <details th:if="${dk.trangThai == 'TU_CHOI'}" class="sv-rejection-history">
+                    <summary class="btn btn-outline sv-btn-small" style="cursor:pointer;white-space:nowrap;">Xem lý do</summary>
+                    <p class="sv-help" style="max-width:320px;margin-top:8px;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;"
+                       th:text="${dk.lyDoTuChoi != null and !dk.lyDoTuChoi.isBlank() ? dk.lyDoTuChoi : 'Chưa có lý do từ chối được lưu.'}"></p>
+                </details></td>
         </tr></tbody></table></div>
 </section>
 

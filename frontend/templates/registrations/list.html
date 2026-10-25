@@ -21,7 +21,7 @@
     <dl class="sv-facts" th:if="${nhomCuaToi != null}"><div><dt>Nhóm</dt><dd th:text="${nhomCuaToi.tenNhom}">Nhóm</dd></div>
         <div><dt>Mã nhóm</dt><dd th:text="${nhomCuaToi.maNhom}"></dd></div>
         <div><dt>Số thành viên</dt><dd th:text="|${nhomCuaToi.soThanhVien}/5|"></dd></div>
-        <div><dt>Trạng thái</dt><dd th:text="${nhomCuaToi.trangThai}"></dd></div></dl>
+        <div><dt>Trạng thái</dt><dd><span class="sv-state" th:attr="data-state=${nhomCuaToi.trangThai}" th:text="${nhomCuaToi.trangThai}"></span></dd></div></dl>
     <div th:if="${dangKyHienTai != null}" class="sv-info sv-info-soft" th:classappend="${dangKyHienTai.trangThai == 'TU_CHOI' ? ' sv-alert-danger' : ''}">
         <strong>Đã có đăng ký:</strong> <span th:text="${dangKyHienTai.tenDeTai}">Đề tài</span>
         · <span class="sv-state" th:attr="data-state=${dangKyHienTai.trangThai}" th:text="${dangKyHienTai.trangThai}"></span>
