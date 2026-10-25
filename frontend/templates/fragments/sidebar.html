@@ -170,7 +170,7 @@
                     href="/de-tai/duyet"
                     th:href="@{/de-tai/duyet}"
                     th:classappend="${activeMenu == 'approve-topic'} ? ' is-active' : ''"
-                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
+                    sec:authorize="hasRole('TRUONG_KHOA')"
                 >
                     <svg
                         class="icon"
@@ -192,7 +192,7 @@
                     href="/de-tai/cong-bo"
                     th:href="@{/de-tai/cong-bo}"
                     th:classappend="${activeMenu == 'publish-topic'} ? ' is-active' : ''"
-                    sec:authorize="hasRole('ADMIN') or hasRole('TRUONG_KHOA')"
+                    sec:authorize="hasRole('TRUONG_KHOA')"
                 >
                     <svg
                         class="icon"

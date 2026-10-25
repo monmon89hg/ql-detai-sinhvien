@@ -85,7 +85,7 @@
                                     </form>
 
                                     <form th:if="${dot.trangThai == 'CONG_BO'}" th:action="@{/dot-dang-ky/{maDot}/dong(maDot=${dot.maDot})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;" onclick="return confirm('Bạn có chắc muốn đóng đợt này?');">Đóng đợt</button>
+                                        <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap; color: #c0392b;" onclick="return confirm('Bạn có chắc muốn đóng đợt này?');">Đóng đợt</button>
                                     </form>
                                 </div>
                             </td>
