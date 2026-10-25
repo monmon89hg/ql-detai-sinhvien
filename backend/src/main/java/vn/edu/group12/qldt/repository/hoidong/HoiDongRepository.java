@@ -1,6 +1,7 @@
 package vn.edu.group12.qldt.repository.hoidong;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,6 +19,41 @@ import org.springframework.data.jpa.repository.Lock;
 
 public interface HoiDongRepository
         extends JpaRepository<HoiDong, String> {
+
+        List<HoiDong> findByMaDotOrderByMaHoiDongAsc(String maDot);
+
+        @Query(value = """
+                SELECT ma_dot AS maDot, ten_dot AS tenDot
+                FROM dot_dang_ky
+                ORDER BY created_at DESC, ma_dot ASC
+                """, nativeQuery = true)
+        List<DotDangKyLuaChon> layDanhSachDotMoiNhatTruoc();
+
+        @Query(value = """
+                SELECT hd.ma_hoi_dong
+                FROM hoi_dong hd
+                WHERE (:maDot IS NULL OR hd.ma_dot = :maDot)
+                  AND hd.trang_thai = 'NHAP'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM thanh_vien_hoi_dong tv
+                      WHERE tv.ma_hoi_dong = hd.ma_hoi_dong)
+                  AND NOT EXISTS (
+                      SELECT 1 FROM hoi_dong_de_tai pc
+                      WHERE pc.ma_hoi_dong = hd.ma_hoi_dong)
+                """, nativeQuery = true)
+        List<String> layMaHoiDongCoTheXoa(@Param("maDot") String maDot);
+
+        @Query(value = """
+                SELECT COUNT(*) FROM thanh_vien_hoi_dong
+                WHERE ma_hoi_dong = :maHoiDong
+                """, nativeQuery = true)
+        long demThanhVien(@Param("maHoiDong") String maHoiDong);
+
+        @Query(value = """
+                SELECT COUNT(*) FROM hoi_dong_de_tai
+                WHERE ma_hoi_dong = :maHoiDong
+                """, nativeQuery = true)
+        long demNhomDaPhanCong(@Param("maHoiDong") String maHoiDong);
 
         @Query(
                 value = """
@@ -65,6 +101,27 @@ public interface HoiDongRepository
                 """)
         Optional<HoiDong> timVaKhoaTheoMa(
                 @Param("maHoiDong") String maHoiDong
+        );
+
+        // Cập nhật mã bằng SQL thay vì thay @Id của một Entity đang được quản lý.
+        // V7 giữ nguyên các liên kết qua ON UPDATE CASCADE.
+        @Modifying(flushAutomatically = true, clearAutomatically = true)
+        @Query(value = """
+                UPDATE hoi_dong
+                SET ma_hoi_dong = :maMoi,
+                    ten_hoi_dong = :tenHoiDong,
+                    dia_diem = :diaDiem,
+                    version = version + 1
+                WHERE ma_hoi_dong = :maCu
+                    AND trang_thai = 'NHAP'
+                    AND version = :version
+                """, nativeQuery = true)
+        int suaThongTin(
+                @Param("maCu") String maCu,
+                @Param("maMoi") String maMoi,
+                @Param("tenHoiDong") String tenHoiDong,
+                @Param("diaDiem") String diaDiem,
+                @Param("version") Long version
         );
 
 }

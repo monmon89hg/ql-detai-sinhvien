@@ -3,6 +3,123 @@
       xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head(${isEdit} ? 'Sửa tài khoản' : 'Thêm tài khoản')}"></head>
 <body>
+<style>
+    /* Styles are scoped to the account form; shared Base UI styles remain unchanged. */
+    .account-form-card {
+        max-width: 1080px;
+        padding: 28px 30px;
+        background: #fff;
+        border: 1px solid #e1e7ed;
+        border-radius: 8px;
+    }
+
+    .account-form {
+        width: 100%;
+    }
+
+    .account-form .form-group:not(.account-form-roles) {
+        display: grid;
+        grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+        align-items: center;
+        column-gap: 26px;
+        row-gap: 8px;
+        margin: 0 0 22px;
+    }
+
+    .account-form .form-group:not(.account-form-roles) > label {
+        grid-column: 1;
+        margin: 0;
+        color: #293b4d;
+        font-weight: 500;
+    }
+
+    .account-form .form-group:not(.account-form-roles) > input,
+    .account-form .form-group:not(.account-form-roles) > select {
+        grid-column: 2;
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 13px;
+        color: #263747;
+        background: #fff;
+        border: 1px solid #cfd7df;
+        border-radius: 4px;
+        font: inherit;
+        box-sizing: border-box;
+    }
+
+    .account-form .form-group:not(.account-form-roles) > input:focus,
+    .account-form .form-group:not(.account-form-roles) > select:focus {
+        border-color: #2b719b;
+        outline: 3px solid rgb(43 113 155 / 14%);
+    }
+
+    .account-form .form-group:not(.account-form-roles) > small {
+        grid-column: 2;
+        margin: 0;
+    }
+
+    .account-form-roles {
+        margin: 0 0 22px;
+        padding: 16px 18px;
+        border: 1px solid #d8e0e7;
+        border-radius: 4px;
+    }
+
+    .account-form-roles legend {
+        padding: 0 6px;
+        color: #293b4d;
+        font-weight: 600;
+    }
+
+    .account-form-roles .checkbox-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 18px 6px 0;
+    }
+
+    .account-form-roles input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+    }
+
+    .account-form .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1px solid #e6ebef;
+    }
+
+    @media (max-width: 700px) {
+        .account-form-card {
+            padding: 20px 16px;
+        }
+
+        .account-form .form-group:not(.account-form-roles) {
+            grid-template-columns: minmax(0, 1fr);
+            row-gap: 7px;
+        }
+
+        .account-form .form-group:not(.account-form-roles) > label,
+        .account-form .form-group:not(.account-form-roles) > input,
+        .account-form .form-group:not(.account-form-roles) > select,
+        .account-form .form-group:not(.account-form-roles) > small {
+            grid-column: 1;
+        }
+
+        .account-form .form-actions {
+            justify-content: stretch;
+        }
+
+        .account-form .form-actions > * {
+            flex: 1;
+            text-align: center;
+        }
+    }
+</style>
 <div th:replace="~{fragments/header :: header}"></div>
 
 <div class="app-grid">
@@ -23,8 +140,9 @@
 
         <div th:replace="~{fragments/messages :: messages}"></div>
 
-        <section class="card">
+        <section class="card account-form-card">
             <form th:object="${form}"
+                  class="account-form"
                   th:action="${isEdit}
                       ? @{/admin/users/{id}(id=${maNguoiDung})}
                       : @{/admin/users}"
@@ -134,7 +252,7 @@
                            th:errors="*{lopHanhChinh}"></small>
                 </div>
 
-                <fieldset th:if="${!isEdit}" class="form-group">
+                <fieldset th:if="${!isEdit}" class="form-group account-form-roles">
                     <legend>Vai trò</legend>
 
                     <label th:each="vaiTro : ${vaiTros}" class="checkbox-label">

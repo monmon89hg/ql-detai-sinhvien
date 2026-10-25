@@ -38,8 +38,27 @@
                             </a>
                         </div>
 
+                        <form th:action="@{/hoi-dong}" method="get" class="btn-row"
+                              style="align-items: flex-end; margin-bottom: 20px;">
+                            <div class="form-field" style="margin: 0; flex: 1 1 260px; max-width: 520px;">
+                                <label for="maDot">Đợt đăng ký</label>
+                                <select id="maDot" name="maDot" class="form-control"
+                                        th:disabled="${#lists.isEmpty(danhSachDot)}">
+                                    <option value="" th:selected="${maDotDuocChon == ''}">Tất cả đợt</option>
+                                    <option th:each="dot : ${danhSachDot}"
+                                            th:value="${dot.maDot}"
+                                            th:text="${dot.tenDot + ' (' + dot.maDot + ')'}"
+                                            th:selected="${dot.maDot == maDotDuocChon}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary"
+                                    th:disabled="${#lists.isEmpty(danhSachDot)}">Lọc</button>
+                        </form>
+
                         <p th:if="${#lists.isEmpty(danhSachHoiDong)}">
-                            Chưa có hội đồng nào trong hệ thống.
+                            <span th:if="${#lists.isEmpty(danhSachDot)}">Chưa có đợt đăng ký nào trong hệ thống.</span>
+                            <span th:unless="${#lists.isEmpty(danhSachDot)}"
+                                  th:text="${maDotDuocChon == '' ? 'Chưa có hội đồng nào trong hệ thống.' : 'Chưa có hội đồng nào trong đợt đăng ký này.'}"></span>
                         </p>
 
 
@@ -55,6 +74,7 @@
                                         <th scope="col">Mã đợt</th>
                                         <th scope="col">Địa điểm</th>
                                         <th scope="col">Trạng thái</th>
+                                        <th scope="col" th:if="${coQuyenTaoHoiDong}">Thao tác</th>
                                     </tr>
                                 </thead>
 
@@ -73,7 +93,33 @@
                                             th:text="${#strings.isEmpty(hoiDong.diaDiem)
                                                 ? 'Chưa cập nhật' : hoiDong.diaDiem}"
                                         ></td>
-                                        <td th:text="${hoiDong.trangThai}"></td>
+                                        <td>
+                                            <span class="workflow-status workflow-status--neutral"
+                                                  th:if="${hoiDong.trangThai.name() == 'NHAP'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--waiting"
+                                                  th:if="${hoiDong.trangThai.name() == 'SAN_SANG'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--active"
+                                                  th:if="${hoiDong.trangThai.name() == 'DANG_CHAM'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                            <span class="workflow-status workflow-status--completed"
+                                                  th:if="${hoiDong.trangThai.name() == 'DA_KHOA'}"
+                                                  th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                        </td>
+                                        <td th:if="${coQuyenTaoHoiDong}">
+                                            <form th:if="${maHoiDongCoTheXoa.contains(hoiDong.maHoiDong)}"
+                                                  th:action="@{/hoi-dong/{maHoiDong}/xoa(maHoiDong=${hoiDong.maHoiDong})}"
+                                                  method="post"
+                                                  onsubmit="return confirm('Bạn có chắc muốn xóa hội đồng này?');">
+                                                <input type="hidden" name="version" th:value="${hoiDong.version}">
+                                                <input type="hidden" name="maDot" th:value="${maDotDuocChon}">
+                                                <button type="submit" class="btn btn-outline"
+                                                        th:attr="aria-label=${'Xóa hội đồng ' + hoiDong.maHoiDong}">Xóa</button>
+                                            </form>
+                                            <span th:unless="${maHoiDongCoTheXoa.contains(hoiDong.maHoiDong)}"
+                                                  title="Chỉ xóa hội đồng nháp chưa có thành viên và chưa được phân công nhóm.">—</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

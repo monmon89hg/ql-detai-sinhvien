@@ -28,12 +28,16 @@
                         <div class="section-top sv-panel-heading">
                             <h2 class="section-title">Thông tin hội đồng</h2>
 
-                            <a
-                                class="btn btn-outline"
-                                th:href="@{/hoi-dong}"
-                            >
-                                Quay lại danh sách
-                            </a>
+                            <div class="btn-row">
+                                <a class="btn btn-primary"
+                                   th:if="${coQuyenSuaThongTin}"
+                                   th:href="@{/hoi-dong/{maHoiDong}/sua(maHoiDong=${hoiDong.maHoiDong})}">
+                                    Sửa thông tin
+                                </a>
+                                <a class="btn btn-outline" th:href="@{/hoi-dong(maDot=${hoiDong.maDot})}">
+                                    Quay lại danh sách
+                                </a>
+                            </div>
                         </div>
 
                         <table class="data-table">
@@ -63,7 +67,20 @@
 
                                 <tr>
                                     <th scope="row">Trạng thái</th>
-                                    <td th:text="${hoiDong.trangThai}"></td>
+                                    <td>
+                                        <span class="workflow-status workflow-status--neutral"
+                                              th:if="${hoiDong.trangThai.name() == 'NHAP'}"
+                                              th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                        <span class="workflow-status workflow-status--waiting"
+                                              th:if="${hoiDong.trangThai.name() == 'SAN_SANG'}"
+                                              th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                        <span class="workflow-status workflow-status--active"
+                                              th:if="${hoiDong.trangThai.name() == 'DANG_CHAM'}"
+                                              th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                        <span class="workflow-status workflow-status--completed"
+                                              th:if="${hoiDong.trangThai.name() == 'DA_KHOA'}"
+                                              th:text="${hoiDong.trangThai.tenHienThi}"></span>
+                                    </td>
                                 </tr>
 
                                 <tr>

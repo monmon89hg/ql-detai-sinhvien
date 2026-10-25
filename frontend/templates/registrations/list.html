@@ -22,7 +22,7 @@
         <div><dt>Mã nhóm</dt><dd th:text="${nhomCuaToi.maNhom}"></dd></div>
         <div><dt>Số thành viên</dt><dd th:text="|${nhomCuaToi.soThanhVien}/5|"></dd></div>
         <div><dt>Trạng thái</dt><dd th:text="${nhomCuaToi.trangThai}"></dd></div></dl>
-    <div th:if="${dangKyHienTai != null}" class="sv-info sv-info-soft">
+    <div th:if="${dangKyHienTai != null}" class="sv-info sv-info-soft" th:classappend="${dangKyHienTai.trangThai == 'TU_CHOI' ? ' sv-alert-danger' : ''}">
         <strong>Đã có đăng ký:</strong> <span th:text="${dangKyHienTai.tenDeTai}">Đề tài</span>
         · <span class="sv-state" th:attr="data-state=${dangKyHienTai.trangThai}" th:text="${dangKyHienTai.trangThai}"></span>
         <p th:if="${dangKyHienTai.lyDoTuChoi != null}" th:text="|Lý do từ chối: ${dangKyHienTai.lyDoTuChoi}|"></p>
@@ -54,7 +54,8 @@
             </td></tr></tbody>
         </table></div>
 </section>
-<div class="sv-info"><strong>Quy định:</strong> Nhóm có 3–5 thành viên chính thức, đúng một nhóm trưởng và đang trong thời gian đăng ký. Mỗi nhóm chỉ có tối đa một bản ghi đăng ký đề tài; đăng ký bị từ chối được giữ lại và không tạo bản ghi thứ hai.</div>
+<div class="sv-info sv-alert-warning" role="note"><strong>Điều kiện đăng ký đề tài:</strong> Chỉ nhóm trưởng được gửi đăng ký. Nhóm phải chốt danh sách với 3–5 thành viên chính thức, có đúng 1 nhóm trưởng; đề tài phải được công bố và đợt đăng ký của nhóm vẫn còn mở. Nếu chưa đủ điều kiện, danh sách đề tài chỉ cho phép xem.</div>
+<div class="sv-info sv-alert-danger" role="note"><strong>Quan trọng — kiểm tra trước khi gửi:</strong> Mỗi nhóm chỉ được gửi 1 đăng ký đề tài. Nếu bị từ chối, đăng ký cũ vẫn được lưu và hệ thống hiện không cho gửi một đăng ký mới cho cùng nhóm.</div>
 
 <nav class="sv-actions" aria-label="Phân trang">
     <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/dang-ky-de-tai(trang=${trang - 1},tuKhoa=${tuKhoa},maDot=${maDot})}">Trang trước</a>

@@ -58,7 +58,7 @@
     </section>
     <section class="sv-panel" th:if="${laNhomTruong}">
         <div class="sv-panel-heading"><h2>Thao tác nhóm trưởng</h2></div>
-        <p class="sv-help">Chỉ chốt nhóm khi đủ 3–5 thành viên chính thức và nhóm có đúng một nhóm trưởng. Hệ thống sẽ kiểm tra lại khi gửi.</p>
+        <div class="sv-info sv-alert-danger" role="note"><strong>Kiểm tra kỹ trước khi chốt nhóm:</strong> Nhóm cần có từ 3 đến 5 thành viên đã được chấp nhận tham gia, trong đó có đúng 1 nhóm trưởng. Chỉ sau khi chốt danh sách, nhóm mới có thể đăng ký đề tài. Danh sách đã chốt không thể thêm hoặc xóa thành viên qua chức năng quản lý nhóm thông thường.</div>
         <div class="sv-actions"><form th:if="${nhomCuaToi.trangThai == 'DANG_LAP'}" method="post"
             th:action="@{/nhom/{maNhom}/chot(maNhom=${nhomCuaToi.maNhom})}" data-sv-confirm="Xác nhận chốt danh sách thành viên?">
             <button class="btn btn-primary" type="submit">Chốt danh sách nhóm</button></form>

@@ -18,6 +18,7 @@ import vn.edu.group12.qldt.config.SecurityConfig;
 import vn.edu.group12.qldt.config.auth.PasswordConfig;
 import vn.edu.group12.qldt.controller.auth.AuthController;
 import vn.edu.group12.qldt.dto.detai.DeTaiDto;
+import vn.edu.group12.qldt.dto.hoidong.HoiDongSuaForm;
 import vn.edu.group12.qldt.entity.detai.DeTai;
 import vn.edu.group12.qldt.entity.detai.DotDangKy;
 import vn.edu.group12.qldt.repository.admin.*;
@@ -80,6 +81,7 @@ class SecurityMethodAuthorizationTests {
         assertThatThrownBy(() -> assignments.xoaPhanCong("DT01", "OTHER")).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> rounds.congBoDot("DOT01")).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> councils.layDanhSach()).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> councils.traCuuDanhSach(null)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> results.congBo("N01")).isInstanceOf(AccessDeniedException.class);
         verifyNoInteractions(topicRepo, assignmentRepo, roundRepo, councilRepo, resultRepo);
     }
@@ -134,6 +136,24 @@ class SecurityMethodAuthorizationTests {
     }
 
     @Test
+    void onlyDeanCanCallCouncilEditingServicesDirectly() {
+        HoiDongSuaForm form = new HoiDongSuaForm();
+        form.setMaHoiDong("HD02");
+        form.setTenHoiDong("Hội đồng mới");
+        form.setVersion(0L);
+        for (String role : new String[]{"ADMIN", "GIANG_VIEN", "SINH_VIEN", "TRUONG_BO_MON"}) {
+            signIn("USER", role);
+            assertThatThrownBy(() -> councils.layDeSua("HD01"))
+                .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> councils.suaThongTin("HD01", form))
+                .isInstanceOf(AccessDeniedException.class);
+            assertThatThrownBy(() -> councils.xoaHoiDong("HD01", 0L))
+                .isInstanceOf(AccessDeniedException.class);
+        }
+        verifyNoInteractions(councilRepo);
+    }
+
+    @Test
     void adminCanReadCouncilListButCannotChangeCouncil() {
         signIn("DB_ADMIN", "ADMIN");
 
@@ -161,6 +181,10 @@ class SecurityMethodAuthorizationTests {
         DeTaiDto dto = new DeTaiDto();
         dto.setMaDeTai("DT01");
         dto.setMaDot("DOT01");
+        dto.setMaBoMon("CNPM");
+        var boMon = new vn.edu.group12.qldt.entity.admin.BoMon();
+        boMon.setMaBoMon("CNPM");
+        when(departmentRepo.findById("CNPM")).thenReturn(Optional.of(boMon));
         dto.setTenDeTai("Security regression fixture");
         topics.deXuatDeTai(dto, "DB_GV");
         verify(assignmentRepo).save(argThat(assignment ->

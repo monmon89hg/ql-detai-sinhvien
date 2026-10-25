@@ -41,7 +41,10 @@
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                         <div class="form-field">
                             <label><strong>Mã Bộ môn quản lý *</strong></label>
-                            <input type="text" class="form-control" th:field="*{maBoMon}" placeholder="VD: DEMO_CNPM, DEMO_HTTT, DEMO_KHMT" required>
+                            <select class="form-control" th:field="*{maBoMon}" required>
+                                <option value="">Chọn bộ môn quản lý</option>
+                                <option th:each="boMon : ${boMons}" th:value="${boMon.maBoMon}" th:text="${boMon.tenBoMon}"></option>
+                            </select>
                         </div>
                         <div class="form-field">
                             <label><strong>Trạng thái đề tài *</strong></label>

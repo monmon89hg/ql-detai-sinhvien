@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ThongBaoForm {
 
     @NotBlank(message = "Mã thông báo không được để trống")
@@ -22,10 +25,12 @@ public class ThongBaoForm {
 
     @NotBlank(message = "Phạm vi không được để trống")
     @Pattern(
-            regexp = "TAT_CA|SINH_VIEN|GIANG_VIEN",
+            regexp = "TAT_CA|CA_NHAN",
             message = "Phạm vi không hợp lệ"
     )
     private String phamVi = "TAT_CA";
+
+    private List<String> maNguoiNhan = new ArrayList<>();
 
     public String getMaThongBao() { return maThongBao; }
     public void setMaThongBao(String maThongBao) {
@@ -43,4 +48,9 @@ public class ThongBaoForm {
 
     public String getPhamVi() { return phamVi; }
     public void setPhamVi(String phamVi) { this.phamVi = phamVi; }
+
+    public List<String> getMaNguoiNhan() { return maNguoiNhan; }
+    public void setMaNguoiNhan(List<String> maNguoiNhan) {
+        this.maNguoiNhan = maNguoiNhan == null ? new ArrayList<>() : maNguoiNhan;
+    }
 }

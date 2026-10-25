@@ -38,7 +38,10 @@
                         </div>
                         <div class="form-field">
                             <label>Mã Bộ môn quản lý *</label>
-                            <input type="text" class="form-control" th:field="*{maBoMon}" value="DEMO_CNPM" placeholder="VD: DEMO_CNPM, DEMO_HTTT, DEMO_KHMT" required>
+                            <select class="form-control" th:field="*{maBoMon}" required>
+                                <option value="">Chọn bộ môn quản lý</option>
+                                <option th:each="boMon : ${boMons}" th:value="${boMon.maBoMon}" th:text="${boMon.tenBoMon}"></option>
+                            </select>
                         </div>
                     </div>
 

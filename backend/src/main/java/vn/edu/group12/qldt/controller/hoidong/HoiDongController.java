@@ -1,6 +1,7 @@
 package vn.edu.group12.qldt.controller.hoidong;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.BindingResult;
@@ -13,9 +14,13 @@ import java.security.Principal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import vn.edu.group12.qldt.service.hoidong.HoiDongService;
 import vn.edu.group12.qldt.dto.hoidong.HoiDongForm;
+import vn.edu.group12.qldt.dto.hoidong.DanhSachHoiDong;
+import vn.edu.group12.qldt.dto.hoidong.HoiDongSuaForm;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -58,6 +63,7 @@ public class HoiDongController {
 
     @GetMapping("/hoi-dong")
     public String danhSach(
+            @RequestParam(required = false) String maDot,
             Model model,
             Principal principal,
             HttpServletRequest request) {
@@ -67,10 +73,15 @@ public class HoiDongController {
             nguoiDungHienThiService.layHoTenHienTai()
         );
 
-        model.addAttribute(
-            "danhSachHoiDong",
-            hoiDongService.layDanhSach()
-        );
+        try {
+            DanhSachHoiDong danhSach = hoiDongService.traCuuDanhSach(maDot);
+            model.addAttribute("danhSachHoiDong", danhSach.danhSachHoiDong());
+            model.addAttribute("danhSachDot", danhSach.danhSachDot());
+            model.addAttribute("maDotDuocChon", danhSach.maDotDuocChon());
+            model.addAttribute("maHoiDongCoTheXoa", danhSach.maHoiDongCoTheXoa());
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        }
 
         model.addAttribute(
             "coQuyenTaoHoiDong",
@@ -78,6 +89,30 @@ public class HoiDongController {
         );
 
         return "assessment/hoi-dong/list";
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/xoa")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String xoaHoiDong(
+            @PathVariable String maHoiDong,
+            @RequestParam @PositiveOrZero Long version,
+            @RequestParam(required = false) String maDot,
+            RedirectAttributes redirectAttributes) {
+        if (maDot != null) {
+            redirectAttributes.addAttribute("maDot", maDot);
+        }
+        try {
+            hoiDongService.xoaHoiDong(maHoiDong, version);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa hội đồng thành công.");
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (DataIntegrityViolationException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                "Không thể xóa vì hội đồng đã có dữ liệu liên quan. Vui lòng tải lại trang.");
+        }
+        return "redirect:/hoi-dong";
     }
 
     @GetMapping("/hoi-dong/{maHoiDong}")
@@ -135,6 +170,8 @@ public class HoiDongController {
                 "coQuyenThemThanhVien",
                 coQuyenThemThanhVien
             );
+
+            model.addAttribute("coQuyenSuaThongTin", coQuyenThemThanhVien);
 
             model.addAttribute(
                 "coQuyenXoaThanhVien",
@@ -238,7 +275,73 @@ public class HoiDongController {
             "Tạo hội đồng thành công."
         );
 
+        redirectAttributes.addAttribute("maDot", form.getMaDot().trim());
         return "redirect:/hoi-dong";
+    }
+
+    @GetMapping("/hoi-dong/{maHoiDong}/sua")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String hienThiFormSua(
+            @PathVariable String maHoiDong,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            HoiDong hoiDong = hoiDongService.layDeSua(maHoiDong);
+            HoiDongSuaForm form = new HoiDongSuaForm();
+            form.setMaHoiDong(hoiDong.getMaHoiDong());
+            form.setTenHoiDong(hoiDong.getTenHoiDong());
+            form.setDiaDiem(hoiDong.getDiaDiem());
+            form.setVersion(hoiDong.getVersion());
+            model.addAttribute("hoiDong", hoiDong);
+            model.addAttribute("hoiDongSuaForm", form);
+            model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
+            return "assessment/hoi-dong/sua-form";
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addAttribute("maHoiDong", maHoiDong);
+            return "redirect:/hoi-dong/{maHoiDong}";
+        }
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/sua")
+    @PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String suaThongTin(
+            @PathVariable String maHoiDong,
+            @Valid @ModelAttribute("hoiDongSuaForm") HoiDongSuaForm form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        HoiDong hoiDong;
+        try {
+            hoiDong = hoiDongService.layDeSua(maHoiDong);
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            redirectAttributes.addAttribute("maHoiDong", maHoiDong);
+            return "redirect:/hoi-dong/{maHoiDong}";
+        }
+        model.addAttribute("hoiDong", hoiDong);
+        model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
+        if (bindingResult.hasErrors()) {
+            return "assessment/hoi-dong/sua-form";
+        }
+        try {
+            HoiDong daLuu = hoiDongService.suaThongTin(maHoiDong, form);
+            redirectAttributes.addAttribute("maHoiDong", daLuu.getMaHoiDong());
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin hội đồng thành công.");
+            return "redirect:/hoi-dong/{maHoiDong}";
+        } catch (EntityNotFoundException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+        } catch (DataIntegrityViolationException ex) {
+            model.addAttribute("errorMessage",
+                "Không thể cập nhật vì mã bị trùng hoặc dữ liệu đã thay đổi. Vui lòng tải lại trang và kiểm tra.");
+        }
+        return "assessment/hoi-dong/sua-form";
     }
 
     @PostMapping("/hoi-dong/{maHoiDong}/thanh-vien")
