@@ -40,6 +40,12 @@
     </form>
 </div>
 <section class="sv-panel"><div class="sv-panel-heading"><h2>Đề tài có thể đăng ký</h2></div>
+    <!-- Gợi ý ngắn theo trạng thái thực của nhóm; không lặp thông báo nếu đã có đăng ký. -->
+    <p class="sv-registration-hint" th:if="${goiYChiXem != null}" role="note">
+        <span aria-hidden="true">ⓘ</span>
+        <span th:text="${goiYChiXem}"></span>
+        <a th:if="${nhomCuaToi != null}" th:href="@{/nhom/cua-toi}">Nhóm của tôi</a>
+    </p>
     <div class="sv-empty" th:if="${#lists.isEmpty(danhSachDeTai)}">Chưa có đề tài phù hợp được công bố.</div>
     <div class="sv-table-wrap" th:unless="${#lists.isEmpty(danhSachDeTai)}"><table class="data-table sv-table">
         <thead><tr><th>Mã đề tài</th><th>Tên đề tài</th><th>Bộ môn</th><th>Đợt</th><th>Thao tác</th></tr></thead>
