@@ -51,7 +51,14 @@
             <td th:text="${nhom.tenDot}">Tên đợt</td>
             <td th:text="|${nhom.soThanhVien}/5|">3/5</td>
             <td><span class="sv-state" th:attr="data-state=${nhom.trangThai}" th:text="${nhom.trangThai}">ĐANG LẬP</span></td>
-            <td><a class="btn btn-outline sv-btn-small" th:href="@{/nhom/{maNhom}(maNhom=${nhom.maNhom})}">Xem chi tiết</a></td>
+            <td>
+                <div class="sv-group-actions">
+                    <a class="btn btn-outline sv-btn-small"
+                       th:href="@{/nhom/{maNhom}(maNhom=${nhom.maNhom})}">Chi tiết</a>
+                    <span class="sv-request-status"
+                          th:if="${nhomDaGuiYeuCau.contains(nhom.maNhom)}">Đã gửi yêu cầu tham gia</span>
+                </div>
+            </td>
         </tr></tbody></table></div>
 </section>
 

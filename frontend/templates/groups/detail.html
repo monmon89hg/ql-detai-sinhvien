@@ -31,6 +31,8 @@
         <thead><tr><th>Mã sinh viên</th><th>Họ và tên</th><th>Vai trò</th></tr></thead>
         <tbody><tr th:each="tv : ${danhSachThanhVien}"><td th:text="${tv.maSinhVien}"></td>
             <td th:text="${tv.hoTen}"></td><td th:text="${tv.laNhomTruong ? 'Nhóm trưởng' : 'Thành viên'}"></td></tr></tbody></table></div>
+    <div class="sv-info sv-request-notice" th:if="${trangThaiYeuCauCuaToi == 'CHO_DUYET'}"
+         role="status">Đã gửi yêu cầu tham gia. Vui lòng chờ nhóm trưởng xét duyệt.</div>
     <form th:if="${coTheGuiYeuCau}" th:action="@{/nhom/{maNhom}/yeu-cau(maNhom=${nhom.maNhom})}" method="post" data-sv-form>
         <div class="sv-actions"><button class="btn btn-primary" type="submit">Gửi yêu cầu tham gia</button>
             <span class="sv-help">Nhóm trưởng sẽ xem và phản hồi yêu cầu.</span></div>

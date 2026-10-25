@@ -8,8 +8,10 @@ import vn.edu.group12.qldt.domain.nhom.NhomBaoCaoModels.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class NhomBaoCaoRepository {
@@ -48,6 +50,13 @@ public class NhomBaoCaoRepository {
                 tuKhoa,
                 tuKhoa,
                 offset);
+    }
+
+    // Trạng thái đang chờ xét duyệt của sinh viên đăng nhập, không lấy yêu cầu người khác.
+    public Set<String> nhomDaGuiYeuCau(String maSinhVien) {
+        return new HashSet<>(jdbc.query(
+                "SELECT ma_nhom FROM thanh_vien_nhom WHERE ma_sinh_vien=? AND trang_thai='CHO_DUYET'",
+                (r, i) -> r.getString(1), maSinhVien));
     }
 
     public Optional<Nhom> nhom(String ma) {
