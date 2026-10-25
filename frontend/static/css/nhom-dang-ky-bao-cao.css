@@ -144,6 +144,19 @@ body.sv-reject-modal-open { overflow:hidden; }
     .sv-module .sv-reject-footer > button { flex:1 1 140px; }
 }
 
+/* Danh sách báo cáo Trưởng khoa: căn bộ lọc gọn gàng và đánh dấu nhóm đang xem. */
+.sv-module .sv-report-filter { display:grid; grid-template-columns:minmax(220px,2fr) minmax(170px,1.3fr) minmax(170px,1fr) max-content; gap:10px; align-items:end; margin-bottom:18px; }
+.sv-module .sv-report-filter .sv-field { min-width:0; }
+.sv-module .sv-report-selected { background:#f0f7fc; }
+.sv-module .sv-report-status-success { background:#e8f6ee; color:#1d724b; }
+@media(max-width:1080px) {
+    .sv-module .sv-report-filter { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+    .sv-module .sv-report-filter { grid-template-columns:minmax(0,1fr); }
+    .sv-module .sv-report-filter .sv-filter-button { width:100%; }
+}
+
 /* Chỉ căn lại form lọc trên trang /nhom, không ảnh hưởng trang khác. */
 .sv-module .sv-group-toolbar { flex-direction:column; align-items:stretch; }
 .sv-module .sv-group-shortcuts { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
