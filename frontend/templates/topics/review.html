@@ -48,13 +48,13 @@
                                     <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: nowrap;">
                                         <!-- Nút Duyệt -->
                                         <form th:action="@{/de-tai/{maDeTai}/duyet(maDeTai=${dt.maDeTai})}" method="post" style="display:inline; margin:0;">
-                                            <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 12px; font-size:12px; white-space: nowrap;">Duyệt</button>
+                                            <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 12px; font-size:12px; white-space: nowrap; color: #18794e;">Duyệt</button>
                                         </form>
 
                                         <!-- Nút Từ chối -->
                                         <form th:action="@{/de-tai/{maDeTai}/tu-choi(maDeTai=${dt.maDeTai})}" method="post" style="display:inline; margin:0;" onsubmit="var reason = prompt('Nhập lý do từ chối đề tài:'); if(!reason) return false; this.lyDoTuChoi.value = reason;">
                                             <input type="hidden" name="lyDoTuChoi" value="">
-                                            <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 12px; font-size:12px; white-space: nowrap;">Từ chối</button>
+                                            <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 12px; font-size:12px; white-space: nowrap; color: #c0392b;">Từ chối</button>
                                         </form>
                                     </div>
                                 </td>
