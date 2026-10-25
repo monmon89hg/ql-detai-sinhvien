@@ -47,7 +47,8 @@
             <td><strong th:text="${dt.tenDeTai}"></strong></td><td th:text="${dt.tenBoMon}"></td>
             <td th:text="${dt.tenDot}"></td><td>
                 <form method="post" th:if="${duDieuKienDangKy and laNhomTruong and dangKyHienTai == null}"
-                    th:action="@{/dang-ky-de-tai}" data-sv-confirm="Gửi đăng ký đề tài này cho nhóm?">
+                    th:action="@{/dang-ky-de-tai}" data-sv-register-confirm
+                    th:attr="data-sv-register-code=${dt.maDeTai},data-sv-register-title=${dt.tenDeTai}">
                     <input type="hidden" name="maDeTai" th:value="${dt.maDeTai}">
                     <button class="btn btn-primary sv-btn-small" type="submit">Đăng ký</button></form>
                 <span class="sv-help" th:unless="${duDieuKienDangKy and laNhomTruong and dangKyHienTai == null}">Chỉ xem</span>
@@ -56,6 +57,36 @@
 </section>
 <div class="sv-info sv-alert-warning" role="note"><strong>Điều kiện đăng ký đề tài:</strong> Chỉ nhóm trưởng được gửi đăng ký. Nhóm phải chốt danh sách với 3–5 thành viên chính thức, có đúng 1 nhóm trưởng; đề tài phải được công bố và đợt đăng ký của nhóm vẫn còn mở. Nếu chưa đủ điều kiện, danh sách đề tài chỉ cho phép xem.</div>
 <div class="sv-info sv-alert-danger" role="note"><strong>Quan trọng — kiểm tra trước khi gửi:</strong> Mỗi nhóm chỉ được gửi 1 đăng ký đề tài. Nếu bị từ chối, đăng ký cũ vẫn được lưu và hệ thống hiện không cho gửi một đăng ký mới cho cùng nhóm.</div>
+
+<!-- Xác nhận đăng ký trên giao diện thay cho window.confirm của trình duyệt. -->
+<div class="sv-reject-overlay" data-sv-register-dialog hidden>
+    <section class="sv-reject-modal" role="dialog" aria-modal="true" tabindex="-1"
+             aria-labelledby="sv-register-dialog-title" aria-describedby="sv-register-dialog-desc"
+             data-sv-register-panel>
+        <div class="sv-reject-heading">
+            <h2 id="sv-register-dialog-title">Xác nhận đăng ký đề tài</h2>
+            <button class="sv-reject-close" type="button" data-sv-register-close
+                    aria-label="Đóng hộp thoại">&times;</button>
+        </div>
+        <p id="sv-register-dialog-desc" class="sv-help">
+            Vui lòng kiểm tra đúng đề tài trước khi gửi đăng ký cho nhóm.
+        </p>
+        <dl class="sv-facts">
+            <div><dt>Mã đề tài</dt><dd data-sv-register-code>—</dd></div>
+            <div><dt>Tên đề tài</dt><dd data-sv-register-title>—</dd></div>
+        </dl>
+        <p class="sv-info sv-alert-warning">
+            Mỗi nhóm chỉ có thể đăng ký một đề tài. Nếu đăng ký bị từ chối,
+            hiện chưa thể gửi đăng ký khác cho cùng nhóm.
+        </p>
+        <div class="sv-reject-footer">
+            <button class="btn btn-outline" type="button" data-sv-register-close>Hủy</button>
+            <button class="btn btn-primary" type="button" data-sv-register-submit>
+                Xác nhận đăng ký
+            </button>
+        </div>
+    </section>
+</div>
 
 <nav class="sv-actions" aria-label="Phân trang">
     <a class="btn btn-outline" th:if="${trang > 0}" th:href="@{/dang-ky-de-tai(trang=${trang - 1},tuKhoa=${tuKhoa},maDot=${maDot})}">Trang trước</a>
