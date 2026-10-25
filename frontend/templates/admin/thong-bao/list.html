@@ -6,7 +6,7 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <div class="app-grid">
-    <aside th:replace="~{fragments/sidebar :: sidebar('announcements')}"></aside>
+    <aside th:replace="~{fragments/sidebar :: sidebar('announcement-management')}"></aside>
 
     <main class="page" id="content">
         <div th:replace="~{fragments/breadcrumb :: breadcrumb('Quản lý thông báo')}"></div>
@@ -23,9 +23,9 @@
 
         <div th:replace="~{fragments/messages :: messages}"></div>
 
-        <section class="card">
+        <section class="card admin-list-card">
             <div class="table-responsive">
-                <table class="data-table">
+                <table class="data-table admin-list-table admin-notice-table">
                     <thead>
                     <tr>
                         <th>Tiêu đề</th>
@@ -46,22 +46,23 @@
 
                     <tr th:each="thongBao : ${thongBaos.content}">
                         <td>
-                            <strong th:text="${thongBao.tieuDe}"></strong>
-                            <div th:text="${thongBao.noiDung}"></div>
+                            <strong class="admin-notice-title" th:text="${thongBao.tieuDe}"></strong>
+                            <div class="admin-notice-content" th:text="${thongBao.noiDung}"></div>
                         </td>
-                        <td th:text="${thongBao.phamVi}"></td>
+                        <td><span class="notice-scope-pill" th:text="${thongBao.phamVi == 'TAT_CA' ? 'Tất cả' : (thongBao.phamVi == 'CA_NHAN' ? 'Cá nhân' : thongBao.phamVi)}"></span></td>
                         <td th:text="${thongBao.maDot != null ? thongBao.maDot : '—'}"></td>
                         <td th:text="${thongBao.tenNguoiDang}"></td>
                         <td>
-                            <span th:text="${thongBao.trangThai}"
-                                  th:classappend="${thongBao.trangThai == 'CONG_BO'} ? ' status-active' : ' status-inactive'">
+                            <span class="notice-state"
+                                  th:classappend="${thongBao.trangThai == 'CONG_BO' ? ' notice-state--published' : (thongBao.trangThai == 'AN' ? ' notice-state--hidden' : ' notice-state--draft')}"
+                                  th:text="${thongBao.trangThai == 'CONG_BO' ? 'Đã công bố' : (thongBao.trangThai == 'AN' ? 'Đã ẩn' : (thongBao.trangThai == 'NHAP' ? 'Bản nháp' : thongBao.trangThai))}">
                             </span>
                         </td>
                         <td th:text="${thongBao.congBoLuc != null
                                       ? #temporals.format(thongBao.congBoLuc, 'dd/MM/yyyy HH:mm')
                                       : '—'}">
                         </td>
-                        <td class="table-actions">
+                        <td class="table-actions admin-notice-actions">
                             <a th:if="${thongBao.trangThai == 'NHAP'}"
                                class="btn btn-outline btn-sm"
                                th:href="@{/thong-bao/quan-ly/{id}/edit(id=${thongBao.maThongBao})}">
