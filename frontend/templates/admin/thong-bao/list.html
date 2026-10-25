@@ -62,7 +62,8 @@
                                       ? #temporals.format(thongBao.congBoLuc, 'dd/MM/yyyy HH:mm')
                                       : '—'}">
                         </td>
-                        <td class="table-actions admin-notice-actions">
+                        <td>
+                            <div class="admin-notice-actions">
                             <a th:if="${thongBao.trangThai == 'NHAP'}"
                                class="btn btn-outline btn-sm"
                                th:href="@{/thong-bao/quan-ly/{id}/edit(id=${thongBao.maThongBao})}">
@@ -90,6 +91,7 @@
                                     Ẩn
                                 </button>
                             </form>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -118,3 +120,6 @@
 </div>
 </body>
 </html>
+
+
+
