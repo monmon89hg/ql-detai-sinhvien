@@ -11,9 +11,13 @@
 
 Ứng dụng web hỗ trợ Khoa CNTT quản lý các đợt đăng ký, đề tài, nhóm sinh viên, việc nộp báo cáo, hội đồng chấm điểm và kết quả. Hệ thống được xây dựng theo kiến trúc **Spring Boot MVC + Thymeleaf**, sử dụng **MySQL** để lưu trữ dữ liệu.
 
-Ứng dụng được đóng gói bằng **Docker**, triển khai trên **Render**; **Railway MySQL 8.4** lưu dữ liệu nghiệp vụ và **Cloudflare R2** lưu tệp báo cáo PDF. Mọi phân hệ dùng chung cơ chế xác thực, phân quyền và giao diện Thymeleaf.
+Ứng dụng được đóng gói bằng **Docker**, triển khai chính trên **Railway**, với **Render** là môi trường phụ; **Railway MySQL 8.4** lưu dữ liệu nghiệp vụ và **Cloudflare R2** lưu tệp báo cáo PDF. Mọi phân hệ dùng chung cơ chế xác thực, phân quyền và giao diện Thymeleaf.
 
-> **Trạng thái (25/10/2026):** Mã nguồn tích hợp trên nhánh `develop`; CI gồm kiểm thử build/MVC/Security và MySQL 8.4. Kết quả CI của một commit không thay thế kiểm thử thủ công trên môi trường triển khai.
+> **Trạng thái (25/10/2026):** Mã nguồn đã tích hợp từ `develop` vào `main` để nộp bản chính thức; CI gồm kiểm thử build/MVC/Security và MySQL 8.4. Kết quả CI của một commit không thay thế kiểm thử thủ công trên môi trường triển khai.
+
+**Website chính (Railway):** https://ql-detai-sinhvien-production.up.railway.app  
+**Website phụ (Render):** https://ql-detai-sinhvien.onrender.com  
+**Repository:** https://github.com/monmon89hg/ql-detai-sinhvien
 
 ## 1. Thành viên và phân công
 
@@ -51,7 +55,7 @@ Mỗi thành viên triển khai **giao diện Thymeleaf, xử lý nghiệp vụ 
 | Logging & giám sát | Spring AOP | Đo thời gian thực thi và ghi nhận lỗi ở tầng Service |
 | Build & đóng gói | Maven Wrapper, Docker (multi-stage build) | Tạo JAR và image triển khai |
 | CI | GitHub Actions | Build, unit/MVC/Security tests và kiểm thử MySQL 8.4 độc lập |
-| Triển khai ứng dụng | Render | Chạy container chứa ứng dụng Spring Boot và giao diện Thymeleaf |
+| Triển khai ứng dụng | Railway (chính), Render (phụ) | Chạy container Spring Boot MVC + Thymeleaf |
 | Quản lý mã nguồn | Git, GitHub | Quản lý branch, review và Pull Request |
 
 ### 3.1. Kiến trúc triển khai
@@ -60,15 +64,17 @@ Mỗi thành viên triển khai **giao diện Thymeleaf, xử lý nghiệp vụ 
 Trình duyệt người dùng
          |
          v
-Render — Docker container (Spring Boot MVC + Thymeleaf)
+Railway — Docker container (Spring Boot MVC + Thymeleaf)
          |                                |
          v                                v
 Railway — MySQL 8.4               Cloudflare R2 — PDF
+
+Render — môi trường triển khai phụ (nếu được bật)
 ```
 
-Toàn bộ giao diện Thymeleaf và tài nguyên tĩnh được đóng gói trong cùng ứng dụng Spring Boot; **không có frontend server riêng**. Render sử dụng cổng `PORT` do môi trường cung cấp qua Dockerfile; cấu hình local dùng cổng `8081`.
+Toàn bộ giao diện Thymeleaf và tài nguyên tĩnh được đóng gói trong cùng ứng dụng Spring Boot; **không có frontend server riêng**. Railway sử dụng cổng `PORT` do nền tảng cung cấp; cấu hình local dùng cổng `8081`.
 
-**CI và CD:** GitHub Actions chạy các quality gates của repository; Render phụ trách triển khai dịch vụ. Việc tự động deploy khi có commit mới phụ thuộc thiết lập của Render, không đồng nghĩa workflow CI tự thực hiện lệnh deploy.
+**CI và CD:** GitHub Actions chạy các quality gates của repository; Railway là môi trường triển khai ứng dụng chính, Render là môi trường phụ. Việc tự động deploy khi có commit mới phụ thuộc cấu hình kết nối nhánh GitHub tại từng dịch vụ; workflow CI không đồng nghĩa tự thực hiện lệnh deploy.
 
 **Tài nguyên bên ngoài:** cấu hình Railway, R2 và SMTP được cung cấp qua biến môi trường / secret trên dịch vụ triển khai. Không lưu mật khẩu hoặc khóa truy cập vào repository. Flyway trong `application.properties` đang tắt mặc định; chỉ bật có kiểm soát trên schema phù hợp sau khi kiểm tra lịch sử migration.
 
@@ -195,7 +201,7 @@ Workflow `.github/workflows/ci.yml` gồm hai nhóm kiểm thử chính: **Build
 
 Khi nghiệm thu trên môi trường triển khai, kiểm tra theo vai trò và theo luồng nghiệp vụ toàn hệ thống: đăng nhập/đăng xuất và phân quyền; quản lý người dùng, bộ môn và thông báo; tạo và công bố đợt đăng ký; đề xuất/duyệt/công bố đề tài; nhóm sinh viên, đăng ký đề tài và báo cáo PDF; phân công hội đồng, chấm điểm, tổng hợp/công bố và tra cứu kết quả; xuất dữ liệu Excel và gửi email khi đã cấu hình SMTP. Kiểm tra các tình huống không được cấp quyền, đầu vào không hợp lệ và CSRF trên những thao tác thay đổi dữ liệu.
 
-PDF sử dụng Cloudflare R2: cần xác nhận tải lên, tải xuống và đối chiếu metadata/SHA-256; nếu R2 chưa cấu hình, nghiệp vụ lưu/tải PDF bị chặn có chủ đích. Kết quả **Maven BUILD SUCCESS** xác nhận test mặc định đã qua, không tự chứng minh mọi luồng production hoạt động đúng; đối chiếu thêm CI MySQL và smoke test trên Render.
+PDF sử dụng Cloudflare R2: cần xác nhận tải lên, tải xuống và đối chiếu metadata/SHA-256; nếu R2 chưa cấu hình, nghiệp vụ lưu/tải PDF bị chặn có chủ đích. Kết quả **Maven BUILD SUCCESS** xác nhận test mặc định đã qua, không tự chứng minh mọi luồng production hoạt động đúng; đối chiếu thêm CI MySQL và smoke test trên Railway (môi trường chính).
 
 ## 6. Base UI chung và bản demo
 
