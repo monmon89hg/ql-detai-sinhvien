@@ -70,7 +70,7 @@
                                     <th scope="col">Hội đồng</th>
                                     <th scope="col">Trạng thái</th>
                                     <th scope="col">Điểm cuối</th>
-                                    <th scope="col" th:if="${laAdmin}">Quyền</th>
+                                    <th scope="col" class="result-permission" th:if="${laAdmin}">Quyền</th>
                                     <th scope="col" th:unless="${laAdmin}">Thao tác</th>
                                 </tr>
                             </thead>
@@ -107,7 +107,8 @@
                                         th:text="${nhom.diemCuoi != null
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
-                                    <td class="result-actions">
+                                    <td class="result-permission" th:if="${laAdmin}">Chỉ xem</td>
+                                    <td class="result-actions" th:unless="${laAdmin}">
                                         <a class="btn btn-outline" th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem chi tiết</a>
                                         <form th:if="${!laAdmin and (nhom.trangThaiDangKy == 'DA_DUYET' or nhom.trangThaiDangKy == 'DANG_THUC_HIEN')}"
                                               th:action="@{/ket-qua/{ma}/mo-cham(ma=${nhom.maNhom})}" method="post"
@@ -131,13 +132,6 @@
                                                 Công bố
                                             </button>
                                         </form>
-
-                                        <span th:if="${laAdmin}">Chỉ xem</span>
-                                        <span
-                                            th:if="${!laAdmin and nhom.trangThaiKetQua != 'DA_TONG_HOP'}"
-                                        >
-                                            —
-                                        </span>
                                     </td>
                                 </tr>
                             </tbody>

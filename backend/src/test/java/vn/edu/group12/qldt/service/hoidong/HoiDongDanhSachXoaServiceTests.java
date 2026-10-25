@@ -46,15 +46,16 @@ class HoiDongDanhSachXoaServiceTests {
     }
 
     @Test
-    void defaultUsesNewestRoundEvenWhenItHasNoCouncil() {
+    void defaultLoadsAllCouncilsEvenWhenNewestRoundHasNoCouncil() {
         when(repository.layDanhSachDotMoiNhatTruoc()).thenReturn(List.of(dot("NEW"), dot("OLD")));
-        when(repository.demDotTheoMa("NEW")).thenReturn(1L);
+        hoiDong.setMaDot("OLD");
+        when(repository.findAll(any(Sort.class))).thenReturn(List.of(hoiDong));
         var result = service.traCuuDanhSach(null);
-        assertThat(result.maDotDuocChon()).isEqualTo("NEW");
-        assertThat(result.danhSachHoiDong()).isEmpty();
-        verify(repository).findByMaDotOrderByMaHoiDongAsc("NEW");
-        verify(repository, never()).findAll(any(Sort.class));
-        verify(repository, never()).findByMaDotOrderByMaHoiDongAsc("OLD");
+        assertThat(result.maDotDuocChon()).isEmpty();
+        assertThat(result.danhSachHoiDong()).containsExactly(hoiDong);
+        verify(repository).findAll(Sort.by(Sort.Direction.ASC, "maHoiDong"));
+        verify(repository).layMaHoiDongCoTheXoa(null);
+        verify(repository, never()).findByMaDotOrderByMaHoiDongAsc(any());
     }
 
     @Test

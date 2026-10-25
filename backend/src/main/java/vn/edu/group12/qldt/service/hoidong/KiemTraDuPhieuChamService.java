@@ -37,6 +37,22 @@ public class KiemTraDuPhieuChamService {
     // Trả về các phiếu đã nộp khi mọi người chấm bắt buộc đều hoàn thành.
     @Transactional(readOnly = true)
     public List<PhieuChamDiem> layPhieuDaNopKhiDayDu(String maNhom) {
+        return kiemTraVaLayPhieu(maNhom);
+    }
+
+    public record TrangThaiPhieu(List<PhieuChamDiem> phieuDaNop, String lyDoChuaDu) {}
+
+    // Thiếu phiếu là trạng thái hiển thị; bắt lỗi trước khi rời transaction proxy.
+    @Transactional(readOnly = true)
+    public TrangThaiPhieu xemTrangThai(String maNhom) {
+        try {
+            return new TrangThaiPhieu(kiemTraVaLayPhieu(maNhom), null);
+        } catch (IllegalArgumentException ex) {
+            return new TrangThaiPhieu(List.of(), ex.getMessage());
+        }
+    }
+
+    private List<PhieuChamDiem> kiemTraVaLayPhieu(String maNhom) {
         if (maNhom == null || maNhom.isBlank()) {
             throw new IllegalArgumentException("Mã nhóm không được để trống.");
         }

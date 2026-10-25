@@ -153,13 +153,14 @@ class FrontendIntegrationTests {
 
     @Test
     void councilListRendersSharedFragments() throws Exception {
-        when(hoiDongService.traCuuDanhSach(null)).thenReturn(danhSach("DOT_TEST", Set.of()));
+        when(hoiDongService.traCuuDanhSach(null)).thenReturn(danhSach("", Set.of()));
 
         when(nguoiDungHienThiService.layHoTenHienTai())
             .thenReturn("Đặng Minh Phú");
 
         mvc.perform(get("/hoi-dong").with(user("TEST_TK").roles("TRUONG_KHOA")))
             .andExpect(status().isOk())
+            .andExpect(content().string(containsString("<option value=\"\" selected=\"selected\">Tất cả đợt</option>")))
             .andExpect(content().string(containsString("HD_TEST")))
             .andExpect(content().string(containsString("workflow-status--waiting")))
             .andExpect(content().string(containsString(">Sẵn sàng</span>")))
@@ -271,11 +272,11 @@ class FrontendIntegrationTests {
     }
 
     @Test
-    void emptyLatestRoundAndInvalidSelectionRenderAnEmptyPageOr404() throws Exception {
+    void emptySelectedRoundAndInvalidSelectionRenderAnEmptyPageOr404() throws Exception {
         var selected = danhSach("DOT_TEST", Set.of());
-        when(hoiDongService.traCuuDanhSach(null)).thenReturn(new DanhSachHoiDong(
+        when(hoiDongService.traCuuDanhSach("DOT_TEST")).thenReturn(new DanhSachHoiDong(
             selected.danhSachDot(), "DOT_TEST", List.of(), Set.of()));
-        mvc.perform(get("/hoi-dong").with(user("TK").roles("TRUONG_KHOA")))
+        mvc.perform(get("/hoi-dong").param("maDot", "DOT_TEST").with(user("TK").roles("TRUONG_KHOA")))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Chưa có hội đồng nào trong đợt đăng ký này.")));
         doThrow(new jakarta.persistence.EntityNotFoundException("Đợt không tồn tại"))
