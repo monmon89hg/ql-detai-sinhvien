@@ -40,6 +40,10 @@ public class NhomBaoCaoViewService {
         m.put("maDot", round);
         m.put("trangThai", status);
         m.put("danhSachDot", danhMuc.danhSachDot(false, now()));
+        // Nút tạo nhóm chỉ hiện nếu sinh viên chưa thuộc nhóm nào.
+        // Service tạo nhóm vẫn giữ ràng buộc chuaCoNhom(...) làm nguồn xác thực cuối cùng.
+        m.put("coTheTaoNhom", u.laSinhVien()
+                && repo.nhomHienTai(u.maNguoiDung()).isEmpty());
         trang(m, "danhSachNhom", repo.danhSachNhom(keyword, round, status, offset(page)), page);
         // Chỉ truy vấn một lần cho sinh viên hiện tại; không tạo N+1 query trên từng dòng.
         m.put("nhomDaGuiYeuCau", u.laSinhVien()
@@ -99,16 +103,34 @@ public class NhomBaoCaoViewService {
         m.put("dangKyHienTai", dk);
         boolean truong = n != null && u.laSinhVien() && u.maNguoiDung().equals(n.maNhomTruong());
         m.put("laNhomTruong", truong);
-        m.put(
-                "duDieuKienDangKy",
-                truong
-                        && dk == null
-                        && "DA_CHOT".equals(n.trangThai())
-                        && n.soThanhVien() >= 3
-                        && n.soThanhVien() <= 5
-                        && n.soNhomTruong() == 1
-                        && n.soThanhVienChot() == n.soThanhVien()
-                        && danhMuc.dot(n.maDot(), false).map(d -> d.dangMo(now())).orElse(false));
+        boolean duDieuKienDangKy = truong
+                && dk == null
+                && "DA_CHOT".equals(n.trangThai())
+                && n.soThanhVien() >= 3
+                && n.soThanhVien() <= 5
+                && n.soNhomTruong() == 1
+                && n.soThanhVienChot() == n.soThanhVien()
+                && danhMuc.dot(n.maDot(), false).map(d -> d.dangMo(now())).orElse(false);
+        m.put("duDieuKienDangKy", duDieuKienDangKy);
+        // Không lặp cảnh báo nếu chưa có nhóm hoặc đã gửi đăng ký:
+        // hai trường hợp đó đã có thông báo riêng phía trên danh sách đề tài.
+        if (n != null && dk == null && !duDieuKienDangKy) {
+            String goiYChiXem;
+            if (!truong) {
+                goiYChiXem = "Chỉ nhóm trưởng được gửi đăng ký.";
+            } else if ("DANG_LAP".equals(n.trangThai())) {
+                goiYChiXem = "Nhóm chưa chốt danh sách.";
+            } else if (!"DA_CHOT".equals(n.trangThai())) {
+                goiYChiXem = "Trạng thái nhóm hiện không cho phép đăng ký.";
+            } else if (n.soThanhVien() < 3 || n.soThanhVien() > 5
+                    || n.soNhomTruong() != 1
+                    || n.soThanhVienChot() != n.soThanhVien()) {
+                goiYChiXem = "Danh sách thành viên chưa đủ điều kiện.";
+            } else {
+                goiYChiXem = "Đợt đăng ký của nhóm chưa mở hoặc đã đóng.";
+            }
+            m.put("goiYChiXem", goiYChiXem);
+        }
         m.put("tuKhoa", keyword);
         m.put("maDot", round);
         m.put("danhSachDot", danhMuc.danhSachDot(false, now()));
