@@ -245,6 +245,30 @@
                         </form>
                     </section>
 
+                    <section class="section sv-panel" sec:authorize="hasRole('TRUONG_KHOA')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                        <form th:if="${hoiDong.trangThai.name() == 'SAN_SANG'}" method="post"
+                              th:action="@{/hoi-dong/{ma}/ve-nhap(ma=${hoiDong.maHoiDong})}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn btn-outline" type="submit">Điều chỉnh trước mở chấm</button>
+                        </form>
+                        <form th:if="${hoiDong.trangThai.name() == 'DANG_CHAM'}" method="post"
+                              th:action="@{/hoi-dong/{ma}/khoa(ma=${hoiDong.maHoiDong})}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn btn-outline" type="submit">Khóa hội đồng sau công bố</button>
+                        </form>
+                        <form th:each="luaChon : ${luaChonDoiHoiDong}" th:unless="${#lists.isEmpty(luaChon.value)}"
+                              method="post" th:action="@{/hoi-dong/{ma}/doi-phan-cong(ma=${hoiDong.maHoiDong})}">
+                            <label th:for="${'doi-' + luaChon.key}" th:text="${'Đổi hội đồng của nhóm ' + luaChon.key}"></label>
+                            <input type="hidden" name="maNhom" th:value="${luaChon.key}">
+                            <select class="form-control" name="maHoiDongMoi" th:id="${'doi-' + luaChon.key}" required>
+                                <option value="">Chọn hội đồng thay thế</option>
+                                <option th:each="hd : ${luaChon.value}" th:value="${hd.maHoiDong}" th:text="${hd.tenHoiDong}"></option>
+                            </select>
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn btn-outline" type="submit">Đổi phân công</button>
+                        </form>
+                        <a class="btn btn-outline" th:href="@{/ket-qua/quan-ly}">Mở chấm / Quản lý kết quả</a>
+                    </section>
                     <!-- Danh sách nhóm đã được phân công cho hội đồng đang xem. -->
                     <section class="section sv-panel">
                         <div class="section-top sv-panel-heading">

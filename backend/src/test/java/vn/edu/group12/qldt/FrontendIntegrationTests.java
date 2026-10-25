@@ -55,6 +55,9 @@ import static org.mockito.ArgumentMatchers.argThat;
 @ActiveProfiles("hoi-dong-local")
 class FrontendIntegrationTests {
 
+    @MockitoBean
+    private vn.edu.group12.qldt.service.hoidong.MoChamService moChamService;
+
     @Autowired
     private MockMvc mvc;
 

@@ -44,6 +44,7 @@ import vn.edu.group12.qldt.service.hoidong.NguoiDungHienThiService;
 public class HoiDongController {
 
     private final HoiDongService hoiDongService;
+    private final vn.edu.group12.qldt.service.hoidong.MoChamService moChamService;
     private final ThanhVienHoiDongService thanhVienHoiDongService;
     // Xử lý danh sách và nghiệp vụ phân công nhóm cho hội đồng.
     private final PhanCongHoiDongService phanCongHoiDongService;
@@ -53,9 +54,11 @@ public class HoiDongController {
             HoiDongService hoiDongService,
             ThanhVienHoiDongService thanhVienHoiDongService,
             PhanCongHoiDongService phanCongHoiDongService,
-            NguoiDungHienThiService nguoiDungHienThiService) {
+            NguoiDungHienThiService nguoiDungHienThiService,
+            vn.edu.group12.qldt.service.hoidong.MoChamService moChamService) {
 
         this.hoiDongService = hoiDongService;
+        this.moChamService = moChamService;
         this.thanhVienHoiDongService = thanhVienHoiDongService;
         this.phanCongHoiDongService = phanCongHoiDongService;
         this.nguoiDungHienThiService = nguoiDungHienThiService;
@@ -126,6 +129,10 @@ public class HoiDongController {
             HoiDong hoiDong = hoiDongService.layChiTiet(maHoiDong);
 
             model.addAttribute("hoiDong", hoiDong);
+            model.addAttribute("luaChonDoiHoiDong", request.isUserInRole("TRUONG_KHOA")
+                && (hoiDong.getTrangThai()==TrangThaiHoiDong.NHAP || hoiDong.getTrangThai()==TrangThaiHoiDong.SAN_SANG)
+                ? moChamService.luaChonDoiHoiDong(maHoiDong) : java.util.Map.of());
+
 
             // Luôn hiển thị các nhóm đã được giao cho hội đồng.
             model.addAttribute(
@@ -293,6 +300,7 @@ public class HoiDongController {
             form.setDiaDiem(hoiDong.getDiaDiem());
             form.setVersion(hoiDong.getVersion());
             model.addAttribute("hoiDong", hoiDong);
+
             model.addAttribute("hoiDongSuaForm", form);
             model.addAttribute("currentUserName", nguoiDungHienThiService.layHoTenHienTai());
             return "assessment/hoi-dong/sua-form";
@@ -530,6 +538,33 @@ public class HoiDongController {
         );
 
         return "redirect:/hoi-dong/{maHoiDong}";
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/ve-nhap")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String veNhap(@PathVariable String maHoiDong, RedirectAttributes flash) {
+        try { moChamService.suaLaiHoiDong(maHoiDong); flash.addFlashAttribute("successMessage","Hội đồng đã về nháp để điều chỉnh."); }
+        catch (IllegalArgumentException ex) { flash.addFlashAttribute("errorMessage",ex.getMessage()); }
+        return "redirect:/hoi-dong/"+maHoiDong;
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/khoa")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String khoa(@PathVariable String maHoiDong, RedirectAttributes flash) {
+        try { moChamService.khoaHoiDong(maHoiDong); flash.addFlashAttribute("successMessage","Hội đồng đã được khóa."); }
+        catch (IllegalArgumentException ex) { flash.addFlashAttribute("errorMessage",ex.getMessage()); }
+        return "redirect:/hoi-dong/"+maHoiDong;
+    }
+
+    @PostMapping("/hoi-dong/{maHoiDong}/doi-phan-cong")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRUONG_KHOA')")
+    public String doiHoiDong(@PathVariable String maHoiDong, @RequestParam String maNhom,
+            @RequestParam String maHoiDongMoi, RedirectAttributes flash) {
+        try { moChamService.doiHoiDong(maHoiDong,maNhom,maHoiDongMoi); flash.addFlashAttribute("successMessage","Đã thay hội đồng cho nhóm."); }
+        catch (IllegalArgumentException | org.springframework.dao.DataAccessException ex) {
+            flash.addFlashAttribute("errorMessage",ex instanceof IllegalArgumentException ? ex.getMessage() : "Phân công vừa thay đổi. Vui lòng tải lại trang.");
+        }
+        return "redirect:/hoi-dong/"+maHoiDong;
     }
 
 }

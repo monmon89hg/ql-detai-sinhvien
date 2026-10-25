@@ -39,7 +39,7 @@
                                 </tr>
                                 <tr>
                                     <th scope="row">Hội đồng</th>
-                                    <td th:text="${nhom.maHoiDong + ' - ' + nhom.tenHoiDong}"></td>
+                                    <td th:text="${nhom.maHoiDong != null ? nhom.maHoiDong + ' - ' + nhom.tenHoiDong : 'Không áp dụng'}"></td>
                                 </tr>
                             </tbody>
                         </table>

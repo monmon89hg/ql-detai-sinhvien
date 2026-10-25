@@ -43,17 +43,20 @@ public class ChamDiemHoiDongService {
     private final ThanhVienHoiDongRepository thanhVienHoiDongRepository;
     private final HoiDongRepository hoiDongRepository;
     private final HoiDongDeTaiRepository hoiDongDeTaiRepository;
+    private final vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository;
 
     public ChamDiemHoiDongService(
             PhieuChamDiemRepository phieuChamDiemRepository,
             ThanhVienHoiDongRepository thanhVienHoiDongRepository,
             HoiDongRepository hoiDongRepository,
-            HoiDongDeTaiRepository hoiDongDeTaiRepository) {
+            HoiDongDeTaiRepository hoiDongDeTaiRepository,
+            vn.edu.group12.qldt.repository.hoidong.DanhGiaRepository danhGiaRepository) {
 
         this.phieuChamDiemRepository = phieuChamDiemRepository;
         this.thanhVienHoiDongRepository = thanhVienHoiDongRepository;
         this.hoiDongRepository = hoiDongRepository;
         this.hoiDongDeTaiRepository = hoiDongDeTaiRepository;
+        this.danhGiaRepository = danhGiaRepository;
     }
 
     // Lấy danh sách theo tài khoản đăng nhập, không nhận mã GV từ trình duyệt.
@@ -93,9 +96,9 @@ public class ChamDiemHoiDongService {
 
         if (phieu != null) {
             // Khóa chính không chứa loại phiếu nên cần kiểm tra loại.
-            if (phieu.getLoaiPhieu() != LoaiPhieuCham.HOI_DONG) {
+            if (phieu.getLoaiPhieu() != loaiPhieu(maNhom, maGiangVien)) {
                 throw new IllegalArgumentException(
-                    "Bạn đã có phiếu chấm thuộc loại khác cho nhóm này."
+                    "Phân công hiện tại không khớp loại phiếu đã lưu."
                 );
             }
 
@@ -127,17 +130,19 @@ public class ChamDiemHoiDongService {
             .orElse(null);
 
         if (phieu == null) {
-            // Chưa có phiếu: tạo phiếu hội đồng cho chính giảng viên này.
+            // Chưa có phiếu: tạo đúng loại phiếu theo phân công của giảng viên.
             phieu = new PhieuChamDiem();
             phieu.setId(id);
-            phieu.setLoaiPhieu(LoaiPhieuCham.HOI_DONG);
-            phieu.setMaNhomHoiDong(maNhom);
-            phieu.setMaDeTaiPhanCong(null);
+            LoaiPhieuCham loai = loaiPhieu(maNhom, maGiangVien);
+            phieu.setLoaiPhieu(loai);
+            phieu.setMaNhomHoiDong(loai == LoaiPhieuCham.HOI_DONG ? maNhom : null);
+            phieu.setMaDeTaiPhanCong(loai == LoaiPhieuCham.HOI_DONG ? null
+                : danhGiaRepository.dauVao(maNhom).orElseThrow(() -> new IllegalArgumentException("Nhóm chưa có đăng ký hợp lệ.")).maDeTai());
         } else {
-            // Không ghi đè phiếu phản biện hoặc phiếu chấm độc lập.
-            if (phieu.getLoaiPhieu() != LoaiPhieuCham.HOI_DONG) {
+            // Không ghi đè một phiếu thuộc chức trách khác.
+            if (phieu.getLoaiPhieu() != loaiPhieu(maNhom, maGiangVien)) {
                 throw new IllegalArgumentException(
-                    "Bạn đã có phiếu chấm thuộc loại khác cho nhóm này."
+                    "Phân công hiện tại không khớp loại phiếu đã lưu."
                 );
             }
 
@@ -202,13 +207,15 @@ public class ChamDiemHoiDongService {
             // Cho phép nộp trực tiếp mà không bắt buộc lưu nháp trước.
             phieu = new PhieuChamDiem();
             phieu.setId(id);
-            phieu.setLoaiPhieu(LoaiPhieuCham.HOI_DONG);
-            phieu.setMaNhomHoiDong(maNhom);
-            phieu.setMaDeTaiPhanCong(null);
+            LoaiPhieuCham loai = loaiPhieu(maNhom, maGiangVien);
+            phieu.setLoaiPhieu(loai);
+            phieu.setMaNhomHoiDong(loai == LoaiPhieuCham.HOI_DONG ? maNhom : null);
+            phieu.setMaDeTaiPhanCong(loai == LoaiPhieuCham.HOI_DONG ? null
+                : danhGiaRepository.dauVao(maNhom).orElseThrow(() -> new IllegalArgumentException("Nhóm chưa có đăng ký hợp lệ.")).maDeTai());
         } else {
-            if (phieu.getLoaiPhieu() != LoaiPhieuCham.HOI_DONG) {
+            if (phieu.getLoaiPhieu() != loaiPhieu(maNhom, maGiangVien)) {
                 throw new IllegalArgumentException(
-                    "Bạn đã có phiếu chấm thuộc loại khác cho nhóm này."
+                    "Phân công hiện tại không khớp loại phiếu đã lưu."
                 );
             }
 
@@ -254,9 +261,9 @@ public class ChamDiemHoiDongService {
             return TrangThaiPhieuCham.NHAP;
         }
 
-        if (phieu.getLoaiPhieu() != LoaiPhieuCham.HOI_DONG) {
+        if (phieu.getLoaiPhieu() != loaiPhieu(maNhom, maGiangVien)) {
             throw new IllegalArgumentException(
-                "Bạn đã có phiếu chấm thuộc loại khác cho nhóm này."
+                "Phân công hiện tại không khớp loại phiếu đã lưu."
             );
         }
 
@@ -271,37 +278,24 @@ public class ChamDiemHoiDongService {
         // Kiểm tra quyền trước khi giữ khóa dữ liệu.
         kiemTraQuyenCham(maNhom, maGiangVien);
 
-        HoiDongDeTai phanCong = hoiDongDeTaiRepository
-            .findById(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Nhóm chưa được phân công hội đồng."
-            ));
-
-        String maHoiDong = phanCong.getMaHoiDong();
-
-        // Giữ cùng thứ tự khóa với chức năng phân công:
-        // hội đồng trước, đăng ký của nhóm sau.
-        hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Hội đồng không còn tồn tại."
-            ));
-
-        hoiDongDeTaiRepository.khoaDangKyTheoMaNhom(maNhom)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Đăng ký đề tài của nhóm không còn tồn tại."
-            ));
-
-        // Trong lúc chờ khóa, trạng thái hoặc phân công có thể đã đổi.
-        NhomChamDiemHienThi nhom = kiemTraQuyenCham(
-            maNhom,
-            maGiangVien
-        );
-
-        if (!maHoiDong.equals(nhom.getMaHoiDong())) {
-            throw new IllegalArgumentException(
-                "Hội đồng của nhóm đã thay đổi. Vui lòng tải lại trang."
-            );
+        String maHoiDong = kiemTraQuyenCham(maNhom, maGiangVien).getMaHoiDong();
+        if (maHoiDong != null) {
+            hoiDongRepository.timVaKhoaTheoMa(maHoiDong)
+                .orElseThrow(() -> new IllegalArgumentException("Hội đồng không còn tồn tại."));
         }
+        danhGiaRepository.khoaDauVao(maNhom);
+        NhomChamDiemHienThi nhom = kiemTraQuyenCham(maNhom, maGiangVien);
+        if (!java.util.Objects.equals(maHoiDong, nhom.getMaHoiDong()))
+            throw new IllegalArgumentException("Phân công đã thay đổi. Vui lòng tải lại trang.");
+        var dauVao = danhGiaRepository.dauVao(maNhom).orElseThrow(() -> new IllegalArgumentException("Nhóm chưa có đăng ký hợp lệ."));
+        if (loaiPhieu(maNhom, maGiangVien) == LoaiPhieuCham.PHAN_BIEN
+                && (dauVao.hanPhanBien() == null || LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).isAfter(dauVao.hanPhanBien())))
+            throw new IllegalArgumentException("Đã hết hạn nộp điểm phản biện.");
+    }
+
+    private LoaiPhieuCham loaiPhieu(String maNhom, String maGiangVien) {
+        String loai = kiemTraQuyenCham(maNhom, maGiangVien).getLoaiPhieu();
+        return loai == null ? LoaiPhieuCham.HOI_DONG : LoaiPhieuCham.valueOf(loai);
     }
 
     // Dùng chung khi mở trang và khi xử lý lưu/nộp ở các bước tiếp theo.

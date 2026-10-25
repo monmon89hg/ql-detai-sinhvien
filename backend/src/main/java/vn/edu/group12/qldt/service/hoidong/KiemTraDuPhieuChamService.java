@@ -71,6 +71,8 @@ public class KiemTraDuPhieuChamService {
         Set<String> maGiangVienDaGap = new HashSet<>();
 
         for (PhieuChamYeuCau phieu : yeuCau) {
+            if (phieuChamDiemRepository.demPhanCongHuongDan(maNhom, phieu.getMaGiangVien()) > 0)
+                throw new IllegalArgumentException("Người chấm không được đồng thời hướng dẫn đề tài của nhóm.");
             if (!maGiangVienDaGap.add(phieu.getMaGiangVien())) {
                 throw new IllegalArgumentException(
                     "Một giảng viên đang được yêu cầu nộp nhiều loại phiếu "

@@ -81,6 +81,7 @@ class OfficialSecurityTests {
     @MockitoBean DeTaiGiangVienService deTaiGiangVienService;
     @MockitoBean DotDangKyService dotDangKyService;
     @MockitoBean LichIcsService lichIcsService;
+    @MockitoBean vn.edu.group12.qldt.service.hoidong.MoChamService moChamService;
     @MockitoBean HoiDongService hoiDongService;
     @MockitoBean ThanhVienHoiDongService thanhVienHoiDongService;
     @MockitoBean PhanCongHoiDongService phanCongHoiDongService;

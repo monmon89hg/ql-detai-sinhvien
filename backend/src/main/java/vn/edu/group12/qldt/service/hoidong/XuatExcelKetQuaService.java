@@ -86,6 +86,7 @@ public class XuatExcelKetQuaService {
         if (ten != null && !ten.isBlank()) {
             giaTri += "\n" + ten;
         }
+        if (giaTri.isBlank()) giaTri = "—";
         var o = dong.createCell(cot);
         o.setCellValue(giaTri);
         o.setCellStyle(style);
