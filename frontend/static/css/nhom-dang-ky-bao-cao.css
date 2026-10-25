@@ -176,3 +176,48 @@ body.sv-reject-modal-open { overflow:hidden; }
     border:1px solid #e2e9ef; border-radius:8px;
     padding:12px 14px; max-height:36vh; overflow-y:auto;
 }
+
+/* TV3: Bố cục bảng duyệt đăng ký gọn và dễ đọc. */
+.sv-module.sv-review-layout .sv-table {
+    min-width: 875px;
+}
+.sv-module.sv-review-layout .sv-table th,
+.sv-module.sv-review-layout .sv-table td {
+    padding: 11px 12px;
+}
+.sv-module.sv-review-layout .sv-table th:nth-child(1),
+.sv-module.sv-review-layout .sv-table td:nth-child(1) {
+    min-width: 142px;
+}
+.sv-module.sv-review-layout .sv-table td:nth-child(1) code {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+.sv-module.sv-review-layout .sv-table th:nth-child(2),
+.sv-module.sv-review-layout .sv-table td:nth-child(2) {
+    min-width: 245px;
+    line-height: 1.5;
+}
+.sv-module.sv-review-layout .sv-table th:nth-child(3),
+.sv-module.sv-review-layout .sv-table td:nth-child(3) {
+    min-width: 156px;
+    white-space: nowrap;
+}
+.sv-module.sv-review-layout .sv-table th:nth-child(4),
+.sv-module.sv-review-layout .sv-table td:nth-child(4) {
+    min-width: 112px;
+}
+.sv-module.sv-review-layout .sv-table th:nth-child(5),
+.sv-module.sv-review-layout .sv-table td:nth-child(5) {
+    min-width: 170px;
+}
+.sv-module.sv-review-layout .sv-review-actions,
+.sv-module.sv-review-layout .sv-review-actions form {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+.sv-module.sv-review-layout .sv-review-actions .btn,
+.sv-module.sv-review-layout .sv-table td:last-child > .btn {
+    white-space: nowrap;
+}
