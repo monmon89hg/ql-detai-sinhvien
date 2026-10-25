@@ -107,7 +107,7 @@
                                             ? nhom.diemCuoi : '—'}"
                                     ></td>
                                     <td class="result-actions">
-                                        <a class="btn btn-outline" th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem căn cứ</a>
+                                        <a class="btn btn-outline" th:href="@{/ket-qua/{ma}/chi-tiet(ma=${nhom.maNhom})}">Xem chi tiết</a>
                                         <form th:if="${!laAdmin and (nhom.trangThaiDangKy == 'DA_DUYET' or nhom.trangThaiDangKy == 'DANG_THUC_HIEN')}"
                                               th:action="@{/ket-qua/{ma}/mo-cham(ma=${nhom.maNhom})}" method="post"
                                               onsubmit="return confirm('Mở chấm sẽ khóa báo cáo và phân công của nhóm. Tiếp tục?');">
