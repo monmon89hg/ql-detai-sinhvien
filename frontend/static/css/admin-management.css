@@ -1,0 +1,171 @@
+/* Giao diện gọn theo mẫu danh sách đợt đăng ký */
+.admin-list-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0 0 22px;
+}
+.admin-list-heading p {
+    margin-top: 6px;
+    font-size: 13px;
+}
+.admin-list-card {
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(27, 63, 91, .045);
+}
+.admin-list-table {
+    min-width: 860px;
+    font-size: 12px;
+}
+.admin-list-table th,
+.admin-list-table td {
+    padding: 11px 12px;
+    vertical-align: middle;
+}
+.admin-list-table th {
+    background: #f2f6fa;
+    color: #536c81;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.admin-list-table tbody tr:hover {
+    background: #f8fbfd;
+}
+.admin-list-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+.admin-code {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: #f0f4f8;
+    color: #536a7d;
+    font-size: 11px;
+    white-space: nowrap;
+}
+.admin-primary-cell {
+    color: #263f52;
+    font-weight: 700;
+    min-width: 145px;
+}
+.admin-description-cell {
+    min-width: 210px;
+    max-width: 360px;
+    line-height: 1.5;
+}
+.admin-role,
+.admin-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 25px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.admin-role {
+    color: #286749;
+    background: #e8f4ee;
+}
+.admin-status--active {
+    color: #176345;
+    background: #e6f4ed;
+}
+.admin-status--locked {
+    color: #9a3f36;
+    background: #fff0ee;
+}
+.admin-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.admin-row-actions form {
+    margin: 0;
+}
+.admin-row-actions .btn {
+    min-height: 30px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+}
+.admin-toggle-button--lock {
+    color: #a9473e;
+    border-color: #e7c5c1;
+    background: #fff;
+}
+.admin-toggle-button--lock:hover {
+    background: #fff3f1;
+}
+.admin-toggle-button--unlock {
+    color: #176345;
+    border-color: #b8ddc8;
+    background: #f5fbf7;
+}
+.admin-toggle-button--unlock:hover {
+    background: #eaf7ef;
+}
+@media (max-width: 650px) {
+    .admin-list-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .admin-list-card {
+        padding: 10px;
+    }
+}
+
+/* Phân trang: nút hai đầu, số trang ở chính giữa */
+.admin-list-card .pagination {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 16px;
+}
+.admin-list-card .pagination > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 7px 13px;
+    border: 1px solid #cbdce9;
+    border-radius: 7px;
+    background: #fff;
+    color: #245d80;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .15s, border-color .15s;
+}
+.admin-list-card .pagination > a:hover {
+    border-color: #91b8d3;
+    background: #f1f7fb;
+}
+.admin-list-card .pagination > a:first-child {
+    grid-column: 1;
+    justify-self: start;
+}
+.admin-list-card .pagination > span {
+    grid-column: 2;
+    justify-self: center;
+    color: #536c81;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.admin-list-card .pagination > a:last-child {
+    grid-column: 3;
+    justify-self: end;
+}
