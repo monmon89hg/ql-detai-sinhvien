@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/head :: head('Chi tiết đề tài')}"></head>
 <body>
 <a class="skip" href="#content">Bỏ qua điều hướng</a>
@@ -18,8 +18,8 @@
             <div class="page-heading">
                 <h1 th:text="${deTai.tenDeTai}">Tên đề tài</h1>
                 <p>Mã: <strong th:text="${deTai.maDeTai}">DT001</strong> | Đợt: <strong th:text="${dot.tenDot}">Đợt 1</strong> | Trạng thái: 
-                    <span class="status-pill"
-                          th:style="${deTai.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e;' : (deTai.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1;' : (deTai.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563;' : 'background:#f1f5f9; color:#475569;'))))}"
+                    <span style="font-weight: 600;"
+                          th:style="${deTai.trangThai == 'CONG_BO' ? 'color:#18794e;' : (deTai.trangThai == 'TU_CHOI' ? 'color:#b3261e;' : (deTai.trangThai == 'DA_DUYET' ? 'color:#0369a1;' : (deTai.trangThai == 'CHO_DUYET' ? 'color:#d97706;' : (deTai.trangThai == 'NGUNG_NHAN' ? 'color:#4b5563;' : 'color:#475569;'))))}"
                           th:text="${deTai.tenTrangThaiHienThi}">Đã công bố</span>
                 </p>
             </div>
@@ -41,46 +41,46 @@
             <div class="placeholder" style="max-width: 100%; margin-bottom: 20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0; color:var(--primary);">Danh sách Giảng viên phân công</h3>
-                    <small style="color:#697f91;">(Tối đa 2 GVHD, GVHD không được làm Phản biện / Chấm độc lập)</small>
+                    <small sec:authorize="!hasRole('SINH_VIEN')" style="color:#697f91;">(Tối đa 2 GVHD, GVHD không được làm Phản biện / Chấm độc lập)</small>
                 </div>
 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Mã giảng viên</th>
-                            <th>Vai trò phân công</th>
-                            <th>Thời gian phân công</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:if="${#lists.isEmpty(phanCongs)}">
-                            <td colspan="4" style="text-align:center; padding: 15px; color:#869bab;">
-                                Chưa có giảng viên nào được phân công.
-                            </td>
-                        </tr>
-                        <tr th:each="pc : ${phanCongs}">
-                            <td><strong class="route-line" th:text="${pc.maGiangVien}">Mã giảng viên</strong></td>
-                            <td>
-                                <span class="status-pill"
-                                      th:style="${pc.loaiPhanCong == 'HUONG_DAN' ? 'background:#eaf2fa; color:#214967;' : 'background:#fef7e7; color:#815915;'}"
-                                      th:text="${pc.loaiPhanCong}">HUONG_DAN</span>
-                            </td>
-                            <td>
-                                <span style="font-size:12px;" th:text="${#temporals.format(pc.phanCongLuc, 'dd/MM/yyyy HH:mm')}"></span>
-                            </td>
-                            <td>
-                                <form th:action="@{/de-tai/phan-cong/{maGiangVien}/xoa(maGiangVien=${pc.maGiangVien})}" method="post" style="display:inline;">
-                                    <input type="hidden" name="maDeTai" th:value="${deTai.maDeTai}">
-                                    <button type="submit" class="btn btn-outline" style="min-height:28px; padding:2px 8px; font-size:11px; color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Gỡ phân công giảng viên này?');">Gỡ bỏ</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mã giảng viên</th>
+                                <th>Vai trò phân công</th>
+                                <th>Thời gian phân công</th>
+                                <th sec:authorize="!hasRole('SINH_VIEN')">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(phanCongs)}">
+                                <td colspan="4" th:attr="colspan=${#authorization.expression('hasRole(''SINH_VIEN'')') ? 3 : 4}" style="text-align:center; padding: 15px; color:#557085;">
+                                    Chưa có giảng viên nào được phân công.
+                                </td>
+                            </tr>
+                            <tr th:each="pc : ${phanCongs}">
+                                <td><strong th:text="${pc.maGiangVien}">Mã giảng viên</strong></td>
+                                <td>
+                                    <span th:text="${pc.loaiPhanCong}">HUONG_DAN</span>
+                                </td>
+                                <td>
+                                    <span style="font-size:12px;" th:text="${#temporals.format(pc.phanCongLuc, 'dd/MM/yyyy HH:mm')}"></span>
+                                </td>
+                                <td sec:authorize="!hasRole('SINH_VIEN')">
+                                    <form th:action="@{/de-tai/phan-cong/{maGiangVien}/xoa(maGiangVien=${pc.maGiangVien})}" method="post" style="display:inline;">
+                                        <input type="hidden" name="maDeTai" th:value="${deTai.maDeTai}">
+                                        <button type="submit" class="btn btn-outline" style="min-height:28px; padding:2px 8px; font-size:11px;" onclick="return confirm('Gỡ phân công giảng viên này?');">Gỡ bỏ</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <!-- FORM PHÂN CÔNG THÊM GIẢNG VIÊN -->
-                <form th:action="@{/de-tai/{maDeTai}/phan-cong(maDeTai=${deTai.maDeTai})}" method="post" style="margin-top:20px; padding-top:15px; border-top:1px dashed var(--border); display:grid; grid-template-columns: 1fr 1fr 150px; gap:12px; align-items:end;">
+                <form sec:authorize="!hasRole('SINH_VIEN')" th:action="@{/de-tai/{maDeTai}/phan-cong(maDeTai=${deTai.maDeTai})}" method="post" style="margin-top:20px; padding-top:15px; border-top:1px dashed var(--border); display:grid; grid-template-columns: 1fr 1fr 150px; gap:12px; align-items:end;">
                     <div class="form-field" style="margin:0;">
                         <label>Mã Giảng viên *</label>
                         <input type="text" name="maGiangVien" class="form-control" placeholder="Nhập mã giảng viên cần phân công" required>
@@ -95,25 +95,25 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="height:42px;">+ Phân công</button>
+                    <button type="submit" class="btn btn-outline" style="height:42px;">+ Phân công</button>
                 </form>
             </div>
 
             <div class="btn-row" style="margin-top: 20px; gap: 10px; flex-wrap: wrap;">
-                <a th:if="${deTai.trangThai != 'NGUNG_NHAN'}" th:href="@{/de-tai/sua/{maDeTai}(maDeTai=${deTai.maDeTai})}" class="btn btn-primary">Chỉnh sửa đề tài</a>
+                <a sec:authorize="!hasRole('SINH_VIEN')" th:if="${deTai.trangThai != 'NGUNG_NHAN'}" th:href="@{/de-tai/sua/{maDeTai}(maDeTai=${deTai.maDeTai})}" class="btn btn-outline">Chỉnh sửa đề tài</a>
 
-                <form th:if="${deTai.trangThai == 'CONG_BO' || deTai.trangThai == 'DA_DUYET'}" th:action="@{/de-tai/{maDeTai}/ngung-nhan(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-outline" style="color:#d97706; border-color:#d97706;" onclick="return confirm('Bạn có chắc muốn chuyển đề tài sang trạng thái NGỪNG NHẬN đăng ký?');">Ngừng nhận đăng ký</button>
+                <form sec:authorize="!hasRole('SINH_VIEN')" th:if="${deTai.trangThai == 'CONG_BO' || deTai.trangThai == 'DA_DUYET'}" th:action="@{/de-tai/{maDeTai}/ngung-nhan(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline" onclick="return confirm('Bạn có chắc muốn chuyển đề tài sang trạng thái NGỪNG NHẬN đăng ký?');">Ngừng nhận đăng ký</button>
                 </form>
 
-                <form th:action="@{/de-tai/{maDeTai}/xoa(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#e74c3c;" onclick="return confirm('Bạn có chắc chắn muốn xóa/hủy đề tài này? Nếu đề tài đã có dữ liệu liên quan, hệ thống sẽ tự động chuyển sang NGỪNG NHẬN để bảo toàn lịch sử.');">Xóa / Hủy đề tài</button>
+                <form sec:authorize="!hasRole('SINH_VIEN')" th:if="${deTai.trangThai != 'NGUNG_NHAN'}" th:action="@{/de-tai/{maDeTai}/xoa(maDeTai=${deTai.maDeTai})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-outline" onclick="return confirm('Bạn có chắc chắn muốn xóa/hủy đề tài này? Nếu đề tài đã có dữ liệu liên quan, hệ thống sẽ tự động chuyển sang NGỪNG NHẬN để bảo toàn lịch sử.');">Xóa / Hủy đề tài</button>
                 </form>
 
-                <a th:href="@{/de-tai/lich/{maDot}.ics(maDot=${dot.maDot})}" class="btn btn-outline" style="color:#1a73e8; border-color:#1a73e8;" title="Tải file .ics để thêm mốc thời gian vào Google Calendar / Apple Calendar">📅 Xuất Google Calendar (.ics)</a>
+                <a th:href="@{/de-tai/lich/{maDot}.ics(maDot=${dot.maDot})}" class="btn btn-outline" title="Tải file .ics để thêm mốc thời gian vào Google Calendar / Apple Calendar">📅 Xuất Google Calendar (.ics)</a>
 
                 <a th:href="@{/de-tai}" class="btn btn-outline">Quay lại danh sách đề tài</a>
-                <a th:href="@{/de-tai/duyet}" class="btn btn-outline">Sang trang duyệt đề tài</a>
+                <a sec:authorize="hasRole('TRUONG_KHOA')" th:href="@{/de-tai/duyet}" class="btn btn-outline">Sang trang duyệt đề tài</a>
             </div>
 
             <div th:replace="~{fragments/footer :: footer}"></div>

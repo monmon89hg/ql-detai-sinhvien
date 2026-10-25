@@ -50,6 +50,14 @@ public class DeTaiController {
                             Principal principal,
                             Model model) {
         
+        // Nếu là Sinh viên thì chỉ hiển thị đề tài đã công bố
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean laSinhVien = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SINH_VIEN".equals(a.getAuthority()));
+        if (laSinhVien) {
+            trangThai = "CONG_BO";
+        }
+
         List<DeTai> deTais = deTaiService.filterDeTai(maDot, maBoMon, trangThai, keyword);
         List<DotDangKy> dots = dotDangKyService.getAllDotDangKy();
 

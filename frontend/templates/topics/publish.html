@@ -20,41 +20,59 @@
             </div>
 
             <div class="placeholder" style="max-width: 100%;">
-                <table class="data-table" style="vertical-align: middle;">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center; width: 140px; white-space: nowrap;">Mã đề tài</th>
-                            <th style="text-align: center; min-width: 320px;">Tên đề tài</th>
-                            <th style="text-align: center; width: 140px; white-space: nowrap;">Trạng thái</th>
-                            <th style="text-align: center; width: 220px;">Lý do từ chối</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:if="${#lists.isEmpty(deTais)}">
-                            <td colspan="4" style="text-align:center; padding: 25px; color:#869bab;">
-                                Hiện chưa có đề tài nào cần công bố.
-                            </td>
-                        </tr>
-                        <tr th:each="dt : ${deTais}" style="vertical-align: middle;">
-                            <td style="text-align: left;">
-                                <strong class="route-line" style="white-space: nowrap; display: inline-block;" th:text="${dt.maDeTai}">DT001</strong>
-                            </td>
-                            <td>
-                                <strong th:text="${dt.tenDeTai}">Hệ thống quản lý đề tài</strong>
-                                <br><small style="color:#697f91;">Đợt đăng ký: <span th:text="${dt.maDot}">DOT-01</span></small>
-                            </td>
-                            <td style="text-align: left; white-space: nowrap;">
-                                <span class="status-pill"
-                                      style="white-space: nowrap; display: inline-block; padding: 4px 10px;"
-                                      th:style="${dt.trangThai == 'CONG_BO' ? 'background:#e6f9f0; color:#18794e; white-space:nowrap; display:inline-block; padding:4px 10px;' : (dt.trangThai == 'TU_CHOI' ? 'background:#fdeeee; color:#b3261e; white-space:nowrap; display:inline-block; padding:4px 10px;' : (dt.trangThai == 'DA_DUYET' ? 'background:#e0f2fe; color:#0369a1; white-space:nowrap; display:inline-block; padding:4px 10px;' : (dt.trangThai == 'CHO_DUYET' ? 'background:#fef3c7; color:#92400e; white-space:nowrap; display:inline-block; padding:4px 10px;' : (dt.trangThai == 'NGUNG_NHAN' ? 'background:#f3f4f6; color:#4b5563; white-space:nowrap; display:inline-block; padding:4px 10px;' : 'background:#f1f5f9; color:#475569; white-space:nowrap; display:inline-block; padding:4px 10px;'))))}"
-                                      th:text="${dt.tenTrangThaiHienThi}">Đã duyệt</span>
-                            </td>
-                            <td style="text-align: left; font-size: 13px;">
-                                <span style="color:#c0392b;" th:text="${dt.lyDoTuChoi != null and !dt.lyDoTuChoi.isEmpty() ? dt.lyDoTuChoi : '-'}">-</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="data-table" style="vertical-align: middle;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; white-space: nowrap;">Mã đề tài</th>
+                                <th style="text-align: left;">Tên đề tài</th>
+                                <th style="text-align: center; white-space: nowrap;">Trạng thái</th>
+                                <th style="text-align: center; white-space: nowrap;">Lý do từ chối</th>
+                                <th style="text-align: center; white-space: nowrap;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(deTais)}">
+                                <td colspan="5" style="text-align:center; padding: 32px 20px; color:#557085; font-size: 13.5px;">
+                                    Hiện chưa có đề tài nào cần công bố.
+                                </td>
+                            </tr>
+                            <tr th:each="dt : ${deTais}" style="vertical-align: middle;">
+                                <td style="text-align: left; white-space: nowrap;">
+                                    <strong th:text="${dt.maDeTai}">DT001</strong>
+                                </td>
+                                <td>
+                                    <strong th:text="${dt.tenDeTai}">Hệ thống quản lý đề tài</strong>
+                                    <br><small style="color:#697f91;">Đợt đăng ký: <span th:text="${dt.maDot}">DOT-01</span></small>
+                                </td>
+                                <td style="text-align: center; white-space: nowrap;">
+                                    <span style="white-space: nowrap; font-weight: 600;"
+                                          th:style="${dt.trangThai == 'CONG_BO' ? 'color:#18794e;' : (dt.trangThai == 'TU_CHOI' ? 'color:#b3261e;' : (dt.trangThai == 'DA_DUYET' ? 'color:#0369a1;' : (dt.trangThai == 'CHO_DUYET' ? 'color:#d97706;' : (dt.trangThai == 'NGUNG_NHAN' ? 'color:#4b5563;' : 'color:#475569;'))))}"
+                                          th:text="${dt.tenTrangThaiHienThi}">Đã duyệt</span>
+                                </td>
+                                <td style="text-align: left; font-size: 13px;">
+                                    <span style="color:#c0392b;" th:text="${dt.lyDoTuChoi != null and !dt.lyDoTuChoi.isEmpty() ? dt.lyDoTuChoi : '-'}">-</span>
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: nowrap;">
+                                        <!-- Nút Công bố nếu đang DA_DUYET -->
+                                        <form th:if="${dt.trangThai == 'DA_DUYET'}" th:action="@{/de-tai/{maDeTai}/cong-bo(maDeTai=${dt.maDeTai})}" method="post" style="display:inline; margin:0;">
+                                            <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;" onclick="return confirm('Công bố đề tài này cho sinh viên xem và đăng ký?');">Công bố</button>
+                                        </form>
+
+                                        <!-- Nút Ngừng nhận nếu đang CONG_BO -->
+                                        <form th:if="${dt.trangThai == 'CONG_BO'}" th:action="@{/de-tai/{maDeTai}/ngung-nhan(maDeTai=${dt.maDeTai})}" method="post" style="display:inline; margin:0;">
+                                            <button type="submit" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;" onclick="return confirm('Ngừng nhận đăng ký cho đề tài này?');">Ngừng nhận</button>
+                                        </form>
+
+                                        <!-- Nút Phân công GV -->
+                                        <a th:href="@{/de-tai/chi-tiet/{maDeTai}(maDeTai=${dt.maDeTai})}" class="btn btn-outline" style="min-height:30px; padding:4px 10px; font-size:12px; white-space: nowrap;">Phân công GV</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div th:replace="~{fragments/footer :: footer}"></div>
