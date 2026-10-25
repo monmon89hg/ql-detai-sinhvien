@@ -13,12 +13,204 @@
         if (statusLabels[state]) item.textContent = statusLabels[state];
     });
 
-    document.querySelectorAll('[data-sv-confirm]').forEach(form => {
-        form.addEventListener('submit', event => {
-            const question = form.getAttribute('data-sv-confirm');
-            if (question && !window.confirm(question)) event.preventDefault();
+    // Modal xác nhận dùng chung cho các thao tác TV3 có data-sv-confirm.
+    // Chỉ thay lớp giao diện; POST, ràng buộc form và CSRF vẫn do browser + backend xử lý.
+    const actionForms = [...document.querySelectorAll('form[data-sv-confirm]')];
+    if (actionForms.length) {
+        const root = document.querySelector('.sv-module');
+        if (root) {
+            const overlay = document.createElement('div');
+            overlay.className = 'sv-reject-overlay';
+            overlay.hidden = true;
+            overlay.setAttribute('data-sv-action-dialog', '');
+            // HTML tĩnh do ứng dụng kiểm soát. Dữ liệu nhóm/sinh viên được gán qua textContent.
+            overlay.innerHTML = `
+                <section class="sv-reject-modal" role="dialog" aria-modal="true"
+                         aria-labelledby="sv-action-title" aria-describedby="sv-action-detail sv-action-note"
+                         tabindex="-1" data-sv-action-panel>
+                    <div class="sv-reject-heading">
+                        <h2 id="sv-action-title" data-sv-action-title>Xác nhận thao tác</h2>
+                        <button class="sv-reject-close" type="button" data-sv-action-close
+                                aria-label="Đóng hộp thoại">&times;</button>
+                    </div>
+                    <p id="sv-action-detail" class="sv-help" data-sv-action-detail></p>
+                    <p id="sv-action-note" class="sv-info sv-info-soft" data-sv-action-note hidden></p>
+                    <div class="sv-reject-footer">
+                        <button class="btn btn-outline" type="button" data-sv-action-close>Hủy</button>
+                        <button class="btn btn-primary" type="button" data-sv-action-submit>Xác nhận</button>
+                    </div>
+                </section>`;
+            root.appendChild(overlay);
+            const panel = overlay.querySelector('[data-sv-action-panel]');
+            const title = overlay.querySelector('[data-sv-action-title]');
+            const detail = overlay.querySelector('[data-sv-action-detail]');
+            const note = overlay.querySelector('[data-sv-action-note]');
+            const confirmButton = overlay.querySelector('[data-sv-action-submit]');
+            const approved = new WeakSet();
+            const submitted = new WeakSet();
+            let currentForm = null;
+            let previousFocus = null;
+            let previousSubmitter = null;
+
+            function closeActionDialog() {
+                overlay.hidden = true;
+                document.body.classList.remove('sv-reject-modal-open');
+                currentForm = null;
+                previousSubmitter = null;
+                if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+                previousFocus = null;
+            }
+
+            actionForms.forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (submitted.has(form)) {
+                        event.preventDefault();
+                        return;
+                    }
+                    if (approved.has(form)) {
+                        approved.delete(form);
+                        submitted.add(form);
+                        return;
+                    }
+                    event.preventDefault();
+                    currentForm = form;
+                    previousSubmitter = event.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+                    previousFocus = previousSubmitter;
+                    title.textContent = form.getAttribute('data-sv-confirm') || 'Xác nhận thao tác';
+                    detail.textContent = form.getAttribute('data-sv-confirm-detail') || '';
+                    note.textContent = form.getAttribute('data-sv-confirm-note') || '';
+                    note.hidden = !note.textContent;
+                    note.classList.toggle('sv-alert-danger', form.dataset.svConfirmLevel === 'danger');
+                    note.classList.toggle('sv-alert-warning', form.dataset.svConfirmLevel !== 'danger');
+                    confirmButton.textContent = form.getAttribute('data-sv-confirm-button') || 'Xác nhận';
+                    overlay.hidden = false;
+                    document.body.classList.add('sv-reject-modal-open');
+                    confirmButton.focus();
+                });
+            });
+
+            overlay.querySelectorAll('[data-sv-action-close]').forEach(button => {
+                button.addEventListener('click', closeActionDialog);
+            });
+            overlay.addEventListener('click', event => {
+                if (event.target === overlay) closeActionDialog();
+            });
+            overlay.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeActionDialog();
+                    return;
+                }
+                if (event.key !== 'Tab') return;
+                const focusable = [...panel.querySelectorAll('button:not([disabled])')];
+                if (!focusable.length) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            });
+            confirmButton.addEventListener('click', () => {
+                const form = currentForm;
+                if (!form) return;
+                const submitter = previousSubmitter;
+                closeActionDialog();
+                // Kiểm tra trước để không giữ cờ 'approved' nếu form chưa hợp lệ.
+                if (!form.reportValidity()) return;
+                approved.add(form);
+                if (submitter && submitter.form === form && !submitter.disabled) {
+                    form.requestSubmit(submitter);
+                } else {
+                    form.requestSubmit();
+                }
+            });
+        }
+    }
+
+    // Chỉ riêng nút đăng ký đề tài dùng modal thay cho window.confirm mặc định.
+    // Form POST gốc, CSRF và mã đề tài hidden vẫn do Thymeleaf gửi lên backend.
+    const registerOverlay = document.querySelector('[data-sv-register-dialog]');
+    if (registerOverlay) {
+        const panel = registerOverlay.querySelector('[data-sv-register-panel]');
+        const code = registerOverlay.querySelector('[data-sv-register-code]');
+        const title = registerOverlay.querySelector('[data-sv-register-title]');
+        const confirmButton = registerOverlay.querySelector('[data-sv-register-submit]');
+        const submittedForms = new WeakSet();
+        const approvedForms = new WeakSet();
+        let currentForm = null;
+        let previousFocus = null;
+
+        function closeRegistrationModal() {
+            registerOverlay.hidden = true;
+            document.body.classList.remove('sv-reject-modal-open');
+            currentForm = null;
+            if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+            previousFocus = null;
+        }
+
+        document.querySelectorAll('form[data-sv-register-confirm]').forEach(form => {
+            form.addEventListener('submit', event => {
+                if (submittedForms.has(form)) {
+                    event.preventDefault();
+                    return;
+                }
+                if (approvedForms.has(form)) {
+                    approvedForms.delete(form);
+                    submittedForms.add(form);
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton) submitButton.disabled = true;
+                    return;
+                }
+                event.preventDefault();
+                currentForm = form;
+                previousFocus = event.submitter || form.querySelector('button[type="submit"]');
+                // textContent chống chèn HTML khi tên đề tài chứa ký tự đặc biệt.
+                code.textContent = form.dataset.svRegisterCode || '—';
+                title.textContent = form.dataset.svRegisterTitle || '—';
+                registerOverlay.hidden = false;
+                document.body.classList.add('sv-reject-modal-open');
+                confirmButton.focus();
+            });
         });
-    });
+
+        registerOverlay.querySelectorAll('[data-sv-register-close]').forEach(button => {
+            button.addEventListener('click', closeRegistrationModal);
+        });
+        registerOverlay.addEventListener('click', event => {
+            if (event.target === registerOverlay) closeRegistrationModal();
+        });
+        registerOverlay.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeRegistrationModal();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = [...panel.querySelectorAll('button:not([disabled])')];
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+        confirmButton.addEventListener('click', () => {
+            if (!currentForm) return;
+            const form = currentForm;
+            closeRegistrationModal();
+            // requestSubmit chạy validation + sự kiện submit; form được duyệt đúng một lần.
+            approvedForms.add(form);
+            form.requestSubmit();
+        });
+    }
 
     // Modal từ chối đăng ký: URL theo đúng nhóm, CSRF có sẵn trong form Thymeleaf.
     const rejectOverlay = document.querySelector('[data-sv-reject-dialog]');

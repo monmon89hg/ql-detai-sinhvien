@@ -90,6 +90,9 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                                         ma,
                                         f.sv(item.getValue())))
                         .isEqualTo(1);
+                // Từ chối thành viên đang chờ phải dùng modal chung (không POST khi Hủy).
+                assertThat(leader.get("/nhom/cua-toi").body())
+                        .contains("data-sv-confirm-button=\"Xác nhận từ chối\"");
                 // Hồi quy: khi đang chờ, trạng thái phải hiện ở danh sách và chi tiết.
                 assertThat(item.getKey().get("/nhom").body())
                         .contains("Đã gửi yêu cầu tham gia", "Chi tiết");
@@ -113,6 +116,15 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                                             + " trang_thai='THAM_GIA'",
                                     ma))
                     .isEqualTo(3);
+            // Modal xác nhận TV3: xóa thành viên và chốt nhóm, không dùng popup native.
+            String trangQuanLyNhom = leader.get("/nhom/cua-toi").body();
+            assertThat(trangQuanLyNhom)
+                    .contains("data-sv-confirm-button=\"Xác nhận xóa\"",
+                            "data-sv-confirm-button=\"Xác nhận chốt nhóm\"");
+            String jsXacNhan = leader.get("/js/nhom-dang-ky-bao-cao.js").body();
+            assertThat(jsXacNhan)
+                    .contains("data-sv-action-dialog", "form.requestSubmit(")
+                    .doesNotContain("window.confirm(");
             assertThat(leader.post("/nhom/" + ma + "/chot", Map.of(), "/nhom/cua-toi").statusCode())
                     .isEqualTo(302);
             assertThat(
@@ -125,6 +137,13 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                             sv2.post("/dang-ky-de-tai", Map.of("maDeTai", f.topic), "/nhom/tao")
                                     .statusCode())
                     .isEqualTo(403);
+            // Modal xác nhận đăng ký phải được render, không dùng xác nhận native.
+            String trangDangKyTruocKhiGui = leader.get("/dang-ky-de-tai?maDot=" + f.dot).body();
+            assertThat(trangDangKyTruocKhiGui)
+                    .contains("data-sv-register-confirm", "data-sv-register-dialog",
+                            "data-sv-register-submit", "data-sv-register-code",
+                            "data-sv-register-title", "name=\"maDeTai\"")
+                    .doesNotContain("data-sv-confirm=\"Gửi đăng ký đề tài này cho nhóm?\"");
             assertThat(
                             leader.post(
                                             "/dang-ky-de-tai",
@@ -141,6 +160,8 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                     .isEqualTo(1);
             // Hồi quy: modal từ chối có đúng action từng nhóm, CSRF và giới hạn nhập.
             String trangDuyet = dean.get("/dang-ky-de-tai/duyet?tuKhoa=" + ma).body();
+            // Quyết định duyệt có dữ liệu xác nhận, độc lập với modal từ chối.
+            assertThat(trangDuyet).contains("data-sv-confirm-button=\"Xác nhận duyệt\"");
             assertThat(trangDuyet)
                     .contains("data-sv-reject-dialog", "data-sv-reject-open",
                             "data-sv-reject-form", "name=\"lyDoTuChoi\"",

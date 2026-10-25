@@ -34,7 +34,10 @@
             <td th:text="${dk.dangKyLuc != null ? #temporals.format(dk.dangKyLuc,'dd/MM/yyyy HH:mm') : '—'}"></td>
             <td><span class="sv-state" th:attr="data-state=${dk.trangThai}" th:text="${dk.trangThai}"></span></td>
             <td><div class="sv-review-actions" th:if="${dk.trangThai == 'CHO_DUYET'}">
-                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/duyet(maNhom=${dk.maNhom})}" data-sv-confirm="Duyệt đăng ký của nhóm này?">
+                <form method="post" th:action="@{/dang-ky-de-tai/{maNhom}/duyet(maNhom=${dk.maNhom})}" data-sv-confirm="Duyệt đăng ký đề tài?"
+                      th:attr="data-sv-confirm-detail=|${dk.tenDeTai} - nhóm ${dk.maNhom}|"
+                      data-sv-confirm-level="warning" data-sv-confirm-button="Xác nhận duyệt"
+                      data-sv-confirm-note="Đăng ký được duyệt sẽ chuyển sang bước thực hiện đề tài.">
                     <button class="btn btn-primary sv-btn-small" type="submit">Duyệt</button></form>
                 <button class="btn btn-outline sv-btn-small" type="button"
                         data-sv-reject-open
