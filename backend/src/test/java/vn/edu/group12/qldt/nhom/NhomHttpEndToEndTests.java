@@ -215,6 +215,47 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
         }
     }
 
+    @Test
+    void lyDoTuChoiDuocHienThiAnToanKhiLocDangKy() throws Exception {
+        var f = new Fixture(jdbc);
+        String maNhom = f.prefix + "RJ";
+        jdbc.update(
+                "INSERT INTO nhom_sinh_vien(ma_nhom,ten_nhom,ma_dot,ma_nguoi_tao,trang_thai,chot_luc) "
+                        + "VALUES(?,?,?,?,'DA_CHOT',?)",
+                maNhom, "Nhóm kiểm thử lý do", f.dot, f.sv(1), NOW);
+        // Tạo nhóm hợp lệ với ba thành viên chính thức; chỉ trên schema MySQL test.
+        for (int i = 1; i <= 3; i++) {
+            jdbc.update(
+                    "INSERT INTO thanh_vien_nhom(ma_nhom,ma_sinh_vien,trang_thai,"
+                            + "la_nhom_truong,la_thanh_vien_chot,yeu_cau_luc,tham_gia_luc) "
+                            + "VALUES(?,?,'THAM_GIA',?,TRUE,?,?)",
+                    maNhom, f.sv(i), i == 1, NOW.minusDays(1), NOW.minusDays(1));
+        }
+        jdbc.update(
+                "INSERT INTO dang_ky_de_tai(ma_nhom,ma_de_tai,ma_nguoi_dang_ky,dang_ky_luc) "
+                        + "VALUES(?,?,?,?)",
+                maNhom, f.topic, f.sv(1), NOW);
+        String lyDo = "Phạm vi khảo sát chưa đủ <script>alert(1)</script>";
+        try (var dean = new Session(f.dean)) {
+            var response = dean.post(
+                    "/dang-ky-de-tai/" + maNhom + "/tu-choi",
+                    Map.of("lyDoTuChoi", lyDo),
+                    "/dang-ky-de-tai/duyet?tuKhoa=" + maNhom);
+            assertThat(response.statusCode()).isEqualTo(302);
+            assertThat(jdbc.queryForObject(
+                    "SELECT ly_do_tu_choi FROM dang_ky_de_tai WHERE ma_nhom=?",
+                    String.class, maNhom)).isEqualTo(lyDo);
+            var page = dean.get(
+                    "/dang-ky-de-tai/duyet?trangThai=TU_CHOI&tuKhoa=" + maNhom);
+            assertThat(page.statusCode()).isEqualTo(200);
+            assertThat(page.body())
+                    .contains(maNhom, "Xem lý do", "sv-rejection-history", "&lt;script&gt;alert(1)&lt;/script&gt;")
+                    .doesNotContain("<script>alert(1)</script>");
+            // Quyết định bị từ chối chỉ được xem lại, không xuất hiện form duyệt lại.
+            assertThat(page.body()).doesNotContain("data-sv-reject-open");
+        }
+    }
+
     final class Session implements AutoCloseable {
         final HttpClient client =
                 HttpClient.newBuilder()
