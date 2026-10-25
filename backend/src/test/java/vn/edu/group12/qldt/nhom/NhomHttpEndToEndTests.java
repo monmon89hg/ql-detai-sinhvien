@@ -158,6 +158,13 @@ class NhomHttpEndToEndTests extends NhomMySqlTestBase {
                                     ma,
                                     f.sv(1)))
                     .isEqualTo(1);
+            // Trưởng khoa có bảng duyệt nhóm/báo cáo riêng, gồm bộ lọc và phân trang.
+            String trangTraCuuBaoCao = dean.get("/bao-cao?tuKhoa=" + ma).body();
+            assertThat(trangTraCuuBaoCao)
+                    .contains("Danh sách báo cáo theo nhóm", ma,
+                            "Xem báo cáo", "Chưa có PDF hợp lệ", "name=\"trangThaiNop\"");
+            String trangNopTheoNhom = dean.get("/bao-cao?maNhom=" + ma).body();
+            assertThat(trangNopTheoNhom).contains("Thông tin nộp báo cáo", ma);
             // Hồi quy: modal từ chối có đúng action từng nhóm, CSRF và giới hạn nhập.
             String trangDuyet = dean.get("/dang-ky-de-tai/duyet?tuKhoa=" + ma).body();
             // Quyết định duyệt có dữ liệu xác nhận, độc lập với modal từ chối.

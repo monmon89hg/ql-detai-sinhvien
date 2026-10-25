@@ -131,8 +131,33 @@ public class NhomBaoCaoViewService {
     }
 
     public Map<String, Object> baoCao(String maNhom, int page) {
+        return baoCao(maNhom, page, "", "", "", 0);
+    }
+
+    public Map<String, Object> baoCao(
+            String maNhom, int page, String tuKhoa, String maDot,
+            String trangThaiNop, int trangNhom) {
         var u = quyen.hienTai();
         var m = model(u);
+        m.put("laSinhVienBaoCao", u.laSinhVien());
+        // Danh sách toàn khoa chỉ cấp cho Trưởng khoa; quyền tải PDF vẫn kiểm tra riêng.
+        if (u.laTruongKhoa()) {
+            tuKhoa = loc(tuKhoa, 255);
+            maDot = loc(maDot, 30);
+            trangThaiNop = loc(trangThaiNop, 15);
+            if (!Set.of("", "DA_NOP", "CHUA_NOP").contains(trangThaiNop))
+                throw NghiepVuNhomException.duLieu("Trạng thái lọc báo cáo không hợp lệ.");
+            m.put("tuKhoaBaoCao", tuKhoa);
+            m.put("maDotBaoCao", maDot);
+            m.put("trangThaiNopBaoCao", trangThaiNop);
+            m.put("danhSachDotBaoCao", danhMuc.danhSachDot(false, now()));
+            List<NhomBaoCaoTruongKhoa> ds = danhMuc.danhSachBaoCaoTruongKhoa(
+                    tuKhoa, maDot, trangThaiNop, offset(trangNhom));
+            m.put("danhSachNhomBaoCaoTruongKhoa",
+                    ds.size() > 20 ? List.copyOf(ds.subList(0, 20)) : ds);
+            m.put("trangNhomBaoCao", trangNhom);
+            m.put("coTrangSauNhomBaoCao", ds.size() > 20);
+        }
         // Không suy diễn quyền từ giao diện: chỉ cấp danh sách nhóm liên quan cho GV hợp lệ.
         boolean laGiangVien = "GV".equals(u.loaiNguoiDung()) && u.vaiTro().contains("GIANG_VIEN");
         if (laGiangVien) {

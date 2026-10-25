@@ -26,8 +26,13 @@ public class BaoCaoController {
     String danhSach(
             @RequestParam(required = false) String maNhom,
             @RequestParam(defaultValue = "0") int trang,
+            @RequestParam(defaultValue = "") String tuKhoa,
+            @RequestParam(defaultValue = "") String maDot,
+            @RequestParam(defaultValue = "") String trangThaiNop,
+            @RequestParam(defaultValue = "0") int trangNhom,
             Model model) {
-        model.addAllAttributes(views.baoCao(maNhom, trang));
+        model.addAllAttributes(views.baoCao(
+                maNhom, trang, tuKhoa, maDot, trangThaiNop, trangNhom));
         return "reports/list";
     }
 

@@ -106,6 +106,40 @@ public class NhomDanhMucRepository {
                 offset);
     }
 
+    /** Danh sách nhóm cho Trưởng khoa, phân trang 20 dòng (LIMIT 21 để xác định trang sau). */
+    public List<NhomBaoCaoTruongKhoa> danhSachBaoCaoTruongKhoa(
+            String tuKhoa, String maDot, String trangThaiNop, int offset) {
+        return jdbc.query(
+                """
+                SELECT n.ma_nhom, n.ten_nhom, d.ten_dot,
+                       COALESCE(t.ten_de_tai, 'Chưa đăng ký đề tài') AS ten_de_tai,
+                       (SELECT COUNT(*) FROM nop_bao_cao bc
+                        WHERE bc.ma_nhom=n.ma_nhom AND bc.trang_thai='HOP_LE') AS so_bao_cao_hop_le
+                FROM nhom_sinh_vien n
+                JOIN dot_dang_ky d ON d.ma_dot=n.ma_dot
+                LEFT JOIN dang_ky_de_tai dk ON dk.ma_nhom=n.ma_nhom
+                LEFT JOIN de_tai t ON t.ma_de_tai=dk.ma_de_tai
+                WHERE (?='' OR n.ma_dot=?)
+                  AND (?='' OR LOCATE(?,n.ma_nhom)>0 OR LOCATE(?,n.ten_nhom)>0
+                       OR LOCATE(?,COALESCE(t.ten_de_tai,''))>0)
+                  AND (?=''
+                       OR (?='DA_NOP' AND EXISTS (
+                           SELECT 1 FROM nop_bao_cao bc
+                           WHERE bc.ma_nhom=n.ma_nhom AND bc.trang_thai='HOP_LE'))
+                       OR (?='CHUA_NOP' AND NOT EXISTS (
+                           SELECT 1 FROM nop_bao_cao bc
+                           WHERE bc.ma_nhom=n.ma_nhom AND bc.trang_thai='HOP_LE')))
+                ORDER BY n.created_at DESC, n.ma_nhom
+                LIMIT 21 OFFSET ?
+                """,
+                (r, i) -> new NhomBaoCaoTruongKhoa(
+                        r.getString("ma_nhom"), r.getString("ten_nhom"),
+                        r.getString("ten_dot"), r.getString("ten_de_tai"),
+                        r.getLong("so_bao_cao_hop_le")),
+                maDot, maDot, tuKhoa, tuKhoa, tuKhoa, tuKhoa,
+                trangThaiNop, trangThaiNop, trangThaiNop, offset);
+    }
+
     /** Chỉ hiển thị nhóm có GVHD hoặc thành viên hội đồng là giảng viên hiện tại. */
     public List<NhomBaoCaoGiangVien> nhomBaoCaoGiangVien(String maGiangVien) {
         return jdbc.query(
